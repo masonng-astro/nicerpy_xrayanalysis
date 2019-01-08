@@ -1,0 +1,226 @@
+This is documentation for the suite of programs I am writing.
+
+FUTURE IMPROVEMENTS as of Jan 8 2019:
+
+1) Could add a FULL list of the columns + their descriptions to the bottom
+of each of the files for the Lv0-related FITS files.
+2) For the Lv0 functions, change the function description to add more
+representative variables. Currently, I am just using event_cl as an example.
+
+################################## LEVEL 0 ####################################
+
+Base level - obtaining data and then binning them
+
+>>>>>>>>>> Lv0_dirs <<<<<<<<<<
+
+Functions:
+
+##### global_par
+-- Defining global variables for the directories
+-- has BASE_DIR and NICER_DATADIR
+
+>>>>>>>>>> Lv0_call_eventcl <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid,bary)
+
+-- Opening the FITS file for the cleaned event file
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+
+##### get_eventcl(obsid,bary,par_list)
+
+-- Getting data from the FITS files, e.g., PI_FAST, times, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_eventcl('0034070101',True,['PI_FAST','TIME'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_ufa <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid,mpu_no)
+
+-- Opening the FITS file for the ufa event file
+
+obsid - Observation ID of the object of interest (10-digit str)
+mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs. str!!
+MPU number 7 corresponds to the COMBINED file!
+
+##### get_ufa(obsid,mpu_no,par_list)
+
+-- Getting data from the FITS files, e.g., PI_FAST, times, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_ufa('0034070101','6',['TIME','PI_FAST'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_uf <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid,mpu_no)
+
+-- Opening the FITS file for the unfiltered event file
+
+obsid - Observation ID of the object of interest (10-digit str)
+mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs. str!!
+
+##### get_uf(obsid,mpu_no,par_list)
+
+-- Getting data from the FITS files, e.g., PI_FAST, times, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_uf('0034070101','6',['TIME','RAWX','RAWY'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_hk <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid,mpu_no)
+
+-- Opening the FITS file for the housekeeping file
+
+obsid - Observation ID of the object of interest (10-digit str)
+mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs. str!!
+
+##### get_hk(obsid,mpu_no,par_list)
+
+-- Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_hk('0034070101','4',['MPU_D_TEMP','MPU_ALL_COUNT','MPU_TEC_I'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_att <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid)
+
+-- Opening the FITS file for the attitude file
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### get_att(obsid,par_list)
+
+Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_att('0034070101',['TIME','QPARAM','STATE'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_cat <<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid)
+
+-- Opening the FITS file for the .cat file
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### get_cat(obsid,par_list)
+
+Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_cat('0034070101',['FILENAME','FORMAT','TYPE'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_mkf <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid)
+
+-- Opening the FITS file for the mkf filter file
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### get_mkf(obsid,par_list)
+
+Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_mkf('0034070101',['TIME','ELV','MOON_DEC'])) [WORKED]
+
+>>>>>>>>>> Lv0_call_orb <<<<<<<<<<
+
+Functions:
+
+##### open_fits(obsid)
+
+-- Opening the FITS file for the orbit file
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### get_orb(obsid,par_list)
+
+Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
+
+obsid - Observation ID of the object of interest (10-digit str)
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI)
+
+TEST: print(get_orb('0034070101',['TIME','Vy','QUALITY'])) [WORKED]
+
+--------------------------------------------------------------------------------
+################################################################################
+--------------------------------------------------------------------------------
+
+>>>>>>>>>> Lv1_data_gtis <<<<<<<<<
+
+Functions:
+
+##### get_gtis(obsid,bary)
+
+-- Obtaining the GTIs corresponding to the ObsID
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+
+TEST: print(get_gtis('0034070101',True)) [WORKED]
+
+>>>>>>>>> Lv1_data_bin <<<<<<<<<
+
+Functions:
+
+##### binning
+
+-- Binning routine. Got to make sure I have TIME and PI called!
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+
+TEST: x,y = binning('0034070101',True,['PI','TIME','PI_FAST','EVENT_FLAGS'],0.05) [WORKED]
+print(x[0:20])
+print(y[0:20])
