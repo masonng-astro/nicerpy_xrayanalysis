@@ -205,13 +205,116 @@ bary - Whether the data is barycentered. True/False
 
 TEST: print(get_gtis('0034070101',True)) [WORKED]
 
->>>>>>>>> Lv1_data_bin <<<<<<<<<
+>>>>>>>>>> Lv1_data_filter <<<<<<<<<<
 
 Functions:
 
-##### binning
+##### filter_time
 
--- Binning routine. Got to make sure I have TIME and PI called!
+-- Obtain the time stamps that fall in a desired time interval.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - time value for the lower boundary (in s)
+t2 - time value for the upper boundary (in s)
+
+TEST:
+
+t_cut = filter_time('1034070104',True,['TIME'],11113,11945)
+counts = np.ones(len(t_cut))
+t_bins = np.linspace(11113,11945,11945-11113+1)
+from scipy import stats
+import matplotlib.pyplot as plt
+summed_data, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
+plt.plot(t_bins[:-1],summed_data)
+plt.show()
+
+[WORKED]
+
+##### filter_energy
+
+-- Obtain the time stamps and the corresponding energy value (of the photon)
+in a desired energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+E1 - energy value for the lower boundary (in keV)
+E2 - energy value for the upper boundary (in keV)
+
+TEST:
+
+t_cut,E_cut = filter_energy('1034070104',True,['TIME','PI'],0.3,12)
+counts = np.ones(len(t_cut))
+startt = int(t_cut[0])
+endt = int(t_cut[-1])
+#t_bins = np.linspace(startt,endt,endt-startt+1)
+t_bins = np.linspace(11113,11945,11945-11113+1)
+E_bins = np.linspace(0.3,12,118)
+from scipy import stats
+import matplotlib.pyplot as plt
+summed_data_t, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
+summed_data_E, bin_edges, binnumber = stats.binned_statistic(E_cut,counts,statistic='sum',bins=E_bins)
+plt.plot(t_bins[:-1],summed_data_t)
+plt.xlim([11113,11945])
+plt.show()
+
+[WORKED? Check to make sure once I got all code running.]
+
+##### filter_data
+
+--  Truncate the data such that you get counts in a given time interval and
+    energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - time value for the lower boundary (in s)
+t2 - time value for the upper boundary (in s)
+E1 - energy value for the lower boundary (in keV)
+E2 - energy value for the upper boundary (in keV)
+
+TEST:
+
+t1 = 0
+t2 = 72000
+E1 = 0.3
+E2 = 12
+t_cut,E_cut = filter_data('1034070104',True,['TIME','PI'],t1,t2,E1,E2)
+counts = np.ones(len(t_cut))
+#t_bins = np.linspace(startt,endt,endt-startt+1)
+t_bins = np.linspace(t1,t2,t2-t1+1)
+E_bins = np.linspace(E1,E2,118)
+from scipy import stats
+import matplotlib.pyplot as plt
+summed_data_t, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
+summed_data_E, bin_edges, binnumber = stats.binned_statistic(E_cut,counts,statistic='sum',bins=E_bins)
+plt.figure()
+plt.plot(t_bins[:-1],summed_data_t)
+plt.xlim([t1,t2])
+
+plt.figure()
+plt.plot(E_bins[:-1],summed_data_E)
+plt.show() [WORKED]
+
+>>>>>>>>>> Lv1_data_bin <<<<<<<<<<
+
+Functions:
+
+##### binning_t
+
+-- Binning routine for when I truncate the data by JUST time interval.
+Got to make sure I have TIME and PI called!
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
@@ -220,7 +323,159 @@ par_list - A list of parameters we'd like to extract from the FITS file
 tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 2 means bin by 2s
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - lower time boundary
+t2 - upper time boundary
 
-TEST: x,y = binning('0034070101',True,['PI','TIME','PI_FAST','EVENT_FLAGS'],0.05) [WORKED]
-print(x[0:20])
-print(y[0:20])
+TEST:
+
+x,y = binning_t('1034070104',True,['PI','TIME'],1,11113,11945)
+print(x[-100:])
+print(y[-100:]) [WORKED]
+
+##### binning_E
+
+-- Binning routine for when I truncate the data by JUST energy range.
+Got to make sure I have TIME and PI called!
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.05 means bin by 0.05keV
+E1 - lower energy boundary
+E2 - upper energy boundary
+
+TEST:
+
+w,x,y,z = binning_E('1034070104',True,['PI','TIME'],1,0.05,0.3,12) [WORKED]
+print(w[:50])
+print(x[:50])
+print(y[:50])
+print(z[:50])
+print(sum(x))
+print(sum(z)) #the two sums are basically the same
+
+##### binning_tE
+
+-- Binning routine for when I truncated the data by BOTH time interval AND energy range.
+Got to make sure I have TIME and PI called!
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.05 means bin by 0.05keV
+t1 - lower time boundary
+t2 - upper time boundary
+E1 - lower energy boundary
+E2 - upper energy boundary
+
+TEST:
+
+w,x,y,z = binning_tE('1034070104',True,['PI','TIME'],1,0.05,11113,11945,0.3,12) [WORKED]
+print(w[:50])
+print(x[:50])
+print(y[:50])
+print(z[:50])
+print(sum(x))
+print(sum(z)) #the two sums are exactly the same
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+########################### THINK ABOUT THIS LATER #############################
+WILL USE PYXSPEC IN THE FUTURE ANYWAYS. DISREGARD.
+
+
+>>>>>>>>>> Lv1_data_spectra <<<<<<<<<<
+
+Functions:
+
+##### read_redist()
+
+--  Opening the FITS file corresponding to the redistribution matrix
+
+    Describes the detector response
+
+    Has CHANNEL, E_MIN, E_MAX for first card
+    Has ENERG_LO, ENERG_HI, N_GRP, F_CHAN, N_CHAN, MATRIX
+
+##### read_anc()
+
+--  Opening the FITS file corresponding to the ancillary response
+
+    Describes the efficiency vs energy; gives telescope area x filter efficiency
+    x detector quantum efficiency vs energy
+
+    Has ENERG_LO, ENERG_HI, SPECRESP, ENERGY, XRCAREA, QE, WINDOW, THERMALSD
+
+TEST:
+redist = read_redist()
+print(redist[1].data['CHANNEL'][0:20])
+print(redist[1].data['E_MIN'][0:20])
+print(redist[1].data['E_MAX'][0:20])
+
+print(redist[2].data['ENERG_LO'][0:20])
+print(redist[2].data['ENERG_HI'][0:20])
+print(redist[2].data['N_GRP'][0:20])
+print(redist[2].data['F_CHAN'][0:20])
+print(redist[2].data['N_CHAN'][0:20])
+print(redist[2].data['MATRIX'][0:20])
+
+read_anc():
+
+print(anc[1].data['ENERG_LO'][0:20])
+print(anc[1].data['ENERG_HI'][0:20])
+print(anc[1].data['SPECRESP'][0:20])
+print(anc[1].data['ENERGY'][0:20])
+print(anc[1].data['XRCAREA'][0:20])
+print(anc[1].data['QE'][0:20])
+print(anc[1].data['WINDOW'][0:20])
+print(anc[1].data['THERMALSD'][0:20])
+
+print(np.min(anc[1].data['XRCAREA'][0:20]),np.max(anc[1].data['XRCAREA'][0:20]))
+print(np.min(anc[1].data['QE'][0:20]),np.max(anc[1].data['QE'][0:20]))
+print(np.min(anc[1].data['WINDOW'][0:20]),np.max(anc[1].data['WINDOW'][0:20]))
+print(np.min(anc[1].data['THERMALSD']),np.max(anc[1].data['THERMALSD']))

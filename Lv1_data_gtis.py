@@ -31,5 +31,3 @@ def get_gtis(obsid,bary):
     data_stops = np.array([gtis[i][1] for i in range(len(gtis))])
 
     return data_starts, data_stops
-
-print(get_gtis('0034070101',True))
