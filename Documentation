@@ -192,6 +192,8 @@ TEST: print(get_orb('0034070101',['TIME','Vy','QUALITY'])) [WORKED]
 ################################################################################
 --------------------------------------------------------------------------------
 
+################################## LEVEL 1 #####################################
+
 >>>>>>>>>> Lv1_data_gtis <<<<<<<<<
 
 Functions:
@@ -209,7 +211,7 @@ TEST: print(get_gtis('0034070101',True)) [WORKED]
 
 Functions:
 
-##### filter_time
+##### filter_time(obsid,bary,par_list,t1,t2)
 
 -- Obtain the time stamps that fall in a desired time interval.
 
@@ -235,7 +237,7 @@ plt.show()
 
 [WORKED]
 
-##### filter_energy
+##### filter_energy(obsid,bary,par_list,E1,E2)
 
 -- Obtain the time stamps and the corresponding energy value (of the photon)
 in a desired energy range.
@@ -268,7 +270,7 @@ plt.show()
 
 [WORKED? Check to make sure once I got all code running.]
 
-##### filter_data
+##### filter_data(obsid,bary,par_list,t1,t2,E1,E2)
 
 --  Truncate the data such that you get counts in a given time interval and
     energy range.
@@ -311,7 +313,7 @@ plt.show() [WORKED]
 
 Functions:
 
-##### binning_t
+##### binning_t(obsid,bary,par_list,tbin_size,t1,t2)
 
 -- Binning routine for when I truncate the data by JUST time interval.
 Got to make sure I have TIME and PI called!
@@ -332,7 +334,7 @@ x,y = binning_t('1034070104',True,['PI','TIME'],1,11113,11945)
 print(x[-100:])
 print(y[-100:]) [WORKED]
 
-##### binning_E
+##### binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2)
 
 -- Binning routine for when I truncate the data by JUST energy range.
 Got to make sure I have TIME and PI called!
@@ -360,7 +362,7 @@ print(z[:50])
 print(sum(x))
 print(sum(z)) #the two sums are basically the same
 
-##### binning_tE
+##### binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
 
 -- Binning routine for when I truncated the data by BOTH time interval AND energy range.
 Got to make sure I have TIME and PI called!
@@ -390,14 +392,116 @@ print(z[:50])
 print(sum(x))
 print(sum(z)) #the two sums are exactly the same
 
+--------------------------------------------------------------------------------
+################################################################################
+--------------------------------------------------------------------------------
 
+################################## LEVEL 2 #####################################
 
+>>>>>>>>>> Lv2_sources <<<<<<<<<<
 
+Functions:
 
+##### obsid_to_obj(obsid)
 
+-- 'Convert' the ObsID into the corresponding object nameself.
 
+obsid - Observation ID of the object of interest (10-digit str)
 
+TEST: obsid_to_obj['1034070104'] [WORKED]
 
+>>>>>>>>>> Lv2_mkdir <<<<<<<<<<
+
+Functions:
+
+##### makedir(dir)
+
+-- Creating a folder if it does not exist in the directory.
+
+https://gist.github.com/keithweaver/562d3caa8650eefe7f84fa074e9ca949
+
+dir - desired directory (provide FULL path!)
+
+>>>>>>>>>> Lv2_lc <<<<<<<<<<
+
+Functions:
+
+##### whole(obsid,bary,par_list,tbin_size,mode)
+
+-- Plot the entire raw time series without any cuts to the data.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+mode - whether we want to show or save the plot.
+
+TEST: whole('1034070104',True,['PI','TIME','PI_FAST'],2,'save') [WORKED]
+
+##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+
+-- Plot the time series for a desired time interval.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - lower time boundary
+t2 - upper time boundary
+
+TEST: partial_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'show') [WORKED]
+
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode)
+
+-- Plot the time series for a desired energy range.
+   [Though I don't think this will be used much. Count/s vs energy is pointless,
+   since we're not folding in response matrix information here to get the flux.
+   So we're just doing a count/s vs time with an energy cut to the data.]
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+E1 - lower energy boundary
+E2 - upper energy boundary
+
+TEST: partial_E('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show') [WORKED]
+
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
+
+-- Plot the time series for a desired time interval and desired energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+t1 - lower time boundary
+t2 - upper time boundary
+E1 - lower energy boundary
+E2 - upper energy boundary
+
+TEST: [WORKED]
+
+partial_tE('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,11113,11945,0.3,2.7,'save')
+partial_tE('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,11113,11945,2.7,12,'save')
 
 
 

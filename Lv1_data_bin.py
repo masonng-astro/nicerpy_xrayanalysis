@@ -132,6 +132,10 @@ def binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2):
         raise ValueError("You should have BOTH 'PI' and 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
         raise TypeError("par_list should either be a list or an array!")
+    if t2<t1:
+        raise ValueError("t2 should be greater than t1!")
+    if E2<E1:
+        raise ValueError("E2 should be greater than E1!")
 
     truncated_t, truncated_E = Lv1_data_filter.filter_data(obsid,bary,par_list,t1,t2,E1,E2)
     counts = np.ones(len(truncated_t))

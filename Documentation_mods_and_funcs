@@ -1,0 +1,96 @@
+Quick, short list of the modules and functions in this suite of programs.
+
+--------------------------------------------------------------------------------
+################################################################################
+--------------------------------------------------------------------------------
+
+################################## LEVEL 0 #####################################
+
+Base level - obtaining data and then binning them
+
+>>>>>>>>>> Lv0_dirs <<<<<<<<<<
+
+Functions:
+
+##### global_par
+
+>>>>>>>>>> Lv0_call_eventcl <<<<<<<<<<
+
+##### open_fits(obsid,bary)
+##### get_eventcl(obsid,bary,par_list)
+
+>>>>>>>>>> Lv0_call_ufa <<<<<<<<<<
+
+##### open_fits(obsid,mpu_no)
+##### get_ufa(obsid,mpu_no,par_list)
+
+>>>>>>>>>> Lv0_call_uf <<<<<<<<<<
+
+##### open_fits(obsid,mpu_no)
+##### get_uf(obsid,mpu_no,par_list)
+
+>>>>>>>>>> Lv0_call_hk <<<<<<<<<<
+
+##### open_fits(obsid,mpu_no)
+##### get_hk(obsid,mpu_no,par_list)
+
+>>>>>>>>>> Lv0_call_att <<<<<<<<<<
+
+##### open_fits(obsid)
+##### get_att(obsid,par_list)
+
+>>>>>>>>>> Lv0_call_cat <<<<<<<<<
+
+##### open_fits(obsid)
+##### get_cat(obsid,par_list)
+
+>>>>>>>>>> Lv0_call_mkf <<<<<<<<<<
+
+##### open_fits(obsid)
+##### get_mkf(obsid,par_list)
+
+>>>>>>>>>> Lv0_call_orb <<<<<<<<<<
+
+##### open_fits(obsid)
+##### get_orb(obsid,par_list)
+
+--------------------------------------------------------------------------------
+################################################################################
+--------------------------------------------------------------------------------
+
+################################## LEVEL 1 #####################################
+>>>>>>>>>> Lv1_data_gtis <<<<<<<<<
+
+##### get_gtis(obsid,bary)
+
+>>>>>>>>>> Lv1_data_filter <<<<<<<<<<
+
+##### filter_time(obsid,bary,par_list,t1,t2)
+##### filter_energy(obsid,bary,par_list,E1,E2)
+##### filter_data(obsid,bary,par_list,t1,t2,E1,E2)
+
+>>>>>>>>>> Lv1_data_bin <<<<<<<<<<
+
+##### binning_t(obsid,bary,par_list,tbin_size,t1,t2)
+##### binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2)
+##### binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
+
+--------------------------------------------------------------------------------
+################################################################################
+--------------------------------------------------------------------------------
+
+################################## LEVEL 2 ####################################
+
+>>>>>>>>>> Lv2_sources <<<<<<<<<<
+
+##### obsid_to_obj(obsid)
+
+>>>>>>>>>> Lv2_mkdir <<<<<<<<<<
+##### makedir(dir)
+
+>>>>>>>>>> Lv2_lc <<<<<<<<<<
+
+##### whole(obsid,bary,par_list,tbin_size,mode)
+##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode)
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
