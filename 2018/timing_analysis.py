@@ -3,7 +3,7 @@
 """
 Created on Tue Oct 16 22:13:37 2018
 
-Simple test routines to find pulsation signals? First do it with 
+Simple test routines to find pulsation signals? First do it with
 GX349+2 - Obs ID 1034090111
 
 Columns of data: TIME, RAWX, RAWY, PHA, PHA_FAST, DET_ID, DEADTIME, EVENT_FLAGS,
@@ -16,7 +16,7 @@ sumcounts_10130101250p001s.txt - 0.001s bins
 
 0034070103 - Cen X-3 [Commissioning phase]
 
-1034070104 - Cen X-3 #frequency of ~0.207Hz 
+1034070104 - Cen X-3 #frequency of ~0.207Hz
 sumcounts_1034070104_0p001s.txt - 0.001s bins
 sumcounts_1034070104_0p01s.txt - 0.01s bins
 sumcounts_1034070104_0p1s.txt - 0.1s bins
@@ -41,18 +41,18 @@ timestart = time.time()
 
 print(datetime.datetime.now())
 
-work_dir = '/Users/masonng/Documents/MIT/Research/Nicer-Logistics/'
-obsid = '0034070104' 
+work_dir = '/Users/masonng/Documents/MIT/Research/'
+obsid = '0034070104'
 t_interval = '0p01s'
 extra = '_angdist0p035'
 place = 100 #for t_interval = 0p1s
 
-event = '/Users/masonng/Documents/MIT/Research/Nicer-Logistics/' + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl.evt'
+event = work_dir + '/nicer-data/' + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl.evt'
 event = fits.open(event) #see event.info() for each card
 #event[1].header for events; event[2].header for GTIs
 
 #first filter out the nans in the data
-#pi_fast = event[1].data['PI_FAST']
+pi_fast = event[1].data['PI_FAST']
 #print 'Done with PI_FAST'
 #truncated_pi_fast = pi_fast[pi_fast>=0]
 #print 'Done with truncated PI_FAST'
@@ -68,13 +68,13 @@ print 'Done with TIME'
 ##plt.plot(times[0:10000000], truncated_pi_fast[0:10000000],'x')
 ##
 #shifted_t = times_d - times_d[0]
-#t_bins = np.linspace(0,int(shifted_t[-1]),int(shifted_t[-1])*place+1) #gives bins of 0.01s! 
+#t_bins = np.linspace(0,int(shifted_t[-1]),int(shifted_t[-1])*place+1) #gives bins of 0.01s!
 #####
 ##plt.figure(figsize=(10,8))
 #summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,truncated_pi_fast,statistic='sum',bins=t_bins)
 ##plt.plot(t_bins[:-1],summed_data,'x')
 ###plt.xlim([0,1000])
-##timestep = 1/(t_bins[-1]) #because the start time is 0! 
+##timestep = 1/(t_bins[-1]) #because the start time is 0!
 ####
 #countsfile = open("sumcounts_"+obsid+"_"+t_interval+extra+'.txt', "w+")
 #for i in tqdm(range(len(summed_data))):
@@ -83,7 +83,7 @@ print 'Done with TIME'
 #countsfile.close()
 ##
 #plt.figure(figsize=(10,8))
-times, counts = np.loadtxt('sumcounts_'+obsid+'_'+t_interval+extra+'.txt', usecols=(0,1), unpack=True) 
+times, counts = np.loadtxt(work_dir+'metadata/non-barycentered/sumcounts_'+obsid+'_'+t_interval+extra+'.txt', usecols=(0,1), unpack=True)
 #plt.plot(times,counts,'rx')
 #plt.xlabel('Time (s)')
 #plt.ylabel('Counts')
@@ -101,9 +101,16 @@ times, counts = np.loadtxt('sumcounts_'+obsid+'_'+t_interval+extra+'.txt', useco
 
 
 ################################ OVERSAMPLING #################################
-#pad_zeros = np.zeros(len(times)*4) #i.e., add 4T worth of 0s onto the data
-#counts = np.array(list(counts) + list(pad_zeros))
-#times = np.arange(times[0],times[-1]*5+0.005,0.01)
+
+print(len(times))
+print(len(counts))
+print(times[-1]-times[0])
+pad_zeros = np.zeros(len(times)*4) #i.e., add 4T worth of 0s onto the data
+counts = np.array(list(counts) + list(pad_zeros))
+times = np.arange(times[0],times[-1]*5+0.005,0.01)
+print(len(times))
+print(len(counts))
+
 
 times_1 = times
 counts_1 = counts
@@ -111,6 +118,8 @@ counts_1 = counts
 ####
 T = times_1[-1]-times_1[0]
 dt = T/(len(times_1))
+print(dt)
+print(1.0/T)
 ####
 ###################################### PERIODOGRAM #################################
 ####
@@ -122,6 +131,7 @@ plt.xlabel('Hz')
 plt.ylabel('Some normalized power spectrum')
 plt.xlim([0,1])
 plt.axvline(x=0.2082,color='k',alpha=0.5,lw=0.5)
+plt.show()
 
 ### find the frequencies with some sort of peaks
 ##cutoff = f[pxx/np.mean(pxx)>10]
@@ -139,6 +149,7 @@ plt.xlabel('Hz')
 plt.ylabel('Some normalized power spectrum')
 plt.xlim([0,1])
 plt.axvline(x=0.2082,color='k',alpha=0.5,lw=0.5)
+plt.show()
 
 #
 timeend = time.time()

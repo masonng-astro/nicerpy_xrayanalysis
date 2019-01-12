@@ -454,6 +454,7 @@ tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
 t1 - lower time boundary
 t2 - upper time boundary
+mode - whether we want to show or save the plot
 
 TEST: partial_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'show') [WORKED]
 
@@ -476,6 +477,7 @@ Ebin_size - the size of the energy bins (in keV!)
 >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
 E1 - lower energy boundary
 E2 - upper energy boundary
+mode - whether we want to show or save the plot
 
 TEST: partial_E('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show') [WORKED]
 
@@ -497,32 +499,177 @@ t1 - lower time boundary
 t2 - upper time boundary
 E1 - lower energy boundary
 E2 - upper energy boundary
+mode - whether we want to show or save the plot
 
 TEST: [WORKED]
 
 partial_tE('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,11113,11945,0.3,2.7,'save')
 partial_tE('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,11113,11945,2.7,12,'save')
 
+>>>>>>>>>> Lv2_ps_method <<<<<<<<<<
 
+Functions:
 
+##### padding(counts)
 
+-- For use in the function manual. Recall: The optimal number of bins is 2^n,
+n being some natural number. We pad 0s onto the original data set, where
+the number of 0s to pad is determined by the difference between the optimal
+number of bins and the length of the data set (where the former should be
+greater than the latter!)
 
+counts - array of counts from the binned data
 
+##### oversample(factor,counts)
 
+-- Perform oversampling on the data. Return the padded array of counts.
 
+factor - N-times oversampling; factor = 5 means 5x oversampling
+counts - array of counts from the binned data
 
+##### pdgm(times,counts,xlims,vlines,toplot,oversampling)
 
+-- Generating the power spectrum through the signal.periodogram method.
 
+times - array of binned times
+counts - array of counts from the binned data
+xlims - a list or array: first entry = True/False as to whether to impose an
+xlim; second and third entry correspond to the desired x-limits of the plot
+vlines - a list or array: first entry = True/False as to whether to draw
+a vertical line in the plot; second entry is the equation for the vertical line
+toplot - whether to show the plot or not
+oversampling - whether to perform oversampling. Array will consist of
+[True/False, oversampling factor]
 
+##### manual(times,counts,xlims,vlines,toplot,oversampling)
 
+-- Generating the power spectrum through the manual FFT method.
 
+times - array of binned times
+counts - array of counts from the binned data
+xlims - a list or array: first entry = True/False as to whether to impose an
+xlim; second and third entry correspond to the desired x-limits of the plot
+vlines - a list or array: first entry = True/False as to whether to draw
+a vertical line in the plot; second entry is the equation for the vertical line
+toplot - whether to show the plot or not
+oversampling - whether to perform oversampling. Array will consist of
+[True/False, oversampling factor]
 
+>>>>>>>>>> Lv2_ps <<<<<<<<<<
 
+Functions:
 
+##### whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines)
 
+-- Plot the entire power spectrum without any cuts to the data.
 
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+mode - whether we want to show or save the plot.
+ps_type - obtain power spectrum through the periodogram method ('period') or
+the manual FFT way ('manual') or both ('both')
+oversampling - whether to perform oversampling. Array will consist of
+[True/False, oversampling factor]
+xlims - a list or array: first entry = True/False as to whether to impose an
+xlim; second and third entry correspond to the desired x-limits of the plot
+vlines - a list or array: first entry = True/False as to whether to draw
+a vertical line in the plot; second entry is the equation for the vertical line
 
+TEST: whole('0034070101',True,['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2078])
+[WORKED]
 
+##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
+
+-- Plot the power spectrum for a desired time interval.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - lower time boundary
+t2 - upper time boundary
+mode - whether we want to show or save the plot.
+ps_type - obtain power spectrum through the periodogram method ('period') or
+the manual FFT way ('manual') or both ('both')
+oversampling - whether to perform oversampling. Array will consist of
+[True/False, oversampling factor]
+xlims - a list or array: first entry = True/False as to whether to impose an
+xlim; second and third entry correspond to the desired x-limits of the plot
+vlines - a list or array: first entry = True/False as to whether to draw
+a vertical line in the plot; second entry is the equation for the vertical line
+
+TEST: partial_t('1034070104',True,['TIME','PI','PI_FAST'],0.1,11113,11945,'show','both',[True,5],[True,0,1],[True,0.2078])
+[WORKED]
+
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+
+-- Plot the time series for a desired energy range.
+[Though I don't think this will be used much. Count/s vs energy is pointless,
+since we're not folding in response matrix information here to get the flux.
+So we're just doing a count/s vs time with an energy cut to the data.]
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+E1 - lower energy boundary
+E2 - upper energy boundary
+mode - whether we want to show or save the plot.
+ps_type - obtain power spectrum through the periodogram method ('period') or
+the manual FFT way ('manual') or both ('both')
+oversampling - whether to perform oversampling. Array will consist of
+[True/False, oversampling factor]
+xlims - a list or array: first entry = True/False as to whether to impose an
+xlim; second and third entry correspond to the desired x-limits of the plot
+vlines - a list or array: first entry = True/False as to whether to draw
+a vertical line in the plot; second entry is the equation for the vertical line
+
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+
+-- Plot the time series for a desired time interval and desired energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+t1 - lower time boundary
+t2 - upper time boundary
+E1 - lower energy boundary
+E2 - upper energy boundary
+mode - whether we want to show or save the plot.
+ps_type - obtain power spectrum through the periodogram method ('period') or
+the manual FFT way ('manual') or both ('both')
+oversampling - whether to perform oversampling. Array will consist of
+[True/False, oversampling factor]
+xlims - a list or array: first entry = True/False as to whether to impose an
+xlim; second and third entry correspond to the desired x-limits of the plot
+vlines - a list or array: first entry = True/False as to whether to draw
+a vertical line in the plot; second entry is the equation for the vertical line
+
+TEST:
+partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,0.3,2.7,'save','both',[True,5],[True,0,1],[True,0.2078])
+partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,2.7,12,'save','both',[True,5],[True,0,1],[True,0.2078])
+[WORKED]
 
 
 

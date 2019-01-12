@@ -94,3 +94,10 @@ Functions:
 ##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
 ##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode)
 ##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
+
+>>>>>>>>>> Lv2_ps_method <<<<<<<<<<
+
+##### padding(counts)
+##### oversample(factor,counts)
+##### pdgm(times,counts,xlims,vlines,toplot)
+##### manual(times,counts,xlims,vlines,toplot)

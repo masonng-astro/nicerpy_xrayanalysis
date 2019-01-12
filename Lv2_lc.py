@@ -78,6 +78,7 @@ def partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode):
     >> e.g., tbin_size = 0.05 means bin by 0.05s!
     t1 - lower time boundary
     t2 - upper time boundary
+    mode - whether we want to show or save the plot
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
