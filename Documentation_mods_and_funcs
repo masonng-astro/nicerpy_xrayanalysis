@@ -86,6 +86,7 @@ Functions:
 ##### obsid_to_obj(obsid)
 
 >>>>>>>>>> Lv2_mkdir <<<<<<<<<<
+
 ##### makedir(dir)
 
 >>>>>>>>>> Lv2_lc <<<<<<<<<<
@@ -101,3 +102,10 @@ Functions:
 ##### oversample(factor,counts)
 ##### pdgm(times,counts,xlims,vlines,toplot)
 ##### manual(times,counts,xlims,vlines,toplot)
+
+>>>>>>>>>> Lv2_ps <<<<<<<<<<
+
+##### whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines)
+##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)

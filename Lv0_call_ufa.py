@@ -57,3 +57,16 @@ def get_ufa(obsid,mpu_no,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
+
+################################################################################
+
+# Variables (TTYPE) from the FITS file headers that I printed
+
+# ufa
+
+# TIME, RAWX, RAWY, PHA, PHA_FAST, DET_ID, DEADTIME, EVENT_FLAGS, TICK, MPU_A_TEMP
+# MPU_UNDER_COUNT, PI_FAST, PI, PI_RATIO
+
+# gti
+
+# START, STOP

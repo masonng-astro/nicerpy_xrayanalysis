@@ -49,3 +49,13 @@ def get_att(obsid,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
+
+# Variables (TTYPE) from the FITS file headers that I printed
+
+# att
+
+# TIME, QPARAM, STATE, MODE, SUBMODE_AZ, SUBMODE_EL, ST_VALID, QUATSRC, FINEMEAS
+
+# instatt
+
+# TIME, QPARAM, STATE, MODE, SUBMODE_AZ, SUBMODE_EL, ST_VALID, QUATSRC, FINEMEAS

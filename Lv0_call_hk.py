@@ -55,3 +55,16 @@ def get_hk(obsid,mpu_no,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
+
+################################################################################
+
+# Variables (TTYPE) from the FITS file headers that I printed
+
+# TIME, TICK_LOW32, MPU_P33D_VOLT, MPU_P5D_VOLT, MPU_M5D_VOLT, MPU_P33TEC_VOLT
+# MPU_P33M_VOLT, MPU_GNDD_VOLT, MPU_HV_VOLT, MPU_D_TEMP, MPU_GNDA_VOLT,
+# MPU_M5A_VOLT, MPU_P5A_VOLT, MPU_P25R_VOLT, MPU_P3R_VOLT, MPU_A_TEMP,
+# MPU_PWRBRDG_TEMP, MPU_BAD_CSUM, MPU_INVALID_PKT, MPU_INVALID_ID, MPU_INVALID_MPU,
+# MPU_LOWMEM_FIFO, MPU_LOWMEM,SCI, MPU_LOWMEM_OTHER, MPU_ALL_COUNT, MPU_OVER_COUNT,
+# MPU_UNDER_COUNT, MPU_XRAY_COUNT, MPU_FPM_TEMP, MPU_PID_TEMP, MPU_HOTSIDE_TEMP,
+# MPU_TEC_I, MPU_TEC_VOLT, MPU_BIAS_VOLT, MPU_FAST_LLD, MPU_SLOW_LLD, PACKET_FORMAT
+# GIT_HASH, COMPILE_DATE

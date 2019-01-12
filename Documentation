@@ -671,9 +671,71 @@ partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,0.3,2.
 partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,2.7,12,'save','both',[True,5],[True,0,1],[True,0.2078])
 [WORKED]
 
+>>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 
+##### display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
 
+-- To display the plots for desired time interval. Whether to save or show the
+plots is determined in Lv3_diagnostics.
 
+obsid - Observation ID of the object of interest (10-digit str)
+diag_var - the diagnostic variable we are looking at
+lc_t - array corresponding to time values for the light curve
+lc_counts - array corresponding to counts for the light curve
+diag_t - array corresponding to times for the diagnostic variable
+diag_counts - array corresponding to counts for the diagnostic variable
+filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
+
+##### display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype)
+
+-- To display the plots for desired time interval. Whether to save or show the
+plots is determined in Lv3_diagnostics.
+
+obsid - Observation ID of the object of interest (10-digit str)
+diag_var - the diagnostic variable we are looking at
+t1 - lower time boundary
+t2 - upper time boundary
+lc_t - array corresponding to time values for the light curve
+lc_counts - array corresponding to counts for the light curve
+diag_t - array corresponding to times for the diagnostic variable
+diag_counts - array corresponding to counts for the diagnostic variable
+filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
+
+>>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
+
+##### diag_all(obsid,bary,par_list,tbin_size,mode)
+
+-- Get the diagnostic plots for a desired time interval.
+[Likely too large a range in time (and energy) to be sufficiently useful for
+diagnosis.]
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+mode - whether we want to show or save the plot.
+
+TEST: #diag_all('1034070104',True,['PI','TIME','PI_FAST'],1,'save') [WORKED]
+
+##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+
+-- Get the diagnostic plots for a desired time interval.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - lower time boundary
+t2 - upper time boundary
+mode - whether we want to show or save the plot.
+
+TEST: #diag_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'save') [WORKED]
 
 
 ########################### THINK ABOUT THIS LATER #############################

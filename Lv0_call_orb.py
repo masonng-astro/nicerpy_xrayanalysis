@@ -49,3 +49,9 @@ def get_orb(obsid,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
+    
+################################################################################
+
+# Variables (TTYPE) from the FITS file headers that I printed
+
+# TIME, X, Y, Z, Vx, Vy, Vz, GEONS_J2K_TIME_RAW0, GEONS_J2K_WEEK0, ORIG_TIME, QUALITY

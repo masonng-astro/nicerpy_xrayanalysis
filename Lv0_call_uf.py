@@ -54,3 +54,19 @@ def get_uf(obsid,mpu_no,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
+
+################################################################################
+
+# Variables (TTYPE) from the FITS file headers that I printed
+
+# uf
+
+# TIME, RAWX, RAWY, PHA, PHA_FAST, DET_ID, DEADTIME, EVENT_FLAGS, TICK,
+
+# gti
+
+# START, STOP
+
+# pps_trend #housekeeping
+
+# TIME, TICK, PKT_TICK

@@ -49,3 +49,8 @@ def get_cat(obsid,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
+
+# Variables (TTYPE) from the FITS file headers that I printed
+
+# FILENAME, FORMAT, TYPE, FILECLAS, DESCRIP, FILESIZE, ARCHSIZE, CHECKSUM,
+# GZIP_CRC, CKSUM_B4
