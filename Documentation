@@ -671,6 +671,197 @@ partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,0.3,2.
 partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,2.7,12,'save','both',[True,5],[True,0,1],[True,0.2078])
 [WORKED]
 
+>>>>>>>>>> Lv2_phase <<<<<<<<<<
+
+##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
+
+--  Calculating the pulse profile for the observation. Goes from 0 to 2!
+
+f_pulse - the frequency of the pulse
+times - the array of time values
+counts - the array of counts values
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+
+##### whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
+
+-- Plot the entire raw pulse profile without any cuts to the data.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+mode - whether we want to show or save the plot.
+
+TEST: whole('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,'show') [WORKED]
+
+##### partial_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
+
+--  Plot the pulse profile for a desired time interval.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+t1 - lower time boundary
+t2 - upper time boundary
+mode - whether we want to show or save the plot
+
+TEST: partial_t('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,0,809,'show') [WORKED]
+
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
+
+-- Plot the pulse profile for a desired energy range.
+[Though I don't think this will be used much. Count/s vs energy is pointless,
+since we're not folding in response matrix information here to get the flux.
+So we're just doing a count/s vs time with an energy cut to the data.]
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+E1 - lower energy boundary
+E2 - upper energy boundary
+
+TEST: partial_E('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.2085,0.4,1001,0,20,'show') [WORKED]
+
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+
+-- Plot the pulse profile for a desired time interval and desired energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+t1 - lower time boundary
+t2 - upper time boundary
+E1 - lower energy boundary
+E2 - upper energy boundary
+mode - whether we want to show or save the plot
+
+TEST: partial_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.2085,0.4,101,0,809,0,20,'save') [WORKED]
+
+>>>>>>>>>> Lv2_color <<<<<<<<<<
+
+##### soft_counts(E_bound,pi_data)
+
+-- Will get an array of PI values from the data, where each entry = 1 count.
+So construct an array of ones of equal length, then where E >= E_bound, set to 0.
+This will give an array where 0 = harder X-rays, 1 = softer X-rays, so when
+doing the binning, will get just soft counts.
+
+E_bound - boundary energy considered (in keV)
+pi_data - array of PI values
+
+##### hard_counts(E_bound,pi_data)
+
+-- Will get an array of PI values from the data, where each entry = 1 count.
+So construct an array of ones of equal length, then where E < E_bound, set to 0.
+This will give an array where 0 = harder X-rays, 1 = softer X-rays, so when
+doing the binning, will get just soft counts.
+
+E_bound - boundary energy considered (in keV)
+pi_data - array of PI values
+
+##### get_color(obsid,bary,par_list,E_bound,tbin_size)
+
+-- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+E_bound - boundary energy considered (in keV)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+
+##### get_color_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2)
+
+-- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+E_bound - boundary energy considered (in keV)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - lower time boundary
+t2 - upper time boundary
+
+##### plotting(obsid,bary,par_list,E_bound,tbin_size,mode)
+
+-- Plotting the hardness ratio/color diagrams.
+
+t_bins,color,color_diff = color(obsid,bary,par_list,E_bound,tbin_size)
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+E_bound - boundary energy considered (in keV)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+mode - whether we want to show or save the plot.
+
+##### plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode)
+
+-- Plotting the hardness ratio/color diagrams.
+
+t_bins,color,color_diff = color(obsid,bary,par_list,E_bound,tbin_size)
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+E_bound - boundary energy considered (in keV)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+t1 - lower time boundary
+t2 - upper time boundary
+mode - whether we want to show or save the plot.
+
+TEST: plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show') [WORKED]
+
 >>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 
 ##### display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
@@ -718,7 +909,7 @@ tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
 mode - whether we want to show or save the plot.
 
-TEST: #diag_all('1034070104',True,['PI','TIME','PI_FAST'],1,'save') [WORKED]
+TEST: diag_all('1034070104',True,['PI','TIME','PI_FAST'],1,'save') [WORKED]
 
 ##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
 
@@ -735,7 +926,33 @@ t1 - lower time boundary
 t2 - upper time boundary
 mode - whether we want to show or save the plot.
 
-TEST: #diag_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'save') [WORKED]
+TEST: diag_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'save') [WORKED]
+
+>>>>>>>>>> Lv3_E_boundary <<<<<<<<<<
+
+##### E_bound(obsid,bary,par_list,E1,E2,cut_type,bound):
+
+-- Gives the energy bound corresponding to either a custom cut or a median cut.
+   Could add more cuts in the future!
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+E1 - energy value for the lower boundary (in keV)
+E2 - energy value for the upper boundary (in keV)
+cut_type - 'manual' or 'median'
+bound - boundary energy for when cut_type = 'manual'
+
+TEST: print(E_bound('0034070104',True,['PI','TIME','PI_FAST'],0.0,20,'median',2.7)) [WORKED]
+
+>>>>>>>>>> Lv3_color <<<<<<<<<<
+
+#####
+
+plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
 
 
 ########################### THINK ABOUT THIS LATER #############################

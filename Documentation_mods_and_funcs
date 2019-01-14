@@ -79,7 +79,7 @@ Functions:
 ################################################################################
 --------------------------------------------------------------------------------
 
-################################## LEVEL 2 ####################################
+################################## LEVEL 2 #####################################
 
 >>>>>>>>>> Lv2_sources <<<<<<<<<<
 
@@ -109,3 +109,40 @@ Functions:
 ##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
 ##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
 ##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+
+>>>>>>>>>> Lv2_phase <<<<<<<<<<
+
+##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
+##### whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
+##### partial_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+
+>>>>>>>>>> Lv2_color <<<<<<<<<<
+
+##### soft_counts(E_bound,pi_data)
+##### hard_counts(E_bound,pi_data)
+##### get_color(obsid,bary,par_list,E_bound,tbin_size)
+##### get_color_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2)
+##### plotting(obsid,bary,par_list,E_bound,tbin_size,mode)
+##### plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode)
+
+--------------------------------------------------------------------------------
+################################################################################
+--------------------------------------------------------------------------------
+
+################################## LEVEL 3 #####################################
+
+>>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
+
+##### diag_all(obsid,bary,par_list,tbin_size,mode)
+##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+
+>>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
+
+##### display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
+##### display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype)
+
+>>>>>>>>>> Lv3_E_boundary <<<<<<<<<<
+
+##### E_bound(obsid,bary,par_list,E1,E2,cut_type,bound)
