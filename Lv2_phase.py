@@ -53,7 +53,7 @@ def whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode):
     >> e.g., tbin_size = 0.05 means bin by 0.05s!
     f_pulse - the frequency of the pulse
     shift - how much to shift the pulse by in the phase axis.
-    It only affects how it is presented.
+    It only affects how the pulse profile is 'displaced'.
     no_phase_bins - number of phase bins desired
     mode - whether we want to show or save the plot.
     """

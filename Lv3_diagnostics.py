@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 
 Lv0_dirs.global_par() #obtaining the global parameters
 
-def diag_all(obsid,bary,par_list,tbin_size,mode):
+def diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars):
     """
     Get the diagnostic plots for a desired time interval.
     [Likely too large a range in time (and energy) to be sufficiently useful for
@@ -33,6 +33,8 @@ def diag_all(obsid,bary,par_list,tbin_size,mode):
     >> e.g., tbin_size = 2 means bin by 2s
     >> e.g., tbin_size = 0.05 means bin by 0.05s!
     mode - whether we want to show or save the plot.
+    diag_vars - a dictionary where each key = 'att','mkf','hk', or 'cl', and
+    diag_vars[key] provides the list of variables to loop over.
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -60,10 +62,10 @@ def diag_all(obsid,bary,par_list,tbin_size,mode):
     binned_t = t_bins
     binned_counts = summed_data
     #define the variables that we'd like to compare their behavior with the light curve
-    att_var = ['TIME','MODE','SUBMODE_AZ','SUBMODE_EL']
-    mkf_var = ['TIME','ELV', 'BR_EARTH', 'SUNSHINE', 'FOV_FLAG', 'SUN_ANGLE', 'MOON_ANGLE', 'ANG_DIST', 'SAA', 'SAA_TIME', 'COR_ASCA', 'COR_SAX', 'MCILWAIN_L', 'NICER_SAA', 'TOT_ALL_COUNT', 'TOT_UNDER_COUNT', 'TOT_OVER_COUNT', 'TOT_XRAY_COUNT']
-    hk_var = ['TIME','MPU_D_TEMP','MPU_A_TEMP','MPU_PWRBRDG_TEMP'] #remember to loop over the 6 MPUs
-    eventcl_var = ['TIME','DEADTIME','MPU_A_TEMP','MPU_UNDER_COUNT','PI_RATIO']
+    att_var = diag_vars['att']
+    mkf_var = diag_vars['mkf']
+    hk_var = diag_vars['hk']
+    eventcl_var = diag_vars['cl']
 
     ### FOR ATTITUDE
     dict_att = Lv0_call_att.get_att(obsid,att_var)
@@ -180,7 +182,7 @@ def diag_all(obsid,bary,par_list,tbin_size,mode):
                 pdf.savefig()
                 plt.close()
 
-def diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode):
+def diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode,diag_vars):
     """
     Get the diagnostic plots for a desired time interval.
 
@@ -194,6 +196,8 @@ def diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode):
     t1 - lower time boundary
     t2 - upper time boundary
     mode - whether we want to show or save the plot.
+    diag_vars - a dictionary where each key = 'att','mkf','hk', or 'cl', and
+    diag_vars[key] provides the list of variables to loop over.
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -212,10 +216,10 @@ def diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode):
     binned_t, binned_counts = Lv1_data_bin.binning_t(obsid,bary,par_list,tbin_size,t1,t2)
 
     #define the variables that we'd like to compare their behavior with the light curve
-    att_var = ['TIME','MODE','SUBMODE_AZ','SUBMODE_EL']
-    mkf_var = ['TIME','ELV', 'BR_EARTH', 'SUNSHINE', 'FOV_FLAG', 'SUN_ANGLE', 'MOON_ANGLE', 'ANG_DIST', 'SAA', 'SAA_TIME', 'COR_ASCA', 'COR_SAX', 'MCILWAIN_L', 'NICER_SAA', 'TOT_ALL_COUNT', 'TOT_UNDER_COUNT', 'TOT_OVER_COUNT', 'TOT_XRAY_COUNT']
-    hk_var = ['TIME','MPU_D_TEMP','MPU_A_TEMP','MPU_PWRBRDG_TEMP'] #remember to loop over the 6 MPUs
-    eventcl_var = ['TIME','DEADTIME','MPU_A_TEMP','MPU_UNDER_COUNT','PI_RATIO']
+    att_var = diag_vars['att']
+    mkf_var = diag_vars['mkf']
+    hk_var = diag_vars['hk']
+    eventcl_var = diag_vars['cl']
 
     ### FOR ATTITUDE
     dict_att = Lv0_call_att.get_att(obsid,att_var)

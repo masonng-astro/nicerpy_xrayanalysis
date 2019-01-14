@@ -198,14 +198,16 @@ TEST: print(get_orb('0034070101',['TIME','Vy','QUALITY'])) [WORKED]
 
 Functions:
 
-##### get_gtis(obsid,bary)
+##### get_gtis(obsid,bary,gap)
 
 -- Obtaining the GTIs corresponding to the ObsID
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+gap - if time between start of next subregion and the end of the previous
+subregion is greater than the gap, consider that a new subregion!
 
-TEST: print(get_gtis('0034070101',True)) [WORKED]
+TEST: print(get_gtis('1034070104',True,50)) [WORKED]
 
 >>>>>>>>>> Lv1_data_filter <<<<<<<<<<
 
@@ -681,7 +683,7 @@ f_pulse - the frequency of the pulse
 times - the array of time values
 counts - the array of counts values
 shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
+It only affects how the pulse profile is 'displaced'.
 no_phase_bins - number of phase bins desired
 
 ##### whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
@@ -894,7 +896,7 @@ filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
 
 >>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
 
-##### diag_all(obsid,bary,par_list,tbin_size,mode)
+##### diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars)
 
 -- Get the diagnostic plots for a desired time interval.
 [Likely too large a range in time (and energy) to be sufficiently useful for
@@ -908,8 +910,11 @@ tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 2 means bin by 2s
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
 mode - whether we want to show or save the plot.
+diag_vars - a dictionary where each key = 'att','mkf','hk', or 'cl', and
+diag_vars[key] provides the list of variables to loop over.
 
 TEST: diag_all('1034070104',True,['PI','TIME','PI_FAST'],1,'save') [WORKED]
+HAVE NOT TESTED WITH DIAG_VARS, BUT SHOULD BE STRAIGHTFORWARD. 1/14 4PM.
 
 ##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
 
@@ -927,6 +932,7 @@ t2 - upper time boundary
 mode - whether we want to show or save the plot.
 
 TEST: diag_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'save') [WORKED]
+HAVE NOT TESTED WITH DIAG_VARS, BUT SHOULD BE STRAIGHTFORWARD. 1/14 4PM.
 
 >>>>>>>>>> Lv3_E_boundary <<<<<<<<<<
 
@@ -948,11 +954,25 @@ bound - boundary energy for when cut_type = 'manual'
 
 TEST: print(E_bound('0034070104',True,['PI','TIME','PI_FAST'],0.0,20,'median',2.7)) [WORKED]
 
->>>>>>>>>> Lv3_color <<<<<<<<<<
 
-#####
 
-plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ########################### THINK ABOUT THIS LATER #############################

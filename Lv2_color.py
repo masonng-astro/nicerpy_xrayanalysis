@@ -299,5 +299,5 @@ def plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode):
             pdf.savefig()
             plt.close()
 
-plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
+#plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
 #plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show')

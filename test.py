@@ -49,9 +49,6 @@ shifted_t = times-times[0]
 t_bins = np.linspace(0,int(shifted_t[-1]),int(shifted_t[-1])*1/tbin_size+1)
 summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
-print(len(truncated_t))
-print(len(t_bins))
-
 #for i in range(len(counts)):
 #    print(i,summed_data[i]-truncated_counts[i])
 

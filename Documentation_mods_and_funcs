@@ -61,7 +61,7 @@ Functions:
 ################################## LEVEL 1 #####################################
 >>>>>>>>>> Lv1_data_gtis <<<<<<<<<
 
-##### get_gtis(obsid,bary)
+##### get_gtis(obsid,bary,gap)
 
 >>>>>>>>>> Lv1_data_filter <<<<<<<<<<
 
@@ -135,8 +135,8 @@ Functions:
 
 >>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
 
-##### diag_all(obsid,bary,par_list,tbin_size,mode)
-##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+##### diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars)
+##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode,diag_vars)
 
 >>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 
