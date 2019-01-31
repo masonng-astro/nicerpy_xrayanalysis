@@ -231,9 +231,7 @@ def plotting(obsid,bary,par_list,E_bound,tbin_size,mode):
         elif bary == False:
             filename = dir + obsid + '_bin' + str(tbin_size) + 's.pdf'
         Lv2_mkdir.makedir(dir)
-        with PdfPages(filename) as pdf:
-            pdf.savefig()
-            plt.close()
+        plt.savefig(filename,dpi=900)
 
 def plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode):
     """
@@ -295,9 +293,7 @@ def plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode):
         elif bary == False:
             filename = dir + obsid + '_bin' + str(tbin_size) +'s_'+str(t1)+'s-'+str(t2)+'s.pdf'
         Lv2_mkdir.makedir(dir)
-        with PdfPages(filename) as pdf:
-            pdf.savefig()
-            plt.close()
+        plt.savefig(filename,dpi=900)
 
 #plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
 #plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show')

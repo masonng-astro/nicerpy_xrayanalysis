@@ -21,6 +21,7 @@ def obsid_to_obj(obsid):
               '1034070105','1034070106'] #for Centaurus X-3!
     crab = ['1013010125'] #for Crab Pulsar!
     grs1915p105 = ['1103010117'] #for GRS1915+105
+    gx349p2 = ['1034090111']
 
     if obsid in cen_x3:
         return 'Cen X-3'
@@ -28,5 +29,7 @@ def obsid_to_obj(obsid):
         return 'Crab'
     elif obsid in grs1915p105:
         return 'GRS 1915+105'
+    elif obsid in gx349p2:
+        return 'GX 349+2'
     else:
         raise ValueError("Object name not found. Make sure you've uploaded the ObsID + corresponding object name to the module Lv2_sources!")

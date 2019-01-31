@@ -15,7 +15,8 @@ Lv0_dirs.global_par() #obtaining the global parameters
 
 def get_gtis(obsid,bary,gap):
     """
-    Obtaining the GTIs corresponding to the ObsID
+    Obtaining the GTIs corresponding to the ObsID.
+    Jan 30 - added a second list to be returned - the unshifted GTI values
 
     obsid - Observation ID of the object of interest (10-digit str)
     bary - Whether the data is barycentered. True/False
@@ -44,7 +45,13 @@ def get_gtis(obsid,bary,gap):
             index_subreg.append(int(round(starts[i+1])))
     index_subreg.append(int(round(stops[-1])))
 
+    unshifted = np.array(index_subreg) + data_starts[0]
+
     if len(index_subreg)%2 != 0: #if the length of the array is not an even number
         raise ValueError("Note that there are an odd number (so not all are pairs) of values for the subregion definitions!")
 
-    return index_subreg
+    return index_subreg, unshifted
+
+#obsids = ['0034070101','0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
+#for i in range(len(obsids)):
+#    print(get_gtis(obsids[i],True,50))

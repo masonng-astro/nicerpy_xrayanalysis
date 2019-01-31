@@ -25,11 +25,11 @@ def open_fits(obsid,bary):
         raise ValueError("bary should either be True or False!")
 
     if bary == True: #if we're using barycentered data
-        bary_str = 'bary'
+        bary_str = '_bary'
     else: #if not using barycentered data
         bary_str = ''
 
-    event = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl_' + bary_str + '.evt'
+    event = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl' + bary_str + '.evt'
     event = fits.open(event)
     #see event.info() for each card
     #event[1].header for events; event[2].header for GTIs
@@ -59,7 +59,7 @@ def get_eventcl(obsid,bary,par_list):
         data_dict[par_list[i]] = event[1].data[par_list[i]]
 
     return data_dict
-    
+
 ################################################################################
 
 # Variables (TTYPE) from the FITS file headers that I printed

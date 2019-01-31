@@ -34,11 +34,14 @@ def pulse_profile(f_pulse,times,counts,shift,no_phase_bins):
     index_sort = np.argsort(phases)
     phases = list(phases[index_sort]) + list(phases[index_sort]+1)
     counts = list(counts[index_sort])*2
+    print(len(times))
+    print(len(counts))
+    print(len(phases))
 
     phase_bins = np.linspace(0,2,no_phase_bins)
     summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,counts,statistic='sum',bins=phase_bins)
 
-    return phase_bins, summed_profile
+    return phases, phase_bins, summed_profile
 
 def whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode):
     """
@@ -77,9 +80,10 @@ def whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode):
     t_bins = np.linspace(0,int(shifted_t[-1]),int(shifted_t[-1])*1/tbin_size+1)
     summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
-    phase_bins, summed_profile = pulse_profile(f_pulse,t_bins[:-1],summed_data,shift,no_phase_bins)
+    phases, phase_bins, summed_profile = pulse_profile(f_pulse,t_bins[:-1],summed_data,shift,no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
+    plt.figure()
     plt.plot(phase_bins[:-1],summed_profile)
     plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid),fontsize=12)
     plt.xlabel('Phase', fontsize=12)
@@ -128,9 +132,10 @@ def partial_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mo
         raise ValueError("Mode should either be 'show' or 'save'!")
 
     truncated_t, truncated_counts = Lv1_data_bin.binning_t(obsid,bary,par_list,tbin_size,t1,t2)
-    phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_counts,shift,no_phase_bins)
+    phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_counts,shift,no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
+    plt.figure()
     plt.plot(phase_bins[:-1], summed_profile)
     plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid) + '\n Time interval: ' + str(t1) + 's - ' + str(t2) + 's',fontsize=12)
     plt.xlabel('Phase', fontsize=12)
@@ -153,6 +158,7 @@ def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bin
     [Though I don't think this will be used much. Count/s vs energy is pointless,
     since we're not folding in response matrix information here to get the flux.
     So we're just doing a count/s vs time with an energy cut to the data.]
+    INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
 
     obsid - Observation ID of the object of interest (10-digit str)
     bary - Whether the data is barycentered. True/False
@@ -181,18 +187,23 @@ def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bin
         raise TypeError("par_list should either be a list or an array!")
     if E2<E1:
         raise ValueError("E2 should be greater than E1!")
-    if mode != 'show' and mode != 'save':
-        raise ValueError("Mode should either be 'show' or 'save'!")
+    if mode != 'show' and mode != 'save' and mode != 'overlap':
+        raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
     truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2)
-    phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+    phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
-    plt.figure()
-    plt.plot(phase_bins[:-1], summed_profile)
-    plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid)+ '\n Energy range: ' + str(E1) + 'keV - ' + str(E2) + 'keV',fontsize=12)
+    if mode != 'overlap':
+        plt.figure()
+#    plt.hist(phases,bins=phase_bins,alpha=0.5,histtype='step')
+#    plt.plot(phase_bins[:-1], summed_profile)
+    plt.step(phase_bins[:-1],summed_profile)
     plt.xlabel('Phase', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)
+
+    if mode != 'overlap':
+        plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid)+ '\n Energy range: ' + str(E1) + 'keV - ' + str(E2) + 'keV',fontsize=12)
 
     if mode == 'show':
         plt.show()
@@ -245,13 +256,14 @@ def partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bi
         raise ValueError("Mode should either be 'show' or 'save'!")
 
     truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
-    phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+    phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
     plt.figure()
     plt.plot(phase_bins[:-1], summed_profile)
+#    plt.hist(summed_profile,bins=phase_bins[:-1])
     plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid)+ '\n Time interval: ' + str(t1) + 's - ' + str(t2) + 's'+ '\n Energy range: ' + str(E1) + 'keV - ' + str(E2) + 'keV',fontsize=12)
-    plt.xlabel('Time (s)', fontsize=12)
+    plt.xlabel('Phase', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)
 
     if mode == 'show':

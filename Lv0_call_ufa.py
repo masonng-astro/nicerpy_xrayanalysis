@@ -26,7 +26,8 @@ def open_fits(obsid,mpu_no):
     if type(mpu_no) != str:
         raise TypeError("mpu_no should be a string!")
 
-    event = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu' + mpu_no + '_ufa.evt'
+    #event = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu' + mpu_no + '_ufa.evt'
+    event = Lv0_dirs.NICER_DATADIR + 'oldfiles/' + obsid + '_old/xti/event_cl/ni' + obsid + '_0mpu' + mpu_no + '_ufa.evt'
     event = fits.open(event)
     #see event.info() for each card
     #event[1].header for events; event[2].header for GTIs

@@ -82,6 +82,8 @@ def whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines):
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return pdgm_f, pdgm_ps
+
     if ps_type == 'manual':
         plt.figure()
         manual_f,manual_ps = Lv2_ps_method.manual(t_bins,summed_data,xlims,vlines,True,oversampling)
@@ -97,17 +99,19 @@ def whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines):
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return manual_f, manual_ps
+
     if ps_type == 'both':
         pdgm_f,pdgm_ps = Lv2_ps_method.pdgm(t_bins,summed_data,xlims,vlines,False,oversampling)
         manual_f,manual_ps = Lv2_ps_method.manual(t_bins,summed_data,xlims,vlines,False,oversampling)
         fig, (ax1,ax2) = plt.subplots(2,1)
         fig.suptitle('Power spectra for ' + obj_name + ', ObsID ' + str(obsid) + '\n both periodogram and manual FFT method' + '\n Includes whole time interval and energy range' , fontsize=12)
 
-        ax1.semilogy(pdgm_f,pdgm_ps/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
+        ax1.semilogy(pdgm_f,pdgm_ps,'b-')#/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
         ax1.set_xlabel('Hz',fontsize=12)
         ax1.set_ylabel('Normalized power spectrum',fontsize=12)
 
-        ax2.semilogy(manual_f,manual_ps/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
+        ax2.semilogy(manual_f,manual_ps,'r-')#/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
         ax2.set_xlabel('Hz',fontsize=12)
         ax2.set_ylabel('Normalized power spectrum',fontsize=12)
 
@@ -131,6 +135,8 @@ def whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines):
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_both.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+
+        return pdgm_f, pdgm_ps, manual_f, manual_ps
 
 def partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines):
     """
@@ -195,6 +201,8 @@ def partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlim
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return pdgm_f, pdgm_ps
+
     if ps_type == 'manual':
         plt.figure()
         manual_f,manual_ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_counts,xlims,vlines,True,oversampling)
@@ -210,17 +218,19 @@ def partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlim
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return manual_f, manual_ps
+
     if ps_type == 'both':
         pdgm_f,pdgm_ps = Lv2_ps_method.pdgm(truncated_t[:-1],truncated_counts,xlims,vlines,False,oversampling)
         manual_f,manual_ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_counts,xlims,vlines,False,oversampling)
         fig, (ax1,ax2) = plt.subplots(2,1)
         fig.suptitle('Power spectra for ' + obj_name + ', ObsID ' + str(obsid) + '\n both periodogram and manual FFT method'+ '\n Time interval: '+str(t1)+'s-'+str(t2)+'s' + '\n Whole energy range',fontsize=12)
 
-        ax1.semilogy(pdgm_f,pdgm_ps/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
+        ax1.semilogy(pdgm_f,pdgm_ps,'b-')#/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
         ax1.set_xlabel('Hz',fontsize=12)
         ax1.set_ylabel('Normalized power spectrum',fontsize=12)
 
-        ax2.semilogy(manual_f,manual_ps/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
+        ax2.semilogy(manual_f,manual_ps,'r-')#,'r-')#/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
         ax2.set_xlabel('Hz',fontsize=12)
         ax2.set_ylabel('Normalized power spectrum',fontsize=12)
 
@@ -244,6 +254,8 @@ def partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlim
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_both_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+
+        return pdgm_f, pdgm_ps, manual_f, manual_ps
 
 def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines):
     """
@@ -314,6 +326,8 @@ def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversam
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return pdgm_f, pdgm_ps
+
     if ps_type == 'manual':
         plt.figure()
         manual_f,manual_ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_t_counts,xlims,vlines,True,oversampling)
@@ -329,17 +343,19 @@ def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversam
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return manual_f, manual_ps
+
     if ps_type == 'both':
         pdgm_f,pdgm_ps = Lv2_ps_method.pdgm(truncated_t[:-1],truncated_t_counts,xlims,vlines,False,oversampling)
         manual_f,manual_ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_t_counts,xlims,vlines,False,oversampling)
         fig, (ax1,ax2) = plt.subplots(2,1)
         fig.suptitle('Power spectra for ' + obj_name + ', ObsID ' + str(obsid) + '\n both periodogram and manual FFT method'+ '\n Whole time interval'+'\n Energy range: '+str(E1)+'keV-'+str(E2)+'keV',fontsize=12)
 
-        ax1.semilogy(pdgm_f,pdgm_ps/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
+        ax1.semilogy(pdgm_f,pdgm_ps,'b-')#/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
         ax1.set_xlabel('Hz',fontsize=12)
         ax1.set_ylabel('Normalized power spectrum',fontsize=12)
 
-        ax2.semilogy(manual_f,manual_ps/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
+        ax2.semilogy(manual_f,manual_ps,'r-')#/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
         ax2.set_xlabel('Hz',fontsize=12)
         ax2.set_ylabel('Normalized power spectrum',fontsize=12)
 
@@ -364,6 +380,7 @@ def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversam
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return pdgm_f, pdgm_ps, manual_f, manual_ps
 
 def partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines):
     """
@@ -435,6 +452,8 @@ def partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return pdgm_f, pdgm_ps
+
     if ps_type == 'manual':
         plt.figure()
         manual_f,manual_ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_t_counts,xlims,vlines,True,oversampling)
@@ -450,17 +469,19 @@ def partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
 
+        return manual_f, manual_ps
+
     if ps_type == 'both':
         pdgm_f,pdgm_ps = Lv2_ps_method.pdgm(truncated_t[:-1],truncated_t_counts,xlims,vlines,False,oversampling)
         manual_f,manual_ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_t_counts,xlims,vlines,False,oversampling)
         fig, (ax1,ax2) = plt.subplots(2,1)
         fig.suptitle('Power spectra for ' + obj_name + ', ObsID ' + str(obsid) + '\n both periodogram and manual FFT method'+ '\n Time interval: '+str(t1)+'s-'+str(t2)+'s'+'\n Energy range: '+str(E1)+'keV-'+str(E2)+'keV',fontsize=12)
 
-        ax1.semilogy(pdgm_f,pdgm_ps/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
+        ax1.semilogy(pdgm_f,pdgm_ps,'b-')#/np.mean(pdgm_ps),'b-') #periodogram; arrays already truncated!
         ax1.set_xlabel('Hz',fontsize=12)
         ax1.set_ylabel('Normalized power spectrum',fontsize=12)
 
-        ax2.semilogy(manual_f,manual_ps/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
+        ax2.semilogy(manual_f,manual_ps,'r-')#/np.mean(manual_ps),'r-') #manual FFT; arrays already truncated!
         ax2.set_xlabel('Hz',fontsize=12)
         ax2.set_ylabel('Normalized power spectrum',fontsize=12)
 
@@ -484,3 +505,5 @@ def partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+
+        return pdgm_f, pdgm_ps, manual_f, manual_ps

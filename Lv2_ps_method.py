@@ -98,7 +98,7 @@ def pdgm(times,counts,xlims,vlines,toplot,oversampling):
         f,pxx = signal.periodogram(os_counts,fs=freq)
 
     if toplot == True:
-        plt.semilogy(f[1:],pxx[1:]/np.mean(pxx[1:]))
+        plt.semilogy(f[1:],pxx[1:])#/np.mean(pxx[1:]))
         plt.xlabel('Hz',fontsize=12)
         plt.ylabel('Normalized power spectrum',fontsize=12)
         if xlims[0] == True:
@@ -140,7 +140,7 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
 
     padded_counts = padding(counts)
     mean_corrected = padded_counts-np.mean(counts)
-    power_spec = 2.0/sum(counts)**2*np.abs(np.fft.fft(mean_corrected))**2 #sum(counts) = N_photons
+    power_spec = 2.0/sum(counts)*np.abs(np.fft.fft(mean_corrected))**2 #sum(counts) = N_photons
     freqs = np.fft.fftfreq(padded_counts.size,dt)
 
     if oversampling[0] == True:
@@ -149,13 +149,15 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
 
         padded_counts = padding(os_counts)
         mean_corrected = padded_counts-np.mean(counts)
-        power_spec = 2.0/sum(counts)**2*np.abs(np.fft.fft(mean_corrected))**2 #sum(counts) = N_photons
+        power_spec = 2.0/sum(counts)*np.abs(np.fft.fft(mean_corrected))**2 #sum(counts) = N_photons
         freqs = np.fft.fftfreq(padded_counts.size,dt)
 
     N = len(freqs)
+#    checkmean = power_spec[(freqs>=10)&(freqs<=50)]
+#    print(np.mean(checkmean))
     ####freqs = np.linspace(0,1/(2.0*dt),int(len(test_times)/2)) #correct method! Same as that of fftfreq
     if toplot == True:
-        plt.semilogy(freqs[1:int(N/2)],power_spec[1:int(N/2)]/np.mean(power_spec[1:int(N/2)]),'rx-')
+        plt.semilogy(freqs[1:int(N/2)],power_spec[1:int(N/2)],'rx-')#/np.mean(power_spec[1:int(N/2)]),'rx-')
         plt.xlabel('Hz')
         plt.ylabel('Normalized power spectrum')
         if xlims[0] == True:

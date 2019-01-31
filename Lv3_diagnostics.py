@@ -101,7 +101,7 @@ def diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars):
     for i in range(1,len(mkf_var)): #as in, don't compare time with time...
         filtered_mkf = dict_mkf[mkf_var[i]]
         if len(shifted_t) != len(filtered_mkf):
-            raise ValueError("The lengths of arrays filtered t and filtered mkf for variable " + str(mkf_var[i]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_mkf)) + ' respectively.')
+            raise ValueError("The lengths of arrays shifted t and filtered mkf for variable " + str(mkf_var[i]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_mkf)) + ' respectively.')
 
         if mode == 'show':
             Lv3_diagnostics_display.display_all(obsid,mkf_var[i],binned_t,binned_counts,shifted_t,filtered_mkf,'.mkf')
@@ -130,7 +130,7 @@ def diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars):
             for j in range(1,len(hk_var)): #as in, don't compare time with time...
                 filtered_hk = dict_hk[hk_var[j]]
                 if len(shifted_t) != len(filtered_hk):
-                    raise ValueError("The lengths of arrays filtered t and filtered att for variable " + str(hk_var[j]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_hk)) + ' respectively. This is for HK MPU=' + str(i))
+                    raise ValueError("The lengths of arrays shifted t and filtered att for variable " + str(hk_var[j]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_hk)) + ' respectively. This is for HK MPU=' + str(i))
                 Lv3_diagnostics_display.display_all(obsid,hk_var[j],binned_t,binned_counts,shifted_t,filtered_hk,['.hk',str(i)])
                 plt.show()
 
@@ -147,9 +147,9 @@ def diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars):
                 times_hk = dict_hk['TIME']
                 shifted_t = times_hk - times_hk[0]
                 for j in range(1,len(hk_var)): #as in, don't compare time with time...
-                    filtered_hk = dict_hk
+                    filtered_hk = dict_hk[hk_var[j]]
                     if len(shifted_t) != len(filtered_hk):
-                        raise ValueError("The lengths of arrays filtered t and filtered att for variable " + str(hk_var[j]) + ' are different, with ' + str(len(filtered_t)) + ' and ' + str(len(filtered_hk)) + ' respectively. This is for HK MPU=' + str(i))
+                        raise ValueError("The lengths of arrays shifted t and filtered att for variable " + str(hk_var[j]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_hk)) + ' respectively. This is for HK MPU=' + str(i))
                     Lv3_diagnostics_display.display_all(obsid,hk_var[j],binned_t,binned_counts,shifted_t,filtered_hk,['.hk',str(i)])
                     pdf.savefig()
                     plt.close()
@@ -162,7 +162,7 @@ def diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars):
     for i in range(1,len(eventcl_var)): #as in, don't compare time with time...
         filtered_cl = dict_eventcl[eventcl_var[i]]
         if len(shifted_t) != len(filtered_cl):
-            raise ValueError("The lengths of arrays filtered t and filtered cl for variable " + str(eventcl_var[i]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_cl)) + ' respectively.')
+            raise ValueError("The lengths of arrays shifted t and filtered cl for variable " + str(eventcl_var[i]) + ' are different, with ' + str(len(shifted_t)) + ' and ' + str(len(filtered_cl)) + ' respectively.')
 
         if mode == 'show':
             Lv3_diagnostics_display.display_all(obsid,eventcl_var[i],binned_t,binned_counts,shifted_t,filtered_cl,'.cl')
