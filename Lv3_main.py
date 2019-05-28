@@ -20,13 +20,14 @@ import matplotlib.pyplot as plt
 
 ### parameters used EVERYWHERE
 obsid = '0034070102' #observation ID.
+#obsids = ['1050390101','1050390105','1050390115','1050390122','1050390125','1050390132','1050390138','1050390140','1050390141','1050390142','1050390145','1050390148']
 #obsids = ['0034070101','0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
+#obsids = ''
 bary = True #whether the data you want is barycenter-corrected or not
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
-tbin_size = 0.1 #how you want to bin the light curve data
+tbin_size = 1 #how you want to bin the light curve data
 Ebin_size = 0.05 #in keV
-mode = 'show' # 'show' the plots or 'save' the plots
-
+mode = 'show'
 truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
 
 ###############################################################################
@@ -37,9 +38,9 @@ truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to l
 # Lv2_color - plotting_t
 
 t1 = 0
-t2 = 810
-E1 = 0.3
-E2 = 2.7
+t2 = 550
+E1 = 0.2
+E2 = 12
 
 ###############################################################################
 
@@ -49,16 +50,23 @@ gap = 50
 
 #for Lv2_ps
 ps_type = 'both' # 'period' (for periodogram) or 'manual' (for FFT) or 'both'
-oversampling = [False,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
+oversampling = [True,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
 xlims = [True,0,1] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
-vlines = [True,0.2084] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
+vlines = [True,0.208461] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
 
 #for Lv2_phase
 ### For an unknown observation, one should run JUST Lv2_lc and Lv2_ps first to get
 ### the pulsation frequencies. Pulse profiles come LATER.
-f_pulse = 0.2080718358508059 #frequency of the pulse
+f_pulse = 0.101977 #frequency of the pulse
 shift = 0.4 # how much to shift the pulse by in the phase axis. It only affects how the pulse profile is 'displaced'.
-no_phase_bins = 51 # number of phase bins desired
+no_phase_bins = 101 # number of phase bins desired
+
+#0034070101 0.20846118761251825
+#0034070102 0.2080718358508059
+#0034070103 0.20854506857953284
+#0034070104 0.20796037636355533
+#1034070101 0.20799884640430513
+#1034070106 0.20854272550784736
 
 #for Lv2_color
 E1_data = 0.3 #data is reliable between 0.3 and 12 keV
@@ -148,6 +156,15 @@ diag_vars['cl'] = eventcl_var
 ###############################################################################
 ###############################################################################
 ###############################################################################
+#### do for March 25 2019 for now - see broad overview of pulse shapes
+#oh bless, 'overlap' works exactly as I want it to!
+f_pulses = [0.101464,0.10151,0.101738,0.101993,0.102029,0.102029,0.102082,0.102163,0.102103,0.102109,0.102158,0.101977]
+subplot_Es = [(0.2,1),(1,2),(2,3),(3,5),(5,8),(8,12)]
+if type(obsids) == list or type(obsids) == np.array:
+    for i in range(len(obsids)):
+        Lv2_phase.partial_subplots_E(obsids[i],bary,par_list,tbin_size,Ebin_size,f_pulses[i],shift,no_phase_bins,subplot_Es,E1,E2,mode)
+#        Lv2_phase.partial_E(obsids[i],bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
+    plt.show()
 
 ### ONE SHOULD NOT NEED TO EDIT THE SCRIPTS BEYOND THIS POINT, UNLESS YOU KNOW
 ### WHAT YOU'RE DOING. ARGUABLY, I DON'T EITHER, BUT I'LL TRY MY BEST.

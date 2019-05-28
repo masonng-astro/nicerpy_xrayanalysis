@@ -45,7 +45,7 @@ def binning_t(obsid,bary,par_list,tbin_size,t1,t2):
     endt = int(t2)
 
     t_bins = np.linspace(startt,endt,(endt-startt)*1/tbin_size+1) #getting an array of time values for the bins
-    summed_data, bin_edges, binnumber = stats.binned_statistic(truncated_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
+    summed_data, bin_edges, binnumber = stats.binned_statistic(truncated_t,counts,statistic='sum',bins=t_bins) #binning the counts in the data
 
     print("The data is binned by " + str(tbin_size) + 's')
 

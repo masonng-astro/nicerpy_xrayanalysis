@@ -65,6 +65,8 @@ def whole(obsid,bary,par_list,tbin_size,mode):
         Lv2_mkdir.makedir(dir)
         plt.savefig(filename,dpi=900)
 
+#whole('1034090109',True,['TIME','PI','PI_FAST'],1,'show')
+
 def partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode):
     """
     Plot the time series for a desired time interval.
@@ -164,6 +166,8 @@ def partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode):
             filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
         Lv2_mkdir.makedir(dir)
         plt.savefig(filename,dpi=900)
+
+#partial_E('1034090111',True,['TIME','PI','PI_FAST'],1,0.05,8,12,'show')
 
 def partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode):
     """

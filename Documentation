@@ -192,13 +192,78 @@ obsid - Observation ID of the object of interest (10-digit str)
 
 ##### get_orb(obsid,par_list)
 
-Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
+-- Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
 
 obsid - Observation ID of the object of interest (10-digit str)
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI)
 
 TEST: print(get_orb('0034070101',['TIME','Vy','QUALITY'])) [WORKED]
+
+>>>>>>>>>> Lv0_scp <<<<<<<<<<
+
+Functions:
+
+##### scp(obsid)
+
+-- To securely copy the files from ciri onto /Volumes/Samsung_T5/NICER-data/
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+TEST: for i in range(11,25):
+    scp('10600601' + str(i)) WORKED.
+
+>>>>>>>>>> Lv0_gunzip <<<<<<<<<<
+
+Functions:
+
+##### auxil(obsid) -- TESTED THIS WITH unzip_all below!
+
+-- Unzipping the auxil files
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### cl(obsid)
+
+-- Unzipping the cl and ufa files
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### uf(obsid)
+
+-- Unzipping the uf files
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### hk(obsid)
+
+-- Unzipping the hk files
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### unzip_all(obsid)
+
+-- Unzipping all the auxil/cl/uf/hk files
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+TEST: unzip_all('1060060127') - WORKED
+unzip_all('1023021323') - This is a nonsense ObsID. Wanted to check that os.path.isdir works!
+Added an error which'd tell me if one hasn't yet imported the ObsID folder from ciri.
+
+>>>>>>>>>> Lv0_psrpipe <<<<<<<<<<
+
+-- Running psrpipe on the observation, to make more cuts! I decided not to
+put in pre-determined options for fully flexibility. Though standard flags
+would be ['--emin','0.3','--emax','12.0','--shrinkelvcut'], though there are
+others. Check out "psrpipe.py -h"! Also made sure that I moved $OBSID_pipe from
+the working directory to where NICERSOFT_DATADIR is, though I need to temporarily
+  store the output folder in the working directory.
+
+obsid - Observation ID of the object of interest (10-digit str)
+flags - a LIST of input flags for psrpipe
+
+TEST: psrpipe('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'])
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -406,6 +471,25 @@ print(y[:50])
 print(z[:50])
 print(sum(x))
 print(sum(z)) #the two sums are exactly the same
+
+>>>>>>>>>> Lv1_barycorr <<<<<<<<<<
+
+##### get_ra_dec(obsid)
+
+-- Obtain the RA_OBJ and DEC_OBJ corresponding to the observation!
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+TEST: get_ra_dec('1060060127') - WORKED
+
+##### barycorr(obsid,refframe)
+
+-- Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+
+obsid - Observation ID of the object of interest (10-digit str)
+refframe - reference frame for barycenter corrections (usually ICRS)
+
+TEST: barycorr('1060060127','ICRS') - WORKED
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -745,7 +829,7 @@ TEST: partial_t('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,0,80
 [Though I don't think this will be used much. Count/s vs energy is pointless,
 since we're not folding in response matrix information here to get the flux.
 So we're just doing a count/s vs time with an energy cut to the data.]
-INTERJECTION: This caveat is for the spectrum, NOT the pulse profile! 
+INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
@@ -878,6 +962,87 @@ mode - whether we want to show or save the plot.
 
 TEST: plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show') [WORKED]
 
+>>>>>>>>>> Lv2_presto_all <<<<<<<<<<
+
+##### realfft(obsid)
+
+-- Performing PRESTO's realfft on the binned data (.dat)
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+##### accelsearch(obsid,flags)
+
+-- Performing PRESTO's accelsearch on the FFT data (.fft)
+
+obsid - Observation ID of the object of interest (10-digit str)
+flags - a LIST of input flags for psrpipe
+
+##### prepfold(obsid,no_cand,zmax)
+
+-- Performing PRESTO's prepfold on the pulsation candidates.
+
+obsid - Observation ID of the object of interest (10-digit str)
+no_cand - number of candidates. I haven't yet thought of a way to automate this,
+so I'll have to do all of the above first BEFORE I do prepfold. It's fine though,
+since this is the only 'big' manual step.
+zmax - maximum acceleration
+
+##### ps2pdf(obsid)
+
+-- Converting from .ps to .pdf
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+>>>>>>>>>> Lv2_presto_segments <<<<<<<<<<
+
+##### get_gti_file(obsid,segment_length)
+
+-- Creating the individual .gti files for my data segments!
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the individual segments for combining power spectra
+
+TEST: get_gti_file('1060060127',100)
+
+##### niextract_gti_time(obsid,segment_length)
+
+-- Using niextract-events to get segmented data based on the [segment_length]-length
+GTIs that were created above!
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the individual segments for combining power spectra
+
+TEST: niextract_gti_time('1060060127',100)
+
+##### niextract_gti_energy(obsid,PI1,PI2)
+
+-- Using niextract-events to get segmented data based on the energy range
+
+obsid - Observation ID of the object of interest (10-digit str)
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+
+TEST: niextract_gti_energy('1060060127',200,300)
+
+>>>>>>>>>> Lv2_presto_preprocess <<<<<<<<<<
+
+##### preprocess(obsid,psrpipe_flags,refframe,tbin)
+
+-- Preprocessing the NICER data for use in PRESTO, so running scp, gunzip, psrpipe,
+    barycorr, and nicerfits2presto.
+
+obsid - Observation ID of the object of interest (10-digit str)
+psrpipe_flags - a LIST of input flags for psrpipe
+refframe - reference frame for barycenter corrections (usually ICRS)
+tbin - time bin for PRESTO data in seconds
+
+TEST: preprocess('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'],'ICRS','0.00025')
+
+################################################################################
+################################################################################
+################################################################################
+
+
 >>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 
 ##### display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
@@ -968,13 +1133,97 @@ bound - boundary energy for when cut_type = 'manual'
 
 TEST: print(E_bound('0034070104',True,['PI','TIME','PI_FAST'],0.0,20,'median',2.7)) [WORKED]
 
+>>>>>>>>>> Lv3_pulsedfrac.py <<<<<<<<<<
 
+##### pf_all(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode):
 
+-- Obtaining the pulsed fraction from the entire raw pulse profile without
+    any cuts to the data.
 
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how the pulse profile is 'displaced'.
+no_phase_bins - number of phase bins desired
+mode - whether we want to show or save the plot.
 
+TEST: print(pf_all('0034070104',True,['TIME','PI','PI_FAST'],1,0.20846118761251825,0.4,50,'show')) [WORKED]
 
+##### pf_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode):
 
+-- Obtain the pulsed fraction from the pulse profile for a desired time interval.
 
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means bin by 0.05s!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+t1 - lower time boundary
+t2 - upper time boundary
+mode - whether we want to show or save the plot
+
+TEST: print(pf_t('0034070101',True,['TIME','PI','PI_FAST'],1,0.20846118761251825,0.4,50,0,500,'show')) [WORKED]
+
+##### pf_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode):
+
+-- Obtain the pulsed fraction from the pulse profile for a desired energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+E1 - lower energy boundary
+E2 - upper energy boundary
+
+TEST: print(pf_E('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0.3,12,'show')) [WORKED]
+
+##### pf_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode):
+
+-- Obtain the pulsed fraction from a desired time interval and desired energy range.
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+par_list - A list of parameters we'd like to extract from the FITS file
+(e.g., from eventcl, PI_FAST, TIME, PI,)
+tbin_size - the size of the time bins (in seconds!)
+>> e.g., tbin_size = 2 means bin by 2s
+>> e.g., tbin_size = 0.05 means by in 0.05s
+Ebin_size - the size of the energy bins (in keV!)
+>> e.g., Ebin_size = 0.1 means bin by 0.1keV
+>> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+f_pulse - the frequency of the pulse
+shift - how much to shift the pulse by in the phase axis.
+It only affects how it is presented.
+no_phase_bins - number of phase bins desired
+t1 - lower time boundary
+t2 - upper time boundary
+E1 - lower energy boundary
+E2 - upper energy boundary
+mode - whether we want to show or save the plot
+
+TEST: print(pf_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0,500,0.3,12,'show')) [WORKED]
 
 
 

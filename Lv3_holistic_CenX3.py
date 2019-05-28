@@ -17,7 +17,7 @@ import Lv0_dirs,Lv0_obsid_info
 import Lv0_call_eventcl,Lv0_call_att,Lv0_call_hk,Lv0_call_mkf,Lv0_call_orb,Lv0_call_uf,Lv0_call_ufa
 import Lv1_data_bin,Lv1_data_gtis,Lv1_data_spectra
 import Lv2_lc,Lv2_ps,Lv2_color,Lv2_phase,Lv2_sources
-import Lv3_E_boundary,Lv3_diagnostics,Lv3_diagnostics_display
+import Lv3_E_boundary,Lv3_diagnostics,Lv3_diagnostics_display,Lv3_pulsedfrac
 
 from matplotlib.backends.backend_pdf import PdfPages
 
@@ -56,6 +56,10 @@ for i in range(len(obsids)):
     gtis_shifted,gtis_unshifted = Lv1_data_gtis.get_gtis(obsids[i],bary,50)
     Ebound = Lv3_E_boundary.E_bound(obsids[i],bary,par_list,E1,E2,cut_type,bound)
     obj_name = Lv2_sources.obsid_to_obj(obsids[i])
+    if obsids[i] in obsids_freq:
+        pf = Lv3_pulsedfrac.pf_E(obsids[i],bary,par_list,tbin_size,Ebin_size,np.float(peakf[0]),shift,no_phase_bins,E1,E2,'overlap')
+    else:
+        pf = 'Cannot find peak frequency yet.'
 
     with PdfPages(filename) as pdf:
         ### COVER PAGE
@@ -69,6 +73,7 @@ for i in range(len(obsids)):
         cover.text(0.05,0.80,'Shifted GTIs > 50s: ' + str(gtis_shifted))
         cover.text(0.05,0.775,'Unshifted GTIs > 50s: \n')
         cover.text(0.05,0.75,str(gtis_unshifted))
+        cover.text(0.05,0.70,'RMS Pulsed Fraction/Fractional RMS Amplitude - ' + str(pf))
 
         pdf.savefig()
         plt.close()

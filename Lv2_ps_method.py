@@ -165,4 +165,8 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
         if vlines[0] == True:
             plt.axvline(x=vlines[1],color='k',alpha=0.5,lw=0.5)
 
+    if sum(counts) == 0: #for Lv3_average_ps_segments, when a segment has no data!
+        #Added on 5/11/19
+        power_spec = np.ones(int(N/2)) + np.ones(int(N/2))
+
     return freqs[1:int(N/2)], power_spec[1:int(N/2)]
