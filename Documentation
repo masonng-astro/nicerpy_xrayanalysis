@@ -1024,6 +1024,88 @@ PI2 - upper bound of PI (not energy in keV!) desired for the energy range
 
 TEST: niextract_gti_energy('1060060127',200,300)
 
+##### niextract_gti_time_energy(obsid,segment_length,PI1,PI2)
+
+-- Using niextract-events to get segmented data based on [segment_length]-length
+GTIs that were created above, AND energy range!
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the individual segments for combining power spectra
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+
+TEST: niextract_gti_time_energy('0034070101',100,300,800) WORKED.
+
+##### do_nicerfits2presto(obsid,tbin)
+
+-- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
+I can always move files to different folders to prevent repeats (especially for large files)
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+
+TEST: do_nicerfits2presto('1060060127',0.0005)
+
+##### edit_inf(obsid,tbin,segment_length)
+
+-- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
+Mainly need to edit "Number of bins in the time series".
+This is only for when we make segments by time though!
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+segment_length - length of the individual segments
+
+TEST: edit_inf('1060060127',0.0005,1000)
+
+##### edit_binary(obsid,tbin,segment_length)
+
+-- To pad the binary file so that it will be as long as the desired segment length.
+The value to pad with for each time bin, is the average count rate in THAT segment!
+Again, this is only for when we make segments by time!
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+segment_length - length of the individual segments
+
+TEST: edit_binary('1060060127',0.0005,1000)
+
+##### realfft(obsid)
+
+-- Performing PRESTO's realfft on the binned data (.dat)
+
+obsid - Observation ID of the object of interest (10-digit str)
+
+TEST: realfft('1060060127')
+
+##### accelsearch(obsid,flags)
+
+-- Performing PRESTO's accelsearch on the FFT data (.fft)
+
+obsid - Observation ID of the object of interest (10-digit str)
+flags - a LIST of input flags for accelsearch
+
+TEST: accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
+      accelsearch('1060060127',accelsearch_flags) [WORKED]
+
+##### prepfold(obsid,no_cands,zmax)
+
+-- Performing PRESTO's prepfold on the pulsation candidates.
+
+obsid - Observation ID of the object of interest (10-digit str)
+no_cand - number of candidates. I haven't yet thought of a way to automate this,
+so I'll have to do all of the above first BEFORE I do prepfold. It's fine though,
+since this is the only 'big' manual step.
+zmax - maximum acceleration
+
+TEST: prepfold('0034070101',10,0) [WORKED]
+
+##### ps2pdf(obsid)
+
+-- Converting from .ps to .pdf
+
+obsid - Observation ID of the object of interest (10-digit str)
+
 >>>>>>>>>> Lv2_presto_preprocess <<<<<<<<<<
 
 ##### preprocess(obsid,psrpipe_flags,refframe,tbin)
@@ -1225,8 +1307,23 @@ mode - whether we want to show or save the plot
 
 TEST: print(pf_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0,500,0.3,12,'show')) [WORKED]
 
+>>>>>>>>>> Lv3_duty_cycle.py <<<<<<<<<<
 
+##### duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
 
+-- To determine the percentage of "data used"/total amount of data. Have two
+types of values:
+1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
+2) % of bins with data over POTENTIALLY USABLE segments (recall that if the event
+   file is completely empty, then nicerfits2presto would not process it!)
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+segment_length - length of the individual segments
+duty_cycle_bin - binning used to calculate the duty cycle
+threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
+
+TEST: duty_cycle('0034070101',0.00025,100,1,10)
 
 
 

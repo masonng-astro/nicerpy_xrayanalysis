@@ -271,13 +271,89 @@ for i in range(len(hk_files)):
 #subprocess.check_call(['prepfold'])
 """
 
+"""
 import subprocess
 
 infile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034090111_pipe_old/GTI_1000s/ni1034090111_nicersoft_bary_GTI1_1000s_63.86Hz_Cand.pfd.ps'
 outfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034090111_pipe_old/GTI_1000s/ni1034090111_nicersoft_bary_GTI1_1000s_63.86Hz_Cand.pfd.pdf'
 subprocess.check_call(['ps2pdf',infile,outfile])
+"""
 
+"""
+eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1060060127_pipe/test.dat'
+bins = np.fromfile(eventfile,dtype='<f',count=-1)
+ts = np.linspace(0,100,200000)
+tbins = np.linspace(0,100,101)
+sumcounts,bin_edges,binnumber = stats.binned_statistic(ts,bins,statistic='sum',bins=tbins)
+
+plt.plot(tbins[:-1],sumcounts,'r-')
+plt.show()
+print(len(bins[bins>0])/len(bins)*100)
+
+"""
+
+"""
+obsdir = Lv0_dirs.NICERSOFT_DATADIR + '0034070101_pipe/'
+test_dat = obsdir + 'test.dat'
+
+bins = np.fromfile(test_dat,dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
+bins_with_data = len(bins[bins>0]) #number of bins with data (NOT the ones with averaged count rate!)
+average_count_rate = sum(bins)/len(bins)
+
+segment_length = 1000
+tbin = 0.00025
+print(len(bins))
+no_desired_bins = segment_length/tbin #number of desired bins, to go up to the desired segment length
+no_padded = int(no_desired_bins-len(bins)) #number of bins *needed* for original segment to have desired segment length
+padding = np.ones(no_padded,dtype=np.float32)*average_count_rate #generate the array of (averaged) counts needed to pad the original segment
+#padding = np.zeros(no_padded,dtype=np.float32)
+#padding = np.zeros(no_padded,dtype=np.float32)
+new_bins = np.array(list(bins) + list(padding)) #the new set of bins where it contains the original segment, in addition to the padded bins (with counts = average of original segment)
+print(len(new_bins))
+new_bins.tofile('test3.dat')
+
+import subprocess
+subprocess.check_output(['mv','test3.dat',obsdir])
+
+test3_dat = obsdir + 'test3.dat'
+bins = np.fromfile(test3_dat,dtype='<f',count=-1)
+
+print(len(bins))
+
+times = np.linspace(0,len(bins)*tbin,len(bins))
+plt.plot(times,bins,'r-')
+plt.show()
+
+def pad_binary(obsid,tbin,segment_length):
+
+    To pad the binary file so that it will be as long as the desired segment length.
+    The value to pad with for each time bin, is the average count rate in THAT segment!
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    tbin - size of the bins in time
+    segment_length - length of the individual segments
+    
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
+    obsdir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    dat_files = glob.glob(obsdir+'*.dat')
+    for i in range(len(dat_files)):
+        bins = np.fromfile(dat_files[i],dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
+        bins_with_data = len(bins[bins>0]) #number of bins with data (NOT the ones with averaged count rate!)
+        average_count_rate = sum(bins)/len(bins)
+
+        no_desired_bins = segment_length/tbin #number of desired bins, to go up to the desired segment length
+        no_padded = int(no_desired_bins-len(bins)) #number of bins *needed* for original segment to have desired segment length
+        padding = np.ones(no_padded)*average_count_rate #generate the array of (averaged) counts needed to pad the original segment
+        new_bins = list(bins) + list(padding) #the new set of bins where it contains the original segment, in addition to the padded bins (with counts = average of original segment)
+
+        final_dat = open(dat_files[i],"wb")
+        final_dat.write(new_bins)
+
+    return
+"""
 
 timeend = time.time()
 
-print(timeend-timestart)
+print(str(timeend-timestart) + ' seconds')

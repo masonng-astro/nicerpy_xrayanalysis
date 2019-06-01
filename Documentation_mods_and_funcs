@@ -160,6 +160,14 @@ Functions:
 ##### get_gti_file(obsid,segment_length)
 ##### niextract_gti_time(obsid,segment_length)
 ##### niextract_gti_energy(obsid,PI1,PI2)
+##### niextract_gti_time_energy(obsid,segment_length,PI1,PI2)
+##### do_nicerfits2presto(obsid,tbin)
+##### edit_inf(obsid,tbin,segment_length)
+##### edit_binary(obsid,tbin,segment_length)
+##### realfft(obsid)
+##### accelsearch(obsid,flags)
+##### prepfold(obsid,no_cands,zmax)
+##### ps2pdf(obsid)
 
 >>>>>>>>>> Lv2_presto_preprocess <<<<<<<<<<
 
@@ -191,3 +199,7 @@ Functions:
 ##### pf_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
 ##### pf_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
 ##### pf_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+
+>>>>>>>>>> Lv3_duty_cycle <<<<<<<<<<
+
+##### duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold)

@@ -15,10 +15,13 @@ from astropy.io import fits
 import Lv0_dirs
 from tqdm import tqdm
 import os
+import time
 import subprocess
 import glob
 
 Lv0_dirs.global_par()
+
+powers_of_two = [2**i for i in range(31)] # for deciding number of FFT bins
 
 def get_gti_file(obsid,segment_length):
     """
@@ -104,17 +107,261 @@ def niextract_gti_energy(obsid,PI1,PI2):
     inputfile = working_dir + 'ni' + obsid + '_nicersoft_bary.evt'
     outputfile = working_dir + 'ni' + obsid + '_nicersoft_bary_E'+str(PI1)+'-'+str(PI2)+'.evt'
 
-    subprocess.check_call(['niextract-events',inputfile+'[pi='+str(PI1)+':'+str(PI2)+']',outputfile])
+    subprocess.check_call(['niextract-events',inputfile+'[PI='+str(PI1)+':'+str(PI2)+']',outputfile])
 
     return
 
 #niextract_gti_energy('1060060127',200,300)
 
-def do_nicerfits2presto(obsid,tbin,truncations):
-    #use glob to find .evt!
+def niextract_gti_time_energy(obsid,segment_length,PI1,PI2):
+    """
+    Using niextract-events to get segmented data based on [segment_length]-length
+    GTIs that were created above, AND energy range!
 
-def edit_binary(obsid):
-    #will likely be the most intense function to write, remember that we want to find the duty cycle (maybe write separate functions
-    #that I'll call in Lv2_presto_main), then do a plot of % vs segment length, then edit the binary
-    #[MAKE SURE I TEST THIS OUT ON TEST.PY FIRST!!!]
-    #use glob to find .dat
+    obsid - Observation ID of the object of interest (10-digit str)
+    segment_length - length of the individual segments for combining power spectra
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    """
+    event = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/ni' + obsid + '_nicersoft_bary.evt'
+    event = fits.open(event)
+    gtis = event[2].data
+
+    Tobs_start = gtis[0][0] #MJD for the observation start time
+    Tobs_end = gtis[-1][1] #MJD for the observation end time
+
+    segment_times = np.arange(Tobs_start,Tobs_end,segment_length) #array of time values, starting
+    #from the observation start time until the observation end time, in steps of 1000s.
+    #This means that you'll get, for a 4392s observation, np.array([0,1000,2000,3000,4000])!
+    #We'd lose 392s worth of counts, but it can't be used in combining the power spectra anyways.
+
+    working_dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/'
+    inputfile = working_dir + 'ni' + obsid + '_nicersoft_bary.evt'
+
+    working_dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/'
+    for i in tqdm(range(len(segment_times)-1)):
+        outputfile = working_dir + 'ni' + obsid + '_nicersoft_bary_GTI'+str(i)+'_'+str(segment_length)+'s_' + 'E'+str(PI1)+'-'+str(PI2)+'.evt'
+        subprocess.check_call(['niextract-events',inputfile+'[PI='+str(PI1)+':'+str(PI2)+']',outputfile,'timefile='+working_dir+'GTI'+str(i)+'.gti'])
+
+    return
+
+#niextract_gti_time_energy('0034070101',100,300,800)
+
+def do_nicerfits2presto(obsid,tbin):
+    """
+    Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
+    I can always move files to different folders to prevent repeats (especially for large files)
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    tbin - size of the bins in time
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
+    obs_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    E_files = glob.glob(obs_dir+'*E*.evt')
+    time_files = glob.glob(obs_dir+'*GTI*.evt')
+
+    if len(E_files) != 0: #if E_files is not empty
+        for i in range(len(E_files)):
+            subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),E_files[i]])
+    if len(time_files) != 0:
+        for i in range(len(time_files)):
+            if time_files[i] not in E_files: #to prevent the files truncated by E AND time to be processed AGAIN.
+                try:
+                    subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),time_files[i]])
+                except (ValueError,subprocess.CalledProcessError):
+                    pass
+
+    ##### will probably remove once I know to either NOT work in nicerpy_xrayanalysis,
+    ##### and/or install my packages such that I can run the scripts from anywhere
+    ##### in the terminal!
+    obsid_files = glob.glob('*'+obsid+'*')
+    for i in range(len(obsid_files)):
+        subprocess.check_call(['mv',obsid_files[i],obs_dir])
+
+    return
+
+#do_nicerfits2presto('0034070101',0.0005)
+
+def edit_inf(obsid,tbin,segment_length):
+    """
+    Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
+    Mainly need to edit the "Number of bins in the time series".
+    This is only for when we make segments by time though!
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    tbin - size of the bins in time
+    segment_length - length of the individual segments
+    """
+    obs_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    inf_files = sorted(glob.glob(obs_dir + '*GTI*.inf')) #not the .evt file; some .evt files will be empty
+
+    no_desired_bins = float(segment_length)/float(tbin)
+
+    for i in range(len(inf_files)):
+        inf_file = open(inf_files[i],'r')
+        contents = inf_file.read()
+        contents = contents.split('\n')
+        inf_file.close()
+
+        nobins_equal = contents[9].index('=') #find the '=' sign for the "Number of bins..." line)
+        newstring = contents[9][:nobins_equal+1] + '  ' + str(int(no_desired_bins)) #replace old line with new line containing updated number of bins!
+
+        inf_file = open(inf_files[i],'w')
+        for j in range(len(contents)):
+            if j != 9:
+                inf_file.write(contents[j]+'\n')
+            else:
+                inf_file.write(newstring+'\n')
+        inf_file.close()
+
+    return
+
+#edit_inf('1060060127',0.0005,1000)
+
+def edit_binary(obsid,tbin,segment_length):
+    """
+    To pad the binary file so that it will be as long as the desired segment length.
+    The value to pad with for each time bin, is the average count rate in THAT segment!
+    Again, this is only for when we make segments by time!
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    tbin - size of the bins in time
+    segment_length - length of the individual segments
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
+    obsdir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    dat_files = sorted(glob.glob(obsdir+'*GTI*.dat')) #not that order matters here I think, but just in case
+    for i in range(len(dat_files)):
+        bins = np.fromfile(dat_files[i],dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
+        bins_with_data = len(bins[bins>0]) #number of bins with data (NOT the ones with averaged count rate!)
+        average_count_rate = sum(bins)/len(bins)
+
+        no_desired_bins = float(segment_length)/float(tbin) #TOTAL number of desired bins for the segment
+        no_padded = int(no_desired_bins - len(bins)) #number of bins needed to reach the TOTAL number of desired bins
+        if no_padded >= 0:
+            padding = np.ones(no_padded,dtype=np.float32)*average_count_rate #generate the array of (averaged) counts needed to pad the original segment
+            #padding = np.zeros(no_padded,dtype=np.float32) #just in case this is ever needed...
+            new_bins = np.array(list(bins) + list(padding))
+            new_bins.tofile(dat_files[i]) #don't need to do mv since obsdir already has absolute path to the SSD
+        else:
+            new_bins = bins[:int(no_desired_bins)] #truncate the original series; say we had a 1000s segment, but
+            #nicerfits2presto went up to 1008s, so take that last 8s away because there's no data in it anyways...
+            new_bins.tofile(dat_files[i])
+
+    return
+
+#edit_binary('1060060127',0.0005,1000)
+
+def realfft(obsid):
+    """
+    Performing PRESTO's realfft on the binned data (.dat)
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
+    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    dat_files = sorted(glob.glob(nicersoft_output_folder+'*bary_*.dat')) #not that order matters here I think, but just in case
+    # recall that un-truncated data is "*bary.dat", so "*bary_*.dat" is truncated data!
+    logfile = nicersoft_output_folder + 'realfft.log'
+
+    with open(logfile,'w') as logtextfile:
+        for i in range(len(dat_files)):
+            logtextfile.write(subprocess.check_output(['realfft',dat_files[i]]))
+        logtextfile.close()
+
+    return
+
+#realfft('1060060127')
+
+def accelsearch(obsid,flags):
+    """
+    Performing PRESTO's accelsearch on the FFT data (.fft)
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    flags - a LIST of input flags for accelsearch
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+    if type(flags) != list:
+        raise TypeError("flags should be a list! Not even an array.")
+
+    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    fft_files = sorted(glob.glob(nicersoft_output_folder+'*bary_*.fft')) #not that order matters here I think, but just in case
+    logfile = nicersoft_output_folder + 'accelsearch.log'
+
+    with open(logfile,'w') as logtextfile:
+        for i in range(len(fft_files)):
+            logtextfile.write(subprocess.check_output(['accelsearch']+flags+[fft_files[i]]))
+        logtextfile.close()
+
+    return
+
+#accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
+#accelsearch('1060060127',accelsearch_flags)
+
+def prepfold(obsid,no_cands,zmax):
+    """
+    Performing PRESTO's prepfold on the pulsation candidates.
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    no_cand - number of candidates. I haven't yet thought of a way to automate this,
+    so I'll have to do all of the above first BEFORE I do prepfold. It's fine though,
+    since this is the only 'big' manual step.
+    zmax - maximum acceleration
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
+    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    nicersoft_output_folder = './'
+    ############### EDIT THE FUNCTION
+    cand_files = sorted(glob.glob(nicersoft_output_folder+'ni'+obsid+'_nicersoft_bary_*_ACCEL_'+str(zmax)+'.cand'))
+    events_files = [cand_files[i][:-15]+'.events' for i in range(len(cand_files))]
+#    events_files = sorted(glob.glob(nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary_*.events'))
+    ## cand_files and events_files should line up fine...
+    logfile = nicersoft_output_folder + 'prepfold.log'
+
+    if len(cand_files) != len(events_files):
+        raise ValueError("Note that the number of .cand files is not equal to the number of .events files! Likely because accelsearch was not run on all the .events files, or look at Lv2_presto_segments - might be only partially completed.")
+
+#    for i in range(len(no_cands)):
+#        for j in range(no_cands[i]):
+#            subprocess.check_call(['prepfold','-double','-events','-noxwin','-n','50','-accelcand',str(j+1),'-accelfile',cand_files[i],events_files[i]])
+    with open(logfile,'w') as logtextfile:
+        for i in range(len(no_cands)):
+            for j in range(no_cands[i]):
+                prepfold_command = ['prepfold','-double','-events','-noxwin','-n','50','-accelcand',str(j+1),'-accelfile',cand_files[i],events_files[i]]
+                logtextfile.write(subprocess.check_output(prepfold_command))
+        logtextfile.close()
+"""
+    truncated_pdf = sorted(glob.glob(nicersoft_output_folder+'*GTI*_10'))
+    for i in range(len(truncated_pdf)):
+        subprocess.check_call(['mv',truncated_pdf[i],truncated_pdf[i]+'00s_ACCEL_'+str(zmax)+'.pfd.ps'])
+"""
+#    return
+
+#prepfold('0034070101',10,0)
+
+def ps2pdf(obsid):
+    """
+    Converting from .ps to .pdf
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
+    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
+    ps_files = glob.glob(nicersoft_output_folder + '*.ps') #grabs a list of files with extension .ps
+    for i in range(len(ps_files)):
+        pdf_file = ps_files[i][:-2]+'pdf' #replacing .ps to .pdf
+        ps2pdf_command = ['ps2pdf',ps_files[i],pdf_file]
+        subprocess.check_call(ps2pdf_command) #using ps2pdf to convert from ps to pdf ; not just a simple change in extension
+
+    return

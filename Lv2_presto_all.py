@@ -5,7 +5,7 @@ Created on Mon May 27 2:22pm 2019
 
 Program for doing realfft, accelsearch, prepfold, and ps2pdf.
 This is for when we're using data from the WHOLE time series though.
-Use Lv2_presto_segments.py if you want to look at segments instead! 
+Use Lv2_presto_segments.py if you want to look at segments instead!
 
 """
 from __future__ import division, print_function
@@ -35,6 +35,8 @@ def realfft(obsid):
         logtextfile.write(subprocess.check_output(['realfft',dat_file]))
         logtextfile.close()
 
+    return
+
 def accelsearch(obsid,flags):
     """
     Performing PRESTO's accelsearch on the FFT data (.fft)
@@ -54,6 +56,8 @@ def accelsearch(obsid,flags):
     with open(logfile,'w') as logtextfile:
         logtextfile.write(subprocess.check_output(['accelsearch']+flags+[fft_file]))
         logtextfile.close()
+
+    return
 
 #accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
 
@@ -84,6 +88,8 @@ def prepfold(obsid,no_cand,zmax):
             logtextfile.write(subprocess.check_output(['accelsearch']+flags+[fft_file]))
             logtextfile.close()
 
+    return
+
 def ps2pdf(obsid):
     """
     Converting from .ps to .pdf
@@ -98,3 +104,5 @@ def ps2pdf(obsid):
     for i in range(len(ps_files)):
         pdf_file = ps_files[i].replace('.ps','.pdf') #replacing .ps to .pdf
         subprocess.check_call(['ps2pdf',ps_files[i],pdf_file]) #using ps2pdf to convert from ps to pdf ; not just a simple change in extension
+
+    return
