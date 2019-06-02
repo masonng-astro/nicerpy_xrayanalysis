@@ -1,16 +1,17 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jan 14 11:56am 2019
+Created on Sun Jun 2 6:30am 2019
 
-Time to execute the programs!
+Very similar to Lv3_main, but now for NICERsoft event files, and/or with truncations
+by time or energy!
 
 """
 from __future__ import division, print_function
 import numpy as np
 import time
 
-import Lv0_dirs
+import Lv0_dirs,Lv0_nicersoft_evt_filename
 import Lv0_call_eventcl,Lv0_call_att,Lv0_call_hk,Lv0_call_mkf,Lv0_call_orb,Lv0_call_uf,Lv0_call_ufa
 import Lv1_data_bin,Lv1_data_gtis,Lv1_data_spectra
 import Lv2_lc,Lv2_ps,Lv2_color,Lv2_phase
@@ -19,10 +20,10 @@ import Lv3_E_boundary,Lv3_diagnostics
 import matplotlib.pyplot as plt
 
 ### parameters used EVERYWHERE
-obsid = '0034070101' #observation ID.
+obsid = '1034090111' #observation ID.
 #obsids = ['1050390101','1050390105','1050390115','1050390122','1050390125','1050390132','1050390138','1050390140','1050390141','1050390142','1050390145','1050390148']
 #obsids = ['0034070101','0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
-obsids = ''
+#obsids = ''
 bary = True #whether the data you want is barycenter-corrected or not
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 tbin_size = 1 #how you want to bin the light curve data

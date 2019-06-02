@@ -482,14 +482,21 @@ obsid - Observation ID of the object of interest (10-digit str)
 
 TEST: get_ra_dec('1060060127') - WORKED
 
-##### barycorr(obsid,refframe)
+##### nicerdata_barycorr(obsid,refframe)
 
 -- Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
 
 obsid - Observation ID of the object of interest (10-digit str)
 refframe - reference frame for barycenter corrections (usually ICRS)
 
-TEST: barycorr('1060060127','ICRS') - WORKED
+##### nicersoft_barycorr(obsid,refframe)
+
+-- Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+
+obsid - Observation ID of the object of interest (10-digit str)
+refframe - reference frame for barycenter corrections (usually ICRS)
+
+TEST: nicersoft_barycorr('1060060127','ICRS') - WORKED
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -1316,6 +1323,7 @@ types of values:
 1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
 2) % of bins with data over POTENTIALLY USABLE segments (recall that if the event
    file is completely empty, then nicerfits2presto would not process it!)
+3) % of bins with data ACTUALLY USED (so with a threshold defined)
 
 obsid - Observation ID of the object of interest (10-digit str)
 tbin - size of the bins in time

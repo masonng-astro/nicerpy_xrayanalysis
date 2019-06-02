@@ -12,7 +12,7 @@ Should just need .fft itself? Can incorporate with my own program in the future 
 from __future__ import division, print_function
 import numpy as np
 from astropy.io import fits
-import Lv0_dirs
+import Lv0_dirs,Lv2_mkdir
 from tqdm import tqdm
 import os
 import matplotlib.pyplot as plt
@@ -38,8 +38,7 @@ def histogram(obsid,tbin,segment_length):
     fft_files = sorted(glob.glob(obsdir+'*.fft')) #grab the .fft files
 
     hist_dir = obsdir + 'powers_hist/' #create the directory where we'll store the PDFs of the histogram plots
-    if not os.path.exists(hist_dir):
-        os.makedirs(hist_dir)
+    Lv2_mkdir.makedir(hist_dir)
 
     for i in tqdm(range(len(fft_files))):
         binned_data = np.fromfile(fft_files[i],dtype='<f',count=-1)

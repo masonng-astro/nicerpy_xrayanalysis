@@ -29,7 +29,35 @@ def get_ra_dec(obsid):
 
     return event_header['RA_OBJ'], event_header['DEC_OBJ']
 
-def barycorr(obsid,refframe):
+def nicerdata_barycorr(obsid,refframe):
+    """
+    Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+
+    obsid - Observation ID of the object of interest (10-digit str)
+    refframe - reference frame for barycenter corrections (usually ICRS)
+    """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+    if refframe != 'ICRS' and refframe != 'FK5':
+        raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
+
+    event = Lv0_call_eventcl.open_fits(obsid,False))
+    event_header = event[1].header
+    ra,dec = event_header['RA_OBJ'], event_header['DEC_OBJ']
+
+    output_folder = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/'
+    infile = output_folder + 'ni' + obsid + '_0mpu7_cl.evt'
+    outfile = output_folder + 'ni' + obsid + '_0mpu7_cl_bary.evt'
+    orbit_file = Lv0_dirs.NICER_DATADIR + obsid + '/auxil/' + 'ni' + obsid + '.orb'
+    logfile = output_folder + 'barycorr_notes.txt'
+
+    with open(logfile,'w') as logtextfile:
+        logtextfile.write(subprocess.check_output(['barycorr',infile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(ra),'dec='+str(dec),'refframe='+str(refframe),'clobber=YES']))
+        logtextfile.close()
+
+    return
+
+def nicersoft_barycorr(obsid,refframe):
     """
     Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
 

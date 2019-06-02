@@ -94,7 +94,8 @@ Functions:
 >>>>>>>>>> Lv1_barycorr <<<<<<<<<<
 
 ##### get_ra_dec(obsid)
-##### barycorr(obsid,refframe)
+##### nicerdata_barycorr(obsid,refframe)
+##### nicersoft_barycorr(obsid,refframe)
 
 --------------------------------------------------------------------------------
 ################################################################################

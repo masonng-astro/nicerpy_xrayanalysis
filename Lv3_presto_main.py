@@ -59,6 +59,10 @@ segment_length = 1000 #desired length of segments
 PI1 = [300]
 PI2 = [800]
 
+##### For Lv3_duty_cycle:
+duty_cycle_bin = 1 #for 1s bins to do duty cycle calculations
+threshold = 10 #for 10%
+
 ################################################################################
 ################################ PRE-PROCESSING ################################
 ################################################################################
@@ -115,6 +119,8 @@ if process_segments == True:
             Lv2_presto_segments.edit_inf(obsids[i],tbin,segment_length)
             Lv2_presto_segments.edit_binary(obsids[i],tbin,segment_length)
 
+            Lv3_duty_cycle.duty_cycle(obsids[i],tbin,segment_length,duty_cycle_bin,threshold)
+
     if energy_segments == True:
         if len(PI1) != len(PI2):
             raise ValueError("Make sure that the length of PI1 and PI2 are the same! Need pairs of PI values.")
@@ -131,6 +137,8 @@ if process_segments == True:
             Lv2_presto_segments.do_nicerfits2presto(obsids[i],tbin)
             Lv2_presto_segments.edit_inf(obsids[i],tbin,segment_length)
             Lv2_presto_segments.edit_binary(obsids[i],tbin,segment_length)
+
+            Lv3_duty_cycle.duty_cycle(obsids[i],tbin,segment_length,duty_cycle_bin,threshold)
 
     ### Running realfft and accelsearch from PRESTO
     for i in range(len(obsids)):

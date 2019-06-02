@@ -41,7 +41,9 @@ def preprocess(obsid,nicerl2_flags,psrpipe_flags,refframe,tbin):
     Lv0_gunzip.unzip_all(obsid) #unzipping the contents within the observation
     Lv0_nicerl2.nicerl2(obsid,nicerl2_flags)
     Lv0_psrpipe.psrpipe(obsid,psrpipe_flags) #applying custom cuts (though no need --shrinkelv after HEASOFT 6.26)
-    Lv1_barycorr.barycorr(obsid,refframe) #applying barycenter corrections to the cut data
+
+    Lv1_barycorr.nicerdata_barycorr(obsid,refframe) #applying barycenter corrections to the cleaned data file from NICER!
+    Lv1_barycorr.nicersoft_barycorr(obsid,refframe) #applying barycenter corrections to the cut data
 #    subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),nicersoft_dir+'ni'+obsid+'_nicersoft_bary.evt']) #converting to the PRESTO data format
 
     subprocess.check_call(['mv',obsid+'_psrpipe.log',Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/']) #copying the psrpipe log file to the $OBSID_pipe folder
