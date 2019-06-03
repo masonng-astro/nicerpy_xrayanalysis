@@ -35,19 +35,21 @@ phases1, phasebins1, summed_prof1 = Lv2_phase.pulse_profile(freq1,times1,sin1,0,
 fft_phase1 = np.abs(np.fft.fft(summed_prof1))**2
 freqs_phase1 = np.fft.fftfreq(summed_prof1.size,(phasebins1[1]-phasebins1[0])*1/freq1)
 
-"""
+
 plt.figure(1)
 plt.plot(freqs1,fft1)
 #plt.plot(times1,sin1,'r')
 plt.figure(2)
 plt.step(phasebins1[:-1],summed_prof1,'r')
+plt.figure(3)
+plt.hist(np.log10(fft1),bins=100,log=True)
 
 #plt.plot(times1,sin1,'b-')
 #plt.plot(times1,timeseries1,'rx')
-"""
 
-plt.figure(1)
-plt.plot(freqs_phase1,fft_phase1,'r')
+
+#plt.figure(1)
+#plt.plot(freqs_phase1,fft_phase1,'r')
 
 ################################################################################
 ################################################################################
@@ -77,15 +79,16 @@ phases2, phasebins2, summed_prof2 = Lv2_phase.pulse_profile(freq2,times2,sin2,0,
 fft_phase2 = np.abs(np.fft.fft(summed_prof2))**2
 freqs_phase2 = np.fft.fftfreq(summed_prof2.size,(phasebins2[1]-phasebins2[0])*1/freq2)
 
-"""
-plt.figure(3)
+
+plt.figure(4)
 plt.plot(freqs2,fft2)
 #plt.plot(times2,sin2,'b')
-plt.figure(4)
+plt.figure(5)
 plt.step(phasebins2[:-1],summed_prof2,'b')
-"""
+plt.figure(6)
+plt.hist(np.log10(fft2),bins=100,log=True)
 
-plt.figure(2)
-plt.plot(freqs_phase2,fft_phase2,'b')
+#plt.figure(2)
+#plt.plot(freqs_phase2,fft_phase2,'b')
 
 plt.show()

@@ -532,12 +532,13 @@ dir - desired directory (provide FULL path!)
 
 Functions:
 
-##### whole(obsid,bary,par_list,tbin_size,mode)
+##### whole(obsid,bary,name_par_list,par_list,tbin_size,mode)
 
 -- Plot the entire raw time series without any cuts to the data.
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 tbin_size - the size of the time bins (in seconds!)
@@ -545,14 +546,18 @@ tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
 mode - whether we want to show or save the plot.
 
-TEST: whole('1034070104',True,['PI','TIME','PI_FAST'],2,'save') [WORKED]
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
-##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+TEST: whole('1034070104',True,['PI','TIME','PI_FAST'],2,'save') [WORKED]
+whole('0034070101',True,[True,False,4,100,300,800],['TIME','PI','PI_FAST'],1,'show') - Jun 3 [WORKED]
+
+##### partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode)
 
 -- Plot the time series for a desired time interval.
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 tbin_size - the size of the time bins (in seconds!)
@@ -562,7 +567,10 @@ t1 - lower time boundary
 t2 - upper time boundary
 mode - whether we want to show or save the plot
 
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+
 TEST: partial_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'show') [WORKED]
+partial_t('0034070101',True,[True,False,1,100,300,800],['PI','TIME','PI_FAST'],1,0,100,'show') - Jun 3 [WORKED]
 
 ##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode)
 
@@ -573,6 +581,7 @@ TEST: partial_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'show') 
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 tbin_size - the size of the time bins (in seconds!)
@@ -583,9 +592,11 @@ Ebin_size - the size of the energy bins (in keV!)
 >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
 E1 - lower energy boundary
 E2 - upper energy boundary
-mode - whether we want to show or save the plot
+
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
 TEST: partial_E('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show') [WORKED]
+partial_E('0034070101',True,[True,False,1,100,300,800],['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show') - Jun 3 [WORKED]
 
 ##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
 
@@ -688,6 +699,7 @@ a vertical line in the plot; second entry is the equation for the vertical line
 
 TEST: whole('0034070101',True,['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2078])
 [WORKED]
+whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
 
 ##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
 
@@ -714,6 +726,7 @@ a vertical line in the plot; second entry is the equation for the vertical line
 
 TEST: partial_t('1034070104',True,['TIME','PI','PI_FAST'],0.1,11113,11945,'show','both',[True,5],[True,0,1],[True,0.2078])
 [WORKED]
+partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0,100,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
 
 ##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
 
@@ -743,6 +756,8 @@ xlims - a list or array: first entry = True/False as to whether to impose an
 xlim; second and third entry correspond to the desired x-limits of the plot
 vlines - a list or array: first entry = True/False as to whether to draw
 a vertical line in the plot; second entry is the equation for the vertical line
+
+TEST: partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,3,8,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
 
 ##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
 
@@ -776,6 +791,7 @@ TEST:
 partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,0.3,2.7,'save','both',[True,5],[True,0,1],[True,0.2078])
 partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,2.7,12,'save','both',[True,5],[True,0,1],[True,0.2078])
 [WORKED]
+partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,0,100,3,8,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
 
 >>>>>>>>>> Lv2_phase <<<<<<<<<<
 
@@ -790,7 +806,7 @@ shift - how much to shift the pulse by in the phase axis.
 It only affects how the pulse profile is 'displaced'.
 no_phase_bins - number of phase bins desired
 
-##### whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
+##### whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
 
 -- Plot the entire raw pulse profile without any cuts to the data.
 
@@ -808,8 +824,9 @@ no_phase_bins - number of phase bins desired
 mode - whether we want to show or save the plot.
 
 TEST: whole('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,'show') [WORKED]
+whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.2081,0.4,51,'show') - Jun 3 [WORKED]
 
-##### partial_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
+##### partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
 
 --  Plot the pulse profile for a desired time interval.
 
@@ -829,8 +846,9 @@ t2 - upper time boundary
 mode - whether we want to show or save the plot
 
 TEST: partial_t('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,0,809,'show') [WORKED]
+partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.2081,0.4,51,0,100,'show') - Jun 3 [WORKED]
 
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
+##### partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
 
 -- Plot the pulse profile for a desired energy range.
 [Though I don't think this will be used much. Count/s vs energy is pointless,
@@ -856,8 +874,9 @@ E1 - lower energy boundary
 E2 - upper energy boundary
 
 TEST: partial_E('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.2085,0.4,1001,0,20,'show') [WORKED]
+partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.05,0.2081,0.4,51,3,8,'show') [WORKED]
 
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+##### partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
 
 -- Plot the pulse profile for a desired time interval and desired energy range.
 
@@ -882,6 +901,7 @@ E2 - upper energy boundary
 mode - whether we want to show or save the plot
 
 TEST: partial_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.2085,0.4,101,0,809,0,20,'save') [WORKED]
+partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.05,0.2081,0.4,51,0,100,3,8,'show') [WORKED]
 
 >>>>>>>>>> Lv2_color <<<<<<<<<<
 
@@ -905,12 +925,13 @@ doing the binning, will get just soft counts.
 E_bound - boundary energy considered (in keV)
 pi_data - array of PI values
 
-##### get_color(obsid,bary,par_list,E_bound,tbin_size)
+##### get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
 
 -- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 E_bound - boundary energy considered (in keV)
@@ -918,12 +939,22 @@ tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 2 means bin by 2s
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
 
-##### get_color_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2)
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+
+TEST: a,b,c = get_color('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1) [WORKED]
+plt.figure(1)
+plt.plot(a[:-1],b)
+plt.figure(2)
+plt.plot(a[:-1],c)
+plt.show()
+
+##### get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2)
 
 -- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 E_bound - boundary energy considered (in keV)
@@ -933,14 +964,24 @@ tbin_size - the size of the time bins (in seconds!)
 t1 - lower time boundary
 t2 - upper time boundary
 
-##### plotting(obsid,bary,par_list,E_bound,tbin_size,mode)
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+
+TEST: a,b,c = get_color_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1) [WORKED]
+plt.figure(1)
+plt.plot(a[:-1],b)
+plt.figure(2)
+plt.plot(a[:-1],c)
+plt.show()
+
+##### plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode)
 
 -- Plotting the hardness ratio/color diagrams.
 
-t_bins,color,color_diff = color(obsid,bary,par_list,E_bound,tbin_size)
+t_bins,color,color_diff = get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 E_bound - boundary energy considered (in keV)
@@ -948,15 +989,20 @@ tbin_size - the size of the time bins (in seconds!)
 >> e.g., tbin_size = 2 means bin by 2s
 >> e.g., tbin_size = 0.05 means bin by 0.05s!
 mode - whether we want to show or save the plot.
+
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+
+TEST: plotting('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,'save') [WORKED]
 
 ##### plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode)
 
 -- Plotting the hardness ratio/color diagrams.
 
-t_bins,color,color_diff = color(obsid,bary,par_list,E_bound,tbin_size)
+t_bins,color,color_diff = get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
 
 obsid - Observation ID of the object of interest (10-digit str)
 bary - Whether the data is barycentered. True/False
+name_par_list - list of parameters specifying parameters like GTI number and/or energy range
 par_list - A list of parameters we'd like to extract from the FITS file
 (e.g., from eventcl, PI_FAST, TIME, PI,)
 E_bound - boundary energy considered (in keV)
@@ -967,8 +1013,10 @@ t1 - lower time boundary
 t2 - upper time boundary
 mode - whether we want to show or save the plot.
 
-TEST: plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show') [WORKED]
+name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
+TEST: plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show') [WORKED]
+plotting_t('0034070101',True,[True,True,1,100,300,800],['PI','TIME','PI_FAST'],2.7,1,0,99,'show') - Jun 3 [WORKED]
 >>>>>>>>>> Lv2_presto_all <<<<<<<<<<
 
 ##### realfft(obsid)

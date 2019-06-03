@@ -47,9 +47,10 @@ def histogram(obsid,tbin,segment_length):
 #        print(len(binned_data))
         f,(ax1,ax2) = plt.subplots(2,1)
         freqs = np.linspace(-1/(tbin*2),1/(tbin*2),len(binned_data)+1)
+        data_mean = np.mean(np.abs(binned_data)[freqs[:-1]>1])
         ax1.hist(np.log(np.abs(binned_data[freqs[:-1]>1])),bins=50,log=True) #log number of bars!
-        ax2.semilogy(freqs[:-1],np.abs(binned_data))
-        ax2.set_xlim([1,2000])
+        ax2.plot(freqs[:-1],np.abs(binned_data)/data_mean)
+        ax2.set_xlim([-2000,2000])
         plt.show()
     #    print(np.mean(np.abs(binned_data[2500000:])))
         #plt.savefig(fft_files[i][:-3]+'pdf',dpi=900,format='pdf')
@@ -61,4 +62,4 @@ def histogram(obsid,tbin,segment_length):
 
     return
 
-#histogram('1034090111',0.00025,1000)
+histogram('1034090111',0.00025,1000)

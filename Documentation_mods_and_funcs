@@ -113,10 +113,10 @@ Functions:
 
 >>>>>>>>>> Lv2_lc <<<<<<<<<<
 
-##### whole(obsid,bary,par_list,tbin_size,mode)
-##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode)
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
+##### whole(obsid,bary,name_par_list,par_list,tbin_size,mode)
+##### partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode)
+##### partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode)
+##### partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
 
 >>>>>>>>>> Lv2_ps_method <<<<<<<<<<
 
@@ -144,10 +144,10 @@ Functions:
 
 ##### soft_counts(E_bound,pi_data)
 ##### hard_counts(E_bound,pi_data)
-##### get_color(obsid,bary,par_list,E_bound,tbin_size)
-##### get_color_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2)
-##### plotting(obsid,bary,par_list,E_bound,tbin_size,mode)
-##### plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode)
+##### get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
+##### get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2)
+##### plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode)
+##### plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
 
 >>>>>>>>>> Lv2_presto_all <<<<<<<<<<
 

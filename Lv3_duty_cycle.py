@@ -64,7 +64,10 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
             useful_data += usable_data
         segment_duration += len(summed_data)
 
-    print(available_data,useful_data,segment_duration,obs_duration)
+    print('Available Data: ' + str(available_data) + 's')
+    print('Useful Data: ' + str(useful_data) + 's')
+    print('Total duration of all segments: ' + str(segment_duration) +'s')
+    print('Total observation duration: ' + str(obs_duration) + 's')
     print("Percentage of bins with data over the ENTIRE observation: " + str(available_data/obs_duration*100))
     print("Percentage of bins over POTENTIALLY USABLE segments: " + str(available_data/segment_duration*100))
     print("Percentage of bins over ACTUALLY USED segments: " + str(useful_data/segment_duration*100))
@@ -73,8 +76,8 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
 
 #print('0034070101')
 #duty_cycle('0034070101',0.0005,100,1,10)
-#print('1034090111')
-#duty_cycle('1034090111',0.00025,1000,1,10)
+print('1034090111')
+duty_cycle('1034090111',0.00025,1000,1,10)
 
 ## so for each ObsID,
 ## for each .dat file (so nicerfits2presto would already have taken out empty data)

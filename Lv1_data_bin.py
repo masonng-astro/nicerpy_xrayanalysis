@@ -9,17 +9,18 @@ Extracting the GTIs from the FITS files. Use the event_cl files.
 from __future__ import division, print_function
 from astropy.io import fits
 import numpy as np
-import Lv0_dirs,Lv0_call_eventcl,Lv1_data_filter
+import Lv0_dirs,Lv0_call_eventcl,Lv0_call_nicersoft_eventcl,Lv1_data_filter
 from scipy import stats
 import matplotlib.pyplot as plt
 
-def binning_t(obsid,bary,par_list,tbin_size,t1,t2):
+def binning_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2):
     """
     Binning routine for when I truncate the data by JUST time interval.
     Got to make sure I have TIME and PI called!
 
     obsid - Observation ID of the object of interest (10-digit str)
     bary - Whether the data is barycentered. True/False
+    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -27,6 +28,8 @@ def binning_t(obsid,bary,par_list,tbin_size,t1,t2):
     >> e.g., tbin_size = 0.05 means bin by 0.05s!
     t1 - lower time boundary
     t2 - upper time boundary
+
+    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -34,12 +37,16 @@ def binning_t(obsid,bary,par_list,tbin_size,t1,t2):
         raise TypeError("tbin_size should be a float or integer!")
     if bary != True and bary != False:
         raise ValueError("bary should either be True or False!")
+    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
+        raise TypeError("name_par_list should either be a list or an array!")
+    if len(name_par_list) != 6:
+        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'PI' and 'TIME' not in par_list:
         raise ValueError("You should have BOTH 'PI' and 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
         raise TypeError("par_list should either be a list or an array!")
 
-    truncated_t = Lv1_data_filter.filter_time(obsid,bary,par_list,t1,t2)
+    truncated_t = Lv1_data_filter.filter_time(obsid,bary,name_par_list,par_list,t1,t2)
     counts = np.ones(len(truncated_t))
     startt = int(t1)
     endt = int(t2)
@@ -51,13 +58,14 @@ def binning_t(obsid,bary,par_list,tbin_size,t1,t2):
 
     return t_bins, summed_data
 
-def binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2):
+def binning_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2):
     """
     Binning routine for when I truncate the data by JUST energy range.
     Got to make sure I have TIME and PI called!
 
     obsid - Observation ID of the object of interest (10-digit str)
     bary - Whether the data is barycentered. True/False
+    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -68,6 +76,8 @@ def binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2):
     >> e.g., Ebin_size = 0.05 means bin by 0.05keV
     E1 - lower energy boundary
     E2 - upper energy boundary
+
+    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -77,15 +87,19 @@ def binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2):
         raise TypeError("Ebin_size should be a float or integer!")
     if bary != True and bary != False:
         raise ValueError("bary should either be True or False!")
+    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
+        raise TypeError("name_par_list should either be a list or an array!")
+    if len(name_par_list) != 6:
+        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'PI' and 'TIME' not in par_list:
         raise ValueError("You should have BOTH 'PI' and 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
         raise TypeError("par_list should either be a list or an array!")
 
-    truncated_t, truncated_E = Lv1_data_filter.filter_energy(obsid,bary,par_list,E1,E2)
+    truncated_t, truncated_E = Lv1_data_filter.filter_energy(obsid,bary,name_par_list,par_list,E1,E2)
     counts = np.ones(len(truncated_t))
     startt = int(truncated_t[0])
-    endt = int(truncated_t[-1])
+    endt = np.ceil(truncated_t[-1])
 
     t_bins = np.linspace(startt,endt,(endt-startt)*1/tbin_size+1) #getting an array of time values for the bins
     summed_data_t, bin_edges, binnumber = stats.binned_statistic(truncated_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
@@ -100,13 +114,14 @@ def binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2):
 
     return t_bins, summed_data_t, E_bins, summed_data_E
 
-def binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2):
+def binning_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2):
     """
     Binning routine for when I truncated the data by BOTH time interval AND energy range.
     Got to make sure I have TIME and PI called!
 
     obsid - Observation ID of the object of interest (10-digit str)
     bary - Whether the data is barycentered. True/False
+    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -119,6 +134,8 @@ def binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2):
     t2 - upper time boundary
     E1 - lower energy boundary
     E2 - upper energy boundary
+
+    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -128,6 +145,10 @@ def binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2):
         raise TypeError("Ebin_size should be a float or integer!")
     if bary != True and bary != False:
         raise ValueError("bary should either be True or False!")
+    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
+        raise TypeError("name_par_list should either be a list or an array!")
+    if len(name_par_list) != 6:
+        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'PI' and 'TIME' not in par_list:
         raise ValueError("You should have BOTH 'PI' and 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -137,7 +158,7 @@ def binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2):
     if E2<E1:
         raise ValueError("E2 should be greater than E1!")
 
-    truncated_t, truncated_E = Lv1_data_filter.filter_data(obsid,bary,par_list,t1,t2,E1,E2)
+    truncated_t, truncated_E = Lv1_data_filter.filter_data(obsid,bary,name_par_list,par_list,t1,t2,E1,E2)
     counts = np.ones(len(truncated_t))
     startt = int(t1)
     endt = int(t2)

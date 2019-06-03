@@ -35,8 +35,10 @@ def evt_filename(obsid,name_par_list):
 
     prefix = 'ni' + obsid + '_nicersoft_bary'
     suffix = '.evt'
-    if name_par_list[0] == True: #i.e., if we have time segments
+    if name_par_list[0] == True and name_par_list[2] != '' and name_par_list[3] != '': #i.e., if we have time segments
         add1 = '_GTI' + str(name_par_list[2]) + '_' + str(name_par_list[3]) + 's'
+    elif name_par_list[0] == True and name_par_list[2] == '' and name_par_list[3] == '':
+        add1 = ''
     else:
         add1 = ''
 
