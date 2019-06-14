@@ -110,11 +110,13 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bin
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
     return phase_bins[:-1],summed_profile
 
@@ -182,11 +184,13 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
     return phase_bins[:-1],summed_profile
 
@@ -263,11 +267,13 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shif
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
     return phase_bins[:-1],summed_profile
 
@@ -342,11 +348,13 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shi
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
     return phase_bins[:-1],summed_profile
 
@@ -431,10 +439,12 @@ def partial_subplots_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_p
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
     return phase_bins[:-1],summed_profile

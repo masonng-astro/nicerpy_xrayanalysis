@@ -77,11 +77,13 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,mode):
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/lc/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
 #whole('1034090109',True,['TIME','PI','PI_FAST'],1,'show')
 #whole('0034070101',True,[True,False,4,100,300,800],['TIME','PI','PI_FAST'],1,'show')
@@ -140,11 +142,13 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode):
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/lc/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
 #partial_t('0034070101',True,[True,False,1,100,300,800],['PI','TIME','PI_FAST'],1,0,100,'show')
 
@@ -208,11 +212,13 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode):
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/lc/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
 #partial_E('1034090111',True,['TIME','PI','PI_FAST'],1,0.05,8,12,'show')
 #partial_E('0034070101',True,[True,False,1,100,300,800],['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show')
@@ -278,8 +284,10 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/lc/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()

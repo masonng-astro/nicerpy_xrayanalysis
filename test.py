@@ -332,7 +332,7 @@ def pad_binary(obsid,tbin,segment_length):
     obsid - Observation ID of the object of interest (10-digit str)
     tbin - size of the bins in time
     segment_length - length of the individual segments
-    
+
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
 
@@ -353,6 +353,105 @@ def pad_binary(obsid,tbin,segment_length):
 
     return
 """
+
+"""
+tbin = 0.00025
+duty_cycle_bin = 1
+gtino = 0
+segment_length = 1000
+
+binned_data = np.fromfile('/Volumes/Samsung_T5/NICERsoft_outputs/1034090111_pipe/ni1034090111_nicersoft_bary_GTI'+str(gtino)+'_'+str(segment_length)+'s.dat',dtype='<f',count=-1)
+dat_times = np.arange(0,tbin*len(binned_data),tbin)
+
+duty_cycle_times = np.arange(0,tbin*len(binned_data)+tbin,duty_cycle_bin)
+
+summed_data, binedges, binnumber = stats.binned_statistic(dat_times,binned_data,statistic='sum',bins=duty_cycle_times)
+print(len(summed_data))
+print(len(summed_data[(summed_data[i]!=stats.mode(summed_data))&(sum(summed_data[i:i+5])!=5*stats.mode(summed_data) for i in range(len(summed_data)))&(summed_data>0)]))
+print(len(summed_data[(summed_data!=stats.mode(summed_data)[0][0])&(summed_data>0)]))
+plt.plot(duty_cycle_times[:-1],summed_data,'rx')
+plt.axhline(y=stats.mode(summed_data)[0][0])
+plt.show()
+"""
+
+# mkgti.py --gtiname testgti.gti 109451762 109451962
+# niextract-events /Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/ni0034070101_nicersoft_bary.evt testtrunc.evt timefile=testgti.gti
+# nicerfits2presto.py --dt=0.00025 testtrunc.evt
+
+"""
+bins = np.fromfile('testtrunc.dat',dtype='<f',count=-1)
+print(sum(bins[:800000]))
+print(sum(bins[800000:]))
+"""
+
+"""
+from PyAstronomy.pyasl import foldAt
+import matplotlib.pylab as plt
+import numpy as np
+
+# Generate some data ...
+time = np.random.random(1000) * 100.
+flux = 0.05 * np.sin(time*(2.*np.pi/21.5) + 15)
+# ... and add some noise
+flux += np.random.normal(0, 0.02, len(flux))
+
+# Obtain the phases with respect to some
+# reference point (in this case T0=217.4)
+phases = foldAt(time, 21.5, T0=217.4)
+
+# Sort with respect to phase
+# First, get the order of indices ...
+sortIndi = np.argsort(phases)
+# ... and, second, rearrange the arrays.
+phases = list(phases[sortIndi]) + list(phases[sortIndi]+1)
+flux = list(flux[sortIndi])*2
+
+phase_bins = np.linspace(0,2,51)
+summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,flux,statistic='sum',bins=phase_bins)
+
+# Plot the result
+plt.figure(1)
+plt.plot(phases, flux, 'bp')
+plt.axvline(x=1,alpha=0.5)
+plt.figure(2)
+plt.plot(phase_bins[:-1],summed_profile,'r')
+plt.show()
+"""
+
+"""
+#### TESTING semicolons; using multiple commands at once! Need shell=True
+import os
+import subprocess
+#subprocess.check_call(['cd','/Volumes/Samsung_T5/NICERsoft_outputs/testdirha/',';', 'mv','testtest2.txt','renamedYAY.txt',';','cd','..',';', 'mv','testtest1.txt','renamedAGAIN.txt'],shell=True)
+subprocess.Popen('cd /Volumes/Samsung_T5/NICERsoft_outputs/testdirha/ ; mv testtest2.txt renamedYAY.txt ; cd .. ; mv testtest1.txt renamedAGAIN.txt',shell=True)
+"""
+
+"""
+input_filename = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe_old/ni0034070101_nicersoft_bary_ACCEL_200'
+input_file = open(input_filename,'r').read().split('\n')
+print(len(input_file),type(input_file))
+a = "             Summed  Coherent  Num        Period          Frequency         FFT 'r'        Freq Deriv       FFT 'z'         Accel                           "
+b = "                        Power /          Raw           FFT 'r'          Pred 'r'       FFT 'z'     Pred 'z'      Phase       Centroid     Purity                        "
+
+print(len(a))
+print(len(b))
+print(input_file[0],len(input_file[0]),input_file[0]==a)
+print(input_file[17],len(input_file[17]),input_file[17]==b)
+print(np.where(np.array(input_file)==a)[0][0])
+print(np.where(np.array(input_file)==b)[0][0])
+"""
+
+#import subprocess
+#logfile = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe_old/logfile.txt'
+#log = open(logfile,'a')
+#subprocess.Popen('cd /Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe_old/ ; prepfold -double -events -noxwin -n 50 -accelcand 1 -accelfile ni0034070101_nicersoft_bary_800-1200_ACCEL_0.cand ni0034070101_nicersoft_bary.events',stdout=log,shell=True)
+
+for i in range(26):
+    base_folder = '/Volumes/Samsung_T5/NICERsoft_outputs/12002501' + str(i+1).zfill(2) + '_pipe/'
+    event = fits.open(base_folder+'ni12002501'+str(i+1).zfill(2)+'_nicersoft_bary.evt')
+    gtis = event[2].data
+    T = gtis[-1][1] - gtis[0][0]
+    print('12002501'+str(i+1).zfill(2),T)
 
 timeend = time.time()
 

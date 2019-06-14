@@ -40,6 +40,9 @@ def psrpipe(obsid,flags):
     subprocess.check_call(['cp',Lv0_dirs.NICER_DATADIR+obsid+'/auxil/ni'+obsid+'.mkf',Lv0_dirs.NICER_DATADIR+obsid+'/auxil/oldmkf_'+obsid])
     subprocess.check_call(['niprefilter2',indir_nip2,infile_nip2,outfile_nip2,'clobber=YES'])
 
+    if os.path.isdir(Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe'): #to prevent duplicate files ; not likely to be the case, but just in case...
+        subprocess.check_call(['rm','-r',Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe'])
+
     with open(logfile,'w') as logtextfile:
         command = ['psrpipe.py',Lv0_dirs.NICER_DATADIR+obsid] + flags
         logtextfile.write(subprocess.check_output(command))

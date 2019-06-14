@@ -92,11 +92,13 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,
                     filename = dir + obsid + '_bin' + str(tbin_size) + 's_pdgm.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
             else:
                 dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/ps/'
                 filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_pdgm.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
 
         return pdgm_f, pdgm_ps
 
@@ -115,11 +117,13 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,
                     filename = dir + obsid + '_bin' + str(tbin_size) + 's_manual.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
             else:
                 dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/ps/'
                 filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_manual.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
 
         return manual_f, manual_ps
 
@@ -158,11 +162,13 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,
                     filename = dir + obsid + '_bin' + str(tbin_size) + 's_both.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
             else:
                 dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/ps/'
                 filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_both.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
 
@@ -238,11 +244,13 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,ove
                     filename = dir + obsid + '_bin' + str(tbin_size) + 's_pdgm_'+str(t1)+'s-'+str(t2)+'s.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
             else:
                 dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/ps/'
                 filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_pdgm_'+str(t1)+'s-'+str(t2)+'s.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
 
         return pdgm_f, pdgm_ps
 
@@ -261,11 +269,13 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,ove
                     filename = dir + obsid + '_bin' + str(tbin_size) + 's_manual_'+str(t1)+'s-'+str(t2)+'s.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
             else:
                 dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/ps/'
                 filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_manual_'+str(t1)+'s-'+str(t2)+'s.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
 
         return manual_f, manual_ps
 
@@ -304,11 +314,13 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,ove
                     filename = dir + obsid + '_bin' + str(tbin_size) + 's_both_'+str(t1)+'s-'+str(t2)+'s.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
             else:
                 dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/ps/'
                 filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_pdgm_'+str(t1)+'s-'+str(t2)+'s.pdf'
                 Lv2_mkdir.makedir(dir)
                 plt.savefig(filename,dpi=900)
+                plt.close()
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
 

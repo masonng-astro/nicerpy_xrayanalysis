@@ -162,13 +162,13 @@ Functions:
 ##### niextract_gti_time(obsid,segment_length)
 ##### niextract_gti_energy(obsid,PI1,PI2)
 ##### niextract_gti_time_energy(obsid,segment_length,PI1,PI2)
-##### do_nicerfits2presto(obsid,tbin)
+##### do_nicerfits2presto(obsid,tbin,segment_length)
 ##### edit_inf(obsid,tbin,segment_length)
 ##### edit_binary(obsid,tbin,segment_length)
 ##### realfft(obsid)
 ##### accelsearch(obsid,flags)
-##### prepfold(obsid,no_cands,zmax)
-##### ps2pdf(obsid)
+##### prepfold(obsid,zmax,segment_length)
+##### ps2pdf(obsid,segment_length)
 
 >>>>>>>>>> Lv2_presto_preprocess <<<<<<<<<<
 

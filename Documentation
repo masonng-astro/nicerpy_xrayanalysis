@@ -1032,21 +1032,20 @@ obsid - Observation ID of the object of interest (10-digit str)
 obsid - Observation ID of the object of interest (10-digit str)
 flags - a LIST of input flags for psrpipe
 
-##### prepfold(obsid,no_cand,zmax)
+##### prepfold(obsid,zmax,segment_length)
 
 -- Performing PRESTO's prepfold on the pulsation candidates.
 
 obsid - Observation ID of the object of interest (10-digit str)
-no_cand - number of candidates. I haven't yet thought of a way to automate this,
-so I'll have to do all of the above first BEFORE I do prepfold. It's fine though,
-since this is the only 'big' manual step.
 zmax - maximum acceleration
+segment_length - length of the individual segments
 
 ##### ps2pdf(obsid)
 
 -- Converting from .ps to .pdf
 
 obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the individual segments
 
 >>>>>>>>>> Lv2_presto_segments <<<<<<<<<<
 
@@ -1091,13 +1090,14 @@ PI2 - upper bound of PI (not energy in keV!) desired for the energy range
 
 TEST: niextract_gti_time_energy('0034070101',100,300,800) WORKED.
 
-##### do_nicerfits2presto(obsid,tbin)
+##### do_nicerfits2presto(obsid,tbin,segment_length)
 
 -- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
 I can always move files to different folders to prevent repeats (especially for large files)
 
 obsid - Observation ID of the object of interest (10-digit str)
 tbin - size of the bins in time
+segment_length - length of the individual segments for combining power spectra
 
 TEST: do_nicerfits2presto('1060060127',0.0005)
 
@@ -1125,20 +1125,22 @@ segment_length - length of the individual segments
 
 TEST: edit_binary('1060060127',0.0005,1000)
 
-##### realfft(obsid)
+##### realfft(obsid,segment_length)
 
 -- Performing PRESTO's realfft on the binned data (.dat)
 
 obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the individual segments
 
 TEST: realfft('1060060127')
 
-##### accelsearch(obsid,flags)
+##### accelsearch(obsid,flags,segment_length)
 
 -- Performing PRESTO's accelsearch on the FFT data (.fft)
 
 obsid - Observation ID of the object of interest (10-digit str)
 flags - a LIST of input flags for accelsearch
+segment_length - length of the individual segments
 
 TEST: accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
       accelsearch('1060060127',accelsearch_flags) [WORKED]
@@ -1369,9 +1371,7 @@ TEST: print(pf_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761
 -- To determine the percentage of "data used"/total amount of data. Have two
 types of values:
 1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
-2) % of bins with data over POTENTIALLY USABLE segments (recall that if the event
-   file is completely empty, then nicerfits2presto would not process it!)
-3) % of bins with data ACTUALLY USED (so with a threshold defined)
+2) % of bins with data over the GTIs
 
 obsid - Observation ID of the object of interest (10-digit str)
 tbin - size of the bins in time

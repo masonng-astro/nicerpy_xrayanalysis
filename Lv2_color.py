@@ -292,11 +292,13 @@ def plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode):
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/co/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
 #plotting('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,'show')
 
@@ -369,11 +371,13 @@ def plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode):
                 filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
         else:
             dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/lc/'
             filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
             Lv2_mkdir.makedir(dir)
             plt.savefig(filename,dpi=900)
+            plt.close()
 
 #plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
 #plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show')

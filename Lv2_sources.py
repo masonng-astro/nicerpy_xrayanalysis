@@ -25,6 +25,7 @@ def obsid_to_obj(obsid):
                '1034090106','1034090107','1034090108','1034090109','1034090110',
                '1034090111','1034090112']
     j0243_6124 = ['1050390'+str(i) for i in range(101,161)]
+    at2018cow = ['12002501' + str(i+1).zfill(2) for i in range(26)]
 
     if obsid in cen_x3:
         return 'Cen X-3'
@@ -36,5 +37,7 @@ def obsid_to_obj(obsid):
         return 'GX 349+2'
     elif obsid in j0243_6124:
         return 'J0243.6+6124'
+    elif obsid in at2018cow:
+        return 'AT2018cow'
     else:
         raise ValueError("Object name not found. Make sure you've uploaded the ObsID + corresponding object name to the module Lv2_sources!")

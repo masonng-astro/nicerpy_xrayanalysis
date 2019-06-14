@@ -9,7 +9,7 @@ Program for barycorr - doing barycenter corrections to the data
 from __future__ import division, print_function
 import numpy as np
 from astropy.io import fits
-import Lv0_dirs
+import Lv0_dirs,Lv0_call_eventcl
 import subprocess
 
 Lv0_dirs.global_par()
@@ -41,7 +41,7 @@ def nicerdata_barycorr(obsid,refframe):
     if refframe != 'ICRS' and refframe != 'FK5':
         raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
 
-    event = Lv0_call_eventcl.open_fits(obsid,False))
+    event = Lv0_call_eventcl.open_fits(obsid,False)
     event_header = event[1].header
     ra,dec = event_header['RA_OBJ'], event_header['DEC_OBJ']
 

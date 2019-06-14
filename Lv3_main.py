@@ -19,20 +19,27 @@ import Lv3_E_boundary,Lv3_diagnostics
 import matplotlib.pyplot as plt
 
 ### parameters used EVERYWHERE
-obsid = '1034090111' #observation ID.
+obsids = ['1034090111'] #observation ID.
+obsids = ['1200250108']
 #obsids = ['1050390101','1050390105','1050390115','1050390122','1050390125','1050390132','1050390138','1050390140','1050390141','1050390142','1050390145','1050390148']
 #obsids = ['0034070101','0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
-obsids = ''
+#obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
+#obsids = ''
 bary = True #whether the data you want is barycenter-corrected or not
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 
-name_par_list = [True,'',0,1000,'',''] #for Lv3_nicersoft_evt_main ; empty list entries here
+name_par_list = [True,'','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
 #name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
-tbin_size = 0.00025 #how you want to bin the light curve data
+tbin_size = 1 #how you want to bin the light curve data
 Ebin_size = 0.05 #in keV
 mode = 'show'
 truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
+
+lc = True
+ps = False
+phase = False
+color = False
 
 ###############################################################################
 
@@ -41,11 +48,11 @@ truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to l
 # Lv2_phase - partial_t, partial_E, partial_tE
 # Lv2_color - plotting_t
 
-t1 = 0
-t2 = 100
+t1 = 16380
+t2 = 18500
 E1 = 0.3
-E2 = 12
-
+E2 = 2.5
+#0 1800 ; 5400-7360 ; 10960-12925 ; 16380-18500 ; 22050 - 22350 ; 28360 - 28600
 ###############################################################################
 
 ### more 'obscure' parameters
@@ -61,7 +68,7 @@ vlines = [True,0.208461] # [False to NOT draw a vertical line on the plot; 2nd e
 #for Lv2_phase
 ### For an unknown observation, one should run JUST Lv2_lc and Lv2_ps first to get
 ### the pulsation frequencies. Pulse profiles come LATER.
-f_pulse = 0.101977 #frequency of the pulse
+f_pulse = 227.435 #frequency of the pulse
 shift = 0.4 # how much to shift the pulse by in the phase axis. It only affects how the pulse profile is 'displaced'.
 no_phase_bins = 101 # number of phase bins desired
 
@@ -77,56 +84,71 @@ E1_data = 0.3 #data is reliable between 0.3 and 12 keV
 E2_data = 12 # in keV
 cut_type = 'manual' # 'manual' cut for boundary energy, or 'median' - for half number of counts
 bound = 2.7 # boundary energy for when cut_type = 'manual'!
-E_bound = Lv3_E_boundary.E_bound(obsid,bary,par_list,E1_data,E2_data,cut_type,bound) #use Lv3_E_boundary to get boundary energy
 
 ### first get GTIs for the observation
 #gti_array = Lv1_data_gtis.get_gtis(obsid,bary,gap)
 #print(gti_array)
-"""
-for i in range(len(obsids)):
-    print(obsids[i])
-    print(Lv1_data_gtis.get_gtis(obsids[i],bary,gap))
-"""
+
+#for i in range(len(obsids)):
+#    print(obsids[i])
+#    print(Lv1_data_gtis.get_gtis(obsids[i],bary,gap))
+
 # is in the form: [gti_1_start,gti_1_stop,gti_2_start,gti_2_stop,...]
+for i in range(len(obsids)):
+    E_bound = Lv3_E_boundary.E_bound(obsids[i],bary,par_list,E1_data,E2_data,cut_type,bound) #use Lv3_E_boundary to get boundary energy
+    ############################ FOR WHOLE OBSERVATION ############################
+    if truncations == 'all':
+        if lc == True:
+            Lv2_lc.whole(obsids[i],bary,name_par_list,par_list,tbin_size,mode) #light curve
+            time.sleep(1)
+        if ps == True:
+            Lv2_ps.whole(obsids[i],bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines) #power spectra
+            time.sleep(1)
+        if phase == True:
+            Lv2_phase.whole(obsids[i],bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
+            time.sleep(1)
+        if color == True:
+            Lv2_color.plotting(obsids[i],bary,name_par_list,par_list,E_bound,tbin_size,mode)
 
-############################ FOR WHOLE OBSERVATION ############################
-if truncations == 'all':
-    Lv2_lc.whole(obsid,bary,name_par_list,par_list,tbin_size,mode) #light curve
-    time.sleep(1)
-    Lv2_ps.whole(obsid,bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines) #power spectra
-    time.sleep(1)
-    Lv2_phase.whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
-    time.sleep(1)
-    Lv2_color.plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode)
+    ########################## FOR DESIRED TIME INTERVAL ##########################
+    if truncations == 't':
+        if lc == True:
+            Lv2_lc.partial_t(obsids[i],bary,name_par_list,par_list,tbin_size,t1,t2,mode) #light curve
+            time.sleep(1)
+        if ps == True:
+            Lv2_ps.partial_t(obsids[i],bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines) #power spectra
+            time.sleep(1)
+        if phase == True:
+            Lv2_phase.partial_t(obsids[i],bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
+            time.sleep(1)
+        if color == True:
+            Lv2_color.plotting_t(obsids[i],bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
 
-########################## FOR DESIRED TIME INTERVAL ##########################
-if truncations == 't':
-    Lv2_lc.partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode) #light curve
-    time.sleep(1)
-    Lv2_ps.partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines) #power spectra
-    time.sleep(1)
-    Lv2_phase.partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
-    time.sleep(1)
-    Lv2_color.plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
+    ########################### FOR DESIRED ENERGY RANGE ##########################
+    # won't anticipate that this will be used much?
+    if truncations == 'E':
+        if lc == True:
+            Lv2_lc.partial_E(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode)
+            time.sleep(1)
+        if ps == True:
+            Lv2_ps.partial_E(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+            time.sleep(1)
+        if phase == True:
+            Lv2_phase.partial_E(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
 
-########################### FOR DESIRED ENERGY RANGE ##########################
-# won't anticipate that this will be used much?
-if truncations == 'E':
-    Lv2_lc.partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode)
-    time.sleep(1)
-    Lv2_ps.partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
-    time.sleep(1)
-    Lv2_phase.partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
-
-################# FOR DESIRED TIME INTERVAL AND ENERGY RANGE #################
-if truncations == 'tE':
-    Lv2_lc.partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
-    time.sleep(1)
-    Lv2_ps.partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
-    time.sleep(1)
-    Lv2_phase.partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
-    time.sleep(1)
-    Lv2_color.plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
+    ################# FOR DESIRED TIME INTERVAL AND ENERGY RANGE #################
+    if truncations == 'tE':
+        if lc == True:
+            Lv2_lc.partial_tE(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
+            time.sleep(1)
+        if ps == True:
+            Lv2_ps.partial_tE(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+            time.sleep(1)
+        if phase == True:
+            Lv2_phase.partial_tE(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+            time.sleep(1)
+        if color == True:
+            Lv2_color.plotting_t(obsids[i],bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
 
 ###############################################################################
 ################################# DIAGNOSTICS #################################
@@ -156,7 +178,7 @@ diag_vars['cl'] = eventcl_var
 # like TOT_OVER_COUNT changes over time for a desired time interval!
 #Lv3_diagnostics.diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode,diag_vars)
 
-
+"""
 ###############################################################################
 ###############################################################################
 ###############################################################################
@@ -169,6 +191,6 @@ if type(obsids) == list or type(obsids) == np.array:
         Lv2_phase.partial_subplots_E(obsids[i],bary,par_list,tbin_size,Ebin_size,f_pulses[i],shift,no_phase_bins,subplot_Es,E1,E2,mode)
 #        Lv2_phase.partial_E(obsids[i],bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
     plt.show()
-
+"""
 ### ONE SHOULD NOT NEED TO EDIT THE SCRIPTS BEYOND THIS POINT, UNLESS YOU KNOW
 ### WHAT YOU'RE DOING. ARGUABLY, I DON'T EITHER, BUT I'LL TRY MY BEST.
