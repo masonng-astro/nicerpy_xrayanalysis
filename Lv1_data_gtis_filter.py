@@ -57,6 +57,7 @@ def desired_gtis(obsid,bary,gap,desired_length):
 
     return shifted_gtis_desired,actual_gtis_desired
 
-#shifted,actual = desired_gtis('1034090111',True,50,1000)
-#for i in range(len(shifted)):
-#    print(shifted[i],actual[i])
+if __name__ == "__main__":
+    shifted,actual = desired_gtis('1034090111',True,50,1000)
+    for i in range(len(shifted)):
+        print(shifted[i],actual[i])

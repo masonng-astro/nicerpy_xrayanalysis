@@ -55,8 +55,6 @@ def get_gti_file(obsid,segment_length):
 
     return
 
-#get_gti_file('1060060127',100)
-
 def niextract_gti_time(obsid,segment_length):
     """
     Using niextract-events to get segmented data based on the [segment_length]-length
@@ -88,8 +86,6 @@ def niextract_gti_time(obsid,segment_length):
         subprocess.check_call(['niextract-events',inputfile,outputfile,'timefile='+working_dir+str(segment_length)+'s_GTI'+str(i)+'.gti'])
 
     return
-
-#niextract_gti_time('1060060127',100)
 
 def niextract_gti_energy(obsid,PI1,PI2):
     """
@@ -148,8 +144,6 @@ def niextract_gti_time_energy(obsid,segment_length,PI1,PI2):
 
     return
 
-#niextract_gti_time_energy('0034070101',100,300,800)
-
 def do_nicerfits2presto(obsid,tbin,segment_length):
     """
     Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
@@ -191,9 +185,6 @@ def do_nicerfits2presto(obsid,tbin,segment_length):
 
     return
 
-#do_nicerfits2presto('0034070101',0.0005)
-#do_nicerfits2presto('1200250108',0.00025,200)
-
 def edit_inf(obsid,tbin,segment_length):
     """
     Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
@@ -228,8 +219,6 @@ def edit_inf(obsid,tbin,segment_length):
 
     return
 
-#edit_inf('1060060127',0.0005,1000)
-
 def edit_binary(obsid,tbin,segment_length):
     """
     To pad the binary file so that it will be as long as the desired segment length.
@@ -263,8 +252,6 @@ def edit_binary(obsid,tbin,segment_length):
             new_bins.tofile(dat_files[i])
 
     return
-
-#edit_binary('1060060127',0.0005,1000)
 
 def realfft(obsid):
     """
@@ -309,8 +296,6 @@ def realfft_segment(obsid,segment_length):
 
     return
 
-#realfft('1060060127')
-
 def accelsearch(obsid,flags):
     """
     Performing PRESTO's accelsearch on the FFT data (.fft)
@@ -325,7 +310,7 @@ def accelsearch(obsid,flags):
 
     nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
     fft_files = sorted(glob.glob(nicersoft_output_folder+'*bary_*.fft')) #not that order matters here I think, but just in case
-    logfile = nicersoft_output_folder + 'accelsearch.log'
+    logfile = nicersoft_output_folder + 'accelsearch_segments.log'
 
     with open(logfile,'w') as logtextfile:
         for i in range(len(fft_files)):
@@ -349,7 +334,7 @@ def accelsearch_segment(obsid,flags,segment_length):
 
     nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
     fft_files = sorted(glob.glob(nicersoft_output_folder+'*bary_*'+str(segment_length)+'s*.fft')) #not that order matters here I think, but just in case
-    logfile = nicersoft_output_folder + 'accelsearch.log'
+    logfile = nicersoft_output_folder + 'accelsearch_segments.log'
 
     with open(logfile,'w') as logtextfile:
         for i in range(len(fft_files)):
@@ -357,9 +342,6 @@ def accelsearch_segment(obsid,flags,segment_length):
         logtextfile.close()
 
     return
-
-#accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
-#accelsearch('1060060127',accelsearch_flags)
 
 def prepfold(obsid,zmax):
     """
@@ -376,7 +358,7 @@ def prepfold(obsid,zmax):
     ACCEL_files = sorted(glob.glob(nicersoft_output_folder+'ni'+obsid+'_nicersoft_bary_*ACCEL_'+str(zmax)))
     cand_files = [ACCEL_files[i] + '.cand' for i in range(len(ACCEL_files))]
     events_files = [cand_files[i][:-15]+'.events' for i in range(len(cand_files))]
-    logfile = nicersoft_output_folder + 'prepfold.log'
+    logfile = nicersoft_output_folder + 'prepfold_segments.log'
     log = open(logfile,'a')
 
 # Bad test! There's no .cand file if there're no candidates...
@@ -445,8 +427,6 @@ def prepfold_segment(obsid,zmax,segment_length):
 
     return
 
-#prepfold('0034070101',10,0)
-
 def ps2pdf(obsid):
     """
     Converting from .ps to .pdf
@@ -464,8 +444,6 @@ def ps2pdf(obsid):
         subprocess.check_call(ps2pdf_command) #using ps2pdf to convert from ps to pdf ; not just a simple change in extension
 
     return
-
-#ps2pdf('1200250126')
 
 def ps2pdf_segment(obsid,segment_length):
     """
@@ -486,4 +464,15 @@ def ps2pdf_segment(obsid,segment_length):
 
     return
 
-#ps2pdf('1200250108',200)
+if __name__ == "__main__":
+    get_gti_file('1060060127',100)
+    niextract_gti_time('1060060127',100)
+    niextract_gti_time_energy('0034070101',100,300,800)
+    do_nicerfits2presto('1200250108',0.00025,200)
+    edit_inf('1060060127',0.0005,1000)
+    edit_binary('1060060127',0.0005,1000)
+    realfft('1060060127')
+    accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
+    accelsearch('1060060127',accelsearch_flags)
+    prepfold('0034070101',10,0)
+    ps2pdf('1200250126')

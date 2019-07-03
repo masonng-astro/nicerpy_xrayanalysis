@@ -59,6 +59,10 @@ def get_nicersoft_mkf(obsid,par_list):
 
 ################################################################################
 
+if __name__ == "__main__":
+    print(get_nicersoft_mkf('0034070101',['TIME','ELV','MOON_DEC']))
+
+
 # Variables (TTYPE) from the FITS file headers that I printed
 
 # prefilter

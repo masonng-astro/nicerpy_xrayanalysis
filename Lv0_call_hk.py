@@ -57,6 +57,8 @@ def get_hk(obsid,mpu_no,par_list):
     return data_dict
 
 ################################################################################
+if __name__ == "__main__":
+    print(get_hk('0034070101','4',['MPU_D_TEMP','MPU_ALL_COUNT','MPU_TEC_I']))
 
 # Variables (TTYPE) from the FITS file headers that I printed
 

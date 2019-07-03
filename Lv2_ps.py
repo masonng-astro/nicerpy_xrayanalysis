@@ -172,8 +172,6 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
 
-#whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2081])
-
 def partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines):
     """
     Plot the power spectrum for a desired time interval.
@@ -324,8 +322,6 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,ove
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
 
-#partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0,100,'show','both',[True,5],[True,0,1],[True,0.2081])
-
 def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines):
     """
     Plot the time series for a desired energy range.
@@ -475,8 +471,6 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode,p
                 plt.savefig(filename,dpi=900)
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
-
-#partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,3,8,'show','both',[True,5],[True,0,1],[True,0.2081])
 
 def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines):
     """
@@ -629,4 +623,8 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
 
-#partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,0,100,3,8,'show','both',[True,5],[True,0,1],[True,0.2081])
+if __name__ == "__main__":
+    whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2081])
+    partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0,100,'show','both',[True,5],[True,0,1],[True,0.2081])
+    partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,3,8,'show','both',[True,5],[True,0,1],[True,0.2081])
+    partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,0,100,3,8,'show','both',[True,5],[True,0,1],[True,0.2081])

@@ -13,6 +13,7 @@ import numpy as np
 from astropy.io import fits
 import Lv0_dirs
 import os
+from os.path import relpath
 import subprocess
 import glob
 
@@ -51,7 +52,7 @@ def accelsearch(obsid,flags):
 
     nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
     fft_file = nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary.fft'
-    logfile = nicersoft_output_folder + 'accelsearch.log'
+    logfile = nicersoft_output_folder + 'accelsearch_all.log'
 
     with open(logfile,'w') as logtextfile:
         logtextfile.write(subprocess.check_output(['accelsearch']+flags+[fft_file]))
@@ -61,32 +62,42 @@ def accelsearch(obsid,flags):
 
 #accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
 
-def prepfold(obsid,no_cand,zmax):
+def prepfold(obsid,zmax):
     """
     Performing PRESTO's prepfold on the pulsation candidates.
 
     obsid - Observation ID of the object of interest (10-digit str)
-    no_cand - number of candidates. I haven't yet thought of a way to automate this,
-    so I'll have to do all of the above first BEFORE I do prepfold. It's fine though,
-    since this is the only 'big' manual step.
     zmax - maximum acceleration
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
 
     nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
-    cand_file = nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary_ACCEL_' + str(zmax) + '.cand'
-    events_file = nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary.events'
-    logfile = nicersoft_output_folder + 'accelsearch.log'
+    ACCEL_files = sorted(glob.glob(nicersoft_output_folder+'ni'+obsid+'_nicersoft_bary_ACCEL_'+str(zmax)))
+    cand_files = [ACCEL_files[i] + '.cand' for i in range(len(ACCEL_files))]
+    events_files = [cand_files[i][:-15]+'.events' for i in range(len(cand_files))]
+    logfile = nicersoft_output_folder + 'prepfold_all.log'
+    log = open(logfile,'a')
 
     if os.path.isfile(logfile): #basically to overwrite the previous accelsearch.log
         os.remove(logfile)
 
-    with open(logfile,'a+') as logtextfile:
-        for i in range(1,no_cand+1):
-            subprocess.check_call(['prepfold','-double','-events','-noxwin','-accelcand',str(i),'-accelfile',cand_file,events_file])
-            logtextfile.write(subprocess.check_output(['accelsearch']+flags+[fft_file]))
-            logtextfile.close()
+    header1 = "             Summed  Coherent  Num        Period          Frequency         FFT 'r'        Freq Deriv       FFT 'z'         Accel                           "
+    header2 = "                        Power /          Raw           FFT 'r'          Pred 'r'       FFT 'z'     Pred 'z'      Phase       Centroid     Purity                        "
+
+    for i in range(len(ACCEL_files)): #for each successful ACCEL_zmax file:
+        accel_textfile = np.array(open(ACCEL_files[i],'r').read().split('\n')) #read the data from the ACCEL_$zmax files
+        index_header1 = np.where(accel_textfile==header1)[0][0] #index for "Summed, Coherent, Num, Period etc
+        index_header2 = np.where(accel_textfile==header2)[0][0] #index for "Power / Raw  FFT  'r'  etc
+        no_cands = index_header2 - index_header1 - 5 #to obtain number of candidates
+        cand_relpath = relpath(cand_files[i],nicersoft_output_folder) #relative path of .cand file ; PRESTO doesn't like using absolute paths
+        events_relpath = relpath(events_files[i],nicersoft_output_folder) #relative path of .events file ; PRESTO doesn't like using absolute paths
+
+        for j in range(no_cands):
+            command = 'cd ' + nicersoft_output_folder + ' ; prepfold -double -events -noxwin -n 50 -accelcand ' + str(j+1) + ' -accelfile ' + cand_relpath + ' ' + events_relpath
+            subprocess.Popen(command,shell=True)
+
+    log.close()
 
     return
 
@@ -106,3 +117,6 @@ def ps2pdf(obsid):
         subprocess.check_call(['ps2pdf',ps_files[i],pdf_file]) #using ps2pdf to convert from ps to pdf ; not just a simple change in extension
 
     return
+
+if __name__ == "__main__":
+    print('hi') #placeholder

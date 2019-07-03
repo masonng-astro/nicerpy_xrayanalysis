@@ -44,3 +44,6 @@ def read_anc():
     #event[1].header for events; event[2].header for GTIs
 
     return anc
+
+if __name__ == "__main__":
+    print('hi') #placeholder for now

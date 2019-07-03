@@ -56,6 +56,9 @@ def get_uf(obsid,mpu_no,par_list):
     return data_dict
 
 ################################################################################
+if __name__ == "__main__":
+    print(get_uf('0034070101','6',['TIME','RAWX','RAWY']))
+
 
 # Variables (TTYPE) from the FITS file headers that I printed
 

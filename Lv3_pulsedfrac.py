@@ -176,4 +176,5 @@ def pf_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1
 
     return np.sqrt(variance)/phase_ave_mean
 
-print(pf_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0,500,0.3,12,'show'))
+if __name__ == "__main__":
+    print(pf_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0,500,0.3,12,'show'))

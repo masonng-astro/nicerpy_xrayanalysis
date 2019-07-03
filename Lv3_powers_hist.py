@@ -62,4 +62,5 @@ def histogram(obsid,tbin,segment_length):
 
     return
 
-histogram('1034090111',0.00025,1000)
+if __name__ == "__main__":
+    histogram('1034090111',0.00025,1000)

@@ -32,7 +32,8 @@ def scp(obsid):
     subprocess.check_call(['scp','-r',obsid_dir,nicer_dir])
     return
 
+if __name__ == "__main__":
+    scp('1060060127')
+
 ##### for i in range(11,25):
 ##    scp('10600601' + str(i)) WORKED.
-
-#scp('1060060127')

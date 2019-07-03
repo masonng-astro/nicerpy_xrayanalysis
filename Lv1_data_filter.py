@@ -170,3 +170,49 @@ def filter_data(obsid,bary,name_par_list,par_list,t1,t2,E1,E2):
     print("Energy range: " + str(E1) + 'keV to ' + str(E2) + 'keV.')
 
     return truncated_time, truncated_E
+
+if __name__ == "__main__":
+    t_cut = filter_time('1034070104',True,['TIME'],11113,11945)
+    counts = np.ones(len(t_cut))
+    t_bins = np.linspace(11113,11945,11945-11113+1)
+    from scipy import stats
+    import matplotlib.pyplot as plt
+    summed_data, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
+    plt.plot(t_bins[:-1],summed_data)
+    plt.show()
+
+    t_cut,E_cut = filter_energy('1034070104',True,['TIME','PI'],0.3,12)
+    counts = np.ones(len(t_cut))
+    startt = int(t_cut[0])
+    endt = int(t_cut[-1])
+    #t_bins = np.linspace(startt,endt,endt-startt+1)
+    t_bins = np.linspace(11113,11945,11945-11113+1)
+    E_bins = np.linspace(0.3,12,118)
+    from scipy import stats
+    import matplotlib.pyplot as plt
+    summed_data_t, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
+    summed_data_E, bin_edges, binnumber = stats.binned_statistic(E_cut,counts,statistic='sum',bins=E_bins)
+    plt.plot(t_bins[:-1],summed_data_t)
+    plt.xlim([11113,11945])
+    plt.show()
+
+    t1 = 0
+    t2 = 72000
+    E1 = 0.3
+    E2 = 12
+    t_cut,E_cut = filter_data('1034070104',True,['TIME','PI'],t1,t2,E1,E2)
+    counts = np.ones(len(t_cut))
+    #t_bins = np.linspace(startt,endt,endt-startt+1)
+    t_bins = np.linspace(t1,t2,t2-t1+1)
+    E_bins = np.linspace(E1,E2,118)
+    from scipy import stats
+    import matplotlib.pyplot as plt
+    summed_data_t, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
+    summed_data_E, bin_edges, binnumber = stats.binned_statistic(E_cut,counts,statistic='sum',bins=E_bins)
+    plt.figure()
+    plt.plot(t_bins[:-1],summed_data_t)
+    plt.xlim([t1,t2])
+
+    plt.figure()
+    plt.plot(E_bins[:-1],summed_data_E)
+    plt.show()

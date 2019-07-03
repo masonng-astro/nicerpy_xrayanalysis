@@ -60,6 +60,8 @@ def get_ufa(obsid,mpu_no,par_list):
     return data_dict
 
 ################################################################################
+if __name__ == "__main__":
+    print(get_ufa('0034070101','6',['TIME','PI_FAST'])) 
 
 # Variables (TTYPE) from the FITS file headers that I printed
 

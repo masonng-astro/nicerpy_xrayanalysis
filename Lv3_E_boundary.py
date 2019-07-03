@@ -55,3 +55,6 @@ def E_bound(obsid,bary,par_list,E1,E2,cut_type,bound):
         boundary_E = E_cut[boundary_index]
 
         return boundary_E
+
+if __name__ == "__main__":
+    print(E_bound('0034070104',True,['PI','TIME','PI_FAST'],0.0,20,'median',2.7)) 

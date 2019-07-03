@@ -339,3 +339,7 @@ def diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode,diag_vars):
                 Lv3_diagnostics_display.display_t(obsid,eventcl_var[i],t1,t2,binned_t,binned_counts,filtered_t,filtered_cl,'.cl')
                 pdf.savefig()
                 plt.close()
+
+if __name__ == "__main__":
+    diag_all('1034070104',True,['PI','TIME','PI_FAST'],1,'save')
+    diag_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'save') 

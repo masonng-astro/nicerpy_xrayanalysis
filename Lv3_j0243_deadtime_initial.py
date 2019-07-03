@@ -34,5 +34,6 @@ on_source_t = np.array([3099, 4171, 21590, 24029, 2497, 41, 1495,
 
 percent = deadtime/on_source_t*100
 
-for i in range(len(percent)):
-    print(str(i+1),on_source_t[i],percent[i])
+if __name__ == "__main__":
+    for i in range(len(percent)):
+        print(str(i+1),on_source_t[i],percent[i])

@@ -51,9 +51,10 @@ def preprocess(obsid,nicerl2_flags,psrpipe_flags,refframe,tbin):
 #    subprocess.check_call(['mv','ni'+obsid+'_nicersoft_bary.events',Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/'])
 #    subprocess.check_call(['mv','ni'+obsid+'_nicersoft_bary.inf',Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/'])
 
-#obsid = '1060060127'
-#psrpipe_flags = ['--emin','0.3','--emax','12.0'] #for psrpipe in Lv0_psrpipe
-#refframe = 'ICRS' #for barycorr in Lv1_barycorr
-#tbin = '0.00025' #time bin for PRESTO in seconds
+if __name__ == "__main__":
+    obsid = '1060060127'
+    psrpipe_flags = ['--emin','0.3','--emax','12.0'] #for psrpipe in Lv0_psrpipe
+    refframe = 'ICRS' #for barycorr in Lv1_barycorr
+    tbin = '0.00025' #time bin for PRESTO in seconds
 
-#preprocess(obsid,psrpipe_flags,refframe,tbin)
+    preprocess(obsid,psrpipe_flags,refframe,tbin)

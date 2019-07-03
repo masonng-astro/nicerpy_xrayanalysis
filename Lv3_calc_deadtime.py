@@ -41,8 +41,6 @@ def deadtime(obsid,mpu_no,par_list):
 
     return obs_deadtime
 
-print(deadtime('1050390148','7',['TIME','DEADTIME']))
-
 def exposure(obsid,bary,par_list):
     """
     Get the on-source, exposure time
@@ -65,4 +63,6 @@ def exposure(obsid,bary,par_list):
 
     return count,gti_exposure
 
-print(exposure('1050390148',True,['TIME','DEADTIME','PI','PI_FAST']))
+if __name__ == "__main__":
+    print(deadtime('1050390148','7',['TIME','DEADTIME']))
+    print(exposure('1050390148',True,['TIME','DEADTIME','PI','PI_FAST']))

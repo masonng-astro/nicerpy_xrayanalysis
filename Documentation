@@ -265,6 +265,13 @@ flags - a LIST of input flags for psrpipe
 
 TEST: psrpipe('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'])
 
+>>>>>>>>>> Lv0_nicerl2 <<<<<<<<<<
+
+-- Running nicerl2 to do initial filtering of the ufa file!
+
+obsid - Observation ID of the object of interest (10-digit str)
+flags - a LIST of input flags for nicerl2
+
 --------------------------------------------------------------------------------
 ################################################################################
 --------------------------------------------------------------------------------
@@ -286,6 +293,29 @@ gap - if time between start of next subregion and the end of the previous
 subregion is greater than the gap, consider that a new subregion!
 
 TEST: print(get_gtis('1034070104',True,50)) [WORKED]
+
+>>>>>>>>>> Lv1_data_gtis_filter <<<<<<<<<<
+
+Functions:
+
+##### desired_gtis(obsid,bary,gap,desired_length)
+
+-- Obtain a list of tuples for GTIs, both shifted (i.e., starts at 0) and the actual
+   GTIs (MJD), that have intervals longer than a desired length (e.g. 1000s)
+
+obsid - Observation ID of the object of interest (10-digit str)
+bary - Whether the data is barycentered. True/False
+gap - gap between data that would still be considered data
+-- for example, if you have data for t=1000-1040 and t=1045-1100, then if
+gap < 5, you get TWO GTIs. If gap >= 5, then you have 1 GTI from 1000-1100.
+This is different to desired_length - this is just meant to 'join up data'
+which are separated by mere seconds!
+desired_length - if GTIs > some desired length, use that data. This is used to
+weed out short GTIs.
+
+TEST: shifted,actual = desired_gtis('1034090111',True,50,1000)
+      for i in range(len(shifted)):
+         print(shifted[i],actual[i]) [WORKED]
 
 >>>>>>>>>> Lv1_data_filter <<<<<<<<<<
 
@@ -1145,17 +1175,14 @@ segment_length - length of the individual segments
 TEST: accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
       accelsearch('1060060127',accelsearch_flags) [WORKED]
 
-##### prepfold(obsid,no_cands,zmax)
+##### prepfold(obsid,zmax)
 
 -- Performing PRESTO's prepfold on the pulsation candidates.
 
 obsid - Observation ID of the object of interest (10-digit str)
-no_cand - number of candidates. I haven't yet thought of a way to automate this,
-so I'll have to do all of the above first BEFORE I do prepfold. It's fine though,
-since this is the only 'big' manual step.
 zmax - maximum acceleration
 
-TEST: prepfold('0034070101',10,0) [WORKED]
+TEST: prepfold('0034070101',10,0) [WORKED] -OLD VERSION
 
 ##### ps2pdf(obsid)
 

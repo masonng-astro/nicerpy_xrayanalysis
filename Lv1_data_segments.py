@@ -5,6 +5,8 @@ Created on Sat May 11 2.32pm 2019.
 
 Performing NICER-specific HEASOFT functions. Specifically niextract-events for now.
 
+July 3rd 2019 - might be deprecated... see Lv2_presto_segments...! 
+
 """
 from __future__ import division, print_function
 import numpy as np
@@ -79,7 +81,8 @@ def niextract_gti_time(obsid,segment_length):
 
     return
 
-#niextract_gti('1034090108',1000)
+if __name__ == "__main__":
+    niextract_gti('1034090108',1000)
 
 """
 Updated on 5/23/19. This is old! The above incorporated advice from Paul Ray!

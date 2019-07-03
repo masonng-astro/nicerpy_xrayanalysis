@@ -92,3 +92,6 @@ def display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype):
     ax2.set_ylabel(diag_var)
 
     plt.subplots_adjust(hspace=0.2)
+
+if __name__ == "__main__":
+    print('hi') #placeholder, but this is more of a methods script

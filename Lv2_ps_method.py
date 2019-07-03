@@ -170,3 +170,6 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
         power_spec = np.ones(int(N/2)) + np.ones(int(N/2))
 
     return freqs[1:int(N/2)], power_spec[1:int(N/2)]
+
+if __name__ == "__main__":
+    print('hi') #placeholder, but this is just a methods script...

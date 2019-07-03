@@ -128,13 +128,6 @@ def get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size):
 
     return t_bins,color,color_diff
 
-#a,b,c = get_color('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1)
-#plt.figure(1)
-#plt.plot(a[:-1],b)
-#plt.figure(2)
-#plt.plot(a[:-1],c)
-#plt.show()
-
 def get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2):
     """
     Calculating the color - hard/soft and (hard-soft)/(hard+soft)
@@ -203,13 +196,6 @@ def get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2):
     color_diff = (sum_hard-sum_soft)/(sum_soft+sum_hard)
 
     return t_bins,color,color_diff
-
-#a,b,c = get_color_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,0,100)
-#plt.figure(1)
-#plt.plot(a[:-1],b)
-#plt.figure(2)
-#plt.plot(a[:-1],c)
-#plt.show()
 
 def plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode):
     """
@@ -300,8 +286,6 @@ def plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode):
             plt.savefig(filename,dpi=900)
             plt.close()
 
-#plotting('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,'show')
-
 def plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode):
     """
     Plotting the hardness ratio/color diagrams.
@@ -379,6 +363,20 @@ def plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode):
             plt.savefig(filename,dpi=900)
             plt.close()
 
-#plotting('0034070101',True,['PI','TIME','PI_FAST'],2.7,1,'show')
-#plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show')
-#plotting_t('0034070101',True,[True,True,1,100,300,800],['PI','TIME','PI_FAST'],2.7,1,0,99,'show')
+if __name__ == "__main__":
+    a,b,c = get_color('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1)
+    plt.figure(1)
+    plt.plot(a[:-1],b)
+    plt.figure(2)
+    plt.plot(a[:-1],c)
+    plt.show()
+
+    a,b,c = get_color_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,0,100)
+    plt.figure(1)
+    plt.plot(a[:-1],b)
+    plt.figure(2)
+    plt.plot(a[:-1],c)
+    plt.show()
+
+    plotting('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,'show')
+    plotting_t('0034070101',True,[True,True,1,100,300,800],['PI','TIME','PI_FAST'],2.7,1,0,99,'show')

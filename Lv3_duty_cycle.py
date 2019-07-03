@@ -49,7 +49,6 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
     total_gti = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis))])
 
     useful_data = 0
-    segment_duration = 0
     for i in range(len(dat_files)):
         tbin = np.float(tbin)
         binned_data = np.fromfile(dat_files[i],dtype='<f',count=-1)
@@ -57,15 +56,17 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
 
         duty_cycle_times = np.arange(0,tbin*len(binned_data)+tbin,duty_cycle_bin)
         summed_data, binedges, binnumber = stats.binned_statistic(dat_times,binned_data,statistic='sum',bins=duty_cycle_times)
-        #plt.plot(duty_cycle_times[:-1],summed_data)
-        #plt.title(dat_files[i])
-        #plt.show()
+#        plt.plot(duty_cycle_times[:-1],summed_data,'bx')
+#        plt.title(dat_files[i])
+#        plt.axhline(y=stats.mode(summed_data)[0][0])
+#        plt.show()
 
-#        print(stats.mode(summed_data))
         usable_data = len(summed_data[(summed_data!=stats.mode(summed_data)[0][0])&(summed_data>0)])
+        print(usable_data,len(summed_data))
         if usable_data/len(summed_data)*100 >= threshold:
             useful_data += usable_data
-        segment_duration += len(summed_data)
+            print(usable_data)
+        print('--')
 
     print('ObsID: ' + str(obsid))
     print('Segment Length: ' + str(segment_length) + 's')
@@ -76,11 +77,6 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
     print("Percentage of bins with data (over threshold in each segment) over the GTIs: " + str(useful_data/total_gti*100))
 
     return
-
-#print('0034070101')
-#duty_cycle('0034070101',0.0005,100,1,10)
-#print('1034090111')
-#duty_cycle('1034090111',0.00025,200,1,10)
 
 def duty_cycle_dist(obsid,tbin,segment_length,duty_cycle_bin,threshold):
     """
@@ -188,8 +184,6 @@ def duty_cycle_tE(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
 
     return
 
-#duty_cycle_tE('1200250108',0.00025,200,30,250,1,10)
-
 def duty_cycle_tE_dist(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
     """
     To get the distribution of duty cycles over all segments, given an ObsID and
@@ -281,11 +275,17 @@ def compare_segment_lengths(obsid,tbin,segment_lengths,duty_cycle_bin):
 
     subprocess.check_call(['mv','threshold_segmentlength.pdf',Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'])
 
-#seg_lengths = [200,300,500,800,1000,1500,2000]
-#for i in range(len(seg_lengths)):
-#    duty_cycle_dist('1034090111',0.00025,seg_lengths[i],1,10)
+if __name__ == "__main__":
+    duty_cycle('1060020113',0.00025,1000,1,20)
+    ### REMEMBER, tbin is NOT from Lv3_average_segments, but it's from nicerfits2presto!
 
-#compare_segment_lengths('1034090111',0.00025,seg_lengths,1)
+    #duty_cycle_tE('1200250108',0.00025,200,30,250,1,10)
+
+    #seg_lengths = [200,300,500,800,1000,1500,2000]
+    #for i in range(len(seg_lengths)):
+    #    duty_cycle_dist('1034090111',0.00025,seg_lengths[i],1,10)
+
+    #compare_segment_lengths('1034090111',0.00025,seg_lengths,1)
 """
 For 1034090111:
 

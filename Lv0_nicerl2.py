@@ -39,3 +39,6 @@ def nicerl2(obsid,nicerl2_flags):
     subprocess.check_call(['mv',obsid+'_nicerl2.log',nicerdata_dir])
 
     return
+
+if __name__ == "__main__":
+    print('hi') #placeholder. But see Lv2_presto_preprocess for implementation

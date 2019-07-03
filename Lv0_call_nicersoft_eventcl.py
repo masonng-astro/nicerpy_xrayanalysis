@@ -65,14 +65,14 @@ def get_eventcl(obsid,name_par_list,par_list):
     return data_dict
 
 ################################################################################
-"""
-datadict = get_eventcl('1050390140',True,['PI','PI_FAST','TIME'])
-times = datadict['TIME']
-pi = datadict['PI']
-print(len(times)) #1170671 counts?
-print(len(times[(pi>=20)&(pi<=1200)]))
-print(len(pi))
-"""
+if __name__ == "__main__":
+    datadict = get_eventcl('1050390140',['','','','','',''],['PI','PI_FAST','TIME'])
+    times = datadict['TIME']
+    pi = datadict['PI']
+    print(len(times)) #1170671 counts?
+    print(len(times[(pi>=20)&(pi<=1200)]))
+    print(len(pi))
+
 
 # Variables (TTYPE) from the FITS file headers that I printed
 

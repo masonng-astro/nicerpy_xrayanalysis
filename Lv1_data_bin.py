@@ -175,3 +175,24 @@ def binning_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2
     print("The data is binned by " + str(tbin_size) + 's, and ' + str(Ebin_size) + 'keV')
 
     return t_bins, summed_data_t, E_bins, summed_data_E
+
+if __name__ == "__main__":
+    x,y = binning_t('1034070104',True,['PI','TIME'],1,11113,11945)
+    print(x[-100:])
+    print(y[-100:])
+
+    w,x,y,z = binning_E('1034070104',True,['PI','TIME'],1,0.05,0.3,12)
+    print(w[:50])
+    print(x[:50])
+    print(y[:50])
+    print(z[:50])
+    print(sum(x))
+    print(sum(z))
+
+    w,x,y,z = binning_tE('1034070104',True,['PI','TIME'],1,0.05,11113,11945,0.3,12) 
+    print(w[:50])
+    print(x[:50])
+    print(y[:50])
+    print(z[:50])
+    print(sum(x))
+    print(sum(z))

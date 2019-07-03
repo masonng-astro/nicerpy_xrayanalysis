@@ -446,12 +446,160 @@ print(np.where(np.array(input_file)==b)[0][0])
 #log = open(logfile,'a')
 #subprocess.Popen('cd /Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe_old/ ; prepfold -double -events -noxwin -n 50 -accelcand 1 -accelfile ni0034070101_nicersoft_bary_800-1200_ACCEL_0.cand ni0034070101_nicersoft_bary.events',stdout=log,shell=True)
 
-for i in range(26):
-    base_folder = '/Volumes/Samsung_T5/NICERsoft_outputs/12002501' + str(i+1).zfill(2) + '_pipe/'
-    event = fits.open(base_folder+'ni12002501'+str(i+1).zfill(2)+'_nicersoft_bary.evt')
+"""
+obsid = '1060060170'
+base_folder = '/Volumes/Samsung_T5/NICERsoft_outputs/'+obsid+'_pipe/'
+event = base_folder + 'ni'+obsid+'_nicersoft_bary.evt'
+event = fits.open(event)
+counts = len(event[1].data['TIME'])
+gtis = event[2].data
+total_gti = sum([ (gtis[i][1] - gtis[i][0]) for i in range(len(gtis))])
+print('Number of counts: '+str(counts))
+print(total_gti)
+print('Exposure time is ' + str(gtis[-1][1]-gtis[0][0]) + ' s')
+"""
+
+"""
+obsid = '1060060170'
+base_folder = '/Volumes/Samsung_T5/NICERsoft_outputs/'+obsid+'_pipe/'
+event = base_folder + 'ni'+obsid+'_nicersoft_bary.evt'
+event = fits.open(event)
+times = event[1].data['TIME']
+
+import binary_psr
+timea = binary_psr.binary_psr("/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411.par").demodulate_TOAs(times)
+for i in range(100):
+    print(times[i],timea[i])
+"""
+
+"""
+basefolder = '/Volumes/Samsung_T5/NICERsoft_outputs/1034070104_pipe_old/'
+event = basefolder + 'cleanfilt.evt'
+event = fits.open(event)
+times = event[1].data['TIME']
+
+times_zero = times - times[0]
+counts = np.ones(len(times))
+
+tbins = np.linspace(0,len(times_zero),len(times_zero)+1)
+summed_counts,binedges,binnumber = stats.binned_statistic(times_zero,counts,statistic='sum',bins=tbins)
+plt.plot(tbins[:-1],summed_counts,'r-')
+plt.title('Cen X-3 ; ObsID 1034070104',fontsize=12)
+plt.xlabel('Elapsed time (s)',fontsize=12)
+plt.ylabel('Counts/s',fontsize=12)
+plt.show()
+"""
+
+### Testing FFT from PRESTO and FFT from manual method
+"""
+cenx3_data = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/ni0034070101_nicersoft_bary.dat'
+cenx3_fft = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/ni0034070101_nicersoft_bary.fft'
+
+raw_data = np.fromfile(cenx3_data,dtype='<f',count=-1)
+
+freqs = np.fft.fftfreq(raw_data.size,0.00025)
+N = len(freqs)
+use_freqs = freqs[1:int(N/2)]
+
+new_raw_data = raw_data - np.mean(raw_data)
+my_fft = np.fft.fft(new_raw_data)
+my_ps = 2/sum(raw_data)*np.abs(my_fft)**2
+use_my_ps = my_ps[1:int(N/2)]
+print(use_my_ps[:5])
+
+fft_data = np.fromfile(cenx3_fft,dtype='complex64',count=-1)
+fft_ps = 2/sum(raw_data)*np.abs(fft_data)**2
+#fft_ps = signal.detrend(fft_ps,type='constant')
+use_fft_ps = fft_ps[1:int(N/2)]
+print(use_fft_ps[:5])
+
+print('Mean of my power spectrum: ' + str(np.mean(use_my_ps[use_freqs>10])))
+print('Mean of PRESTO power spectrum: ' + str(np.mean(use_fft_ps[use_freqs>10])))
+
+plt.figure(1)
+plt.plot(use_freqs,use_my_ps)
+plt.figure(2)
+plt.plot(use_freqs,use_fft_ps)
+plt.show()
+"""
+
+"""
+test_data = '/Volumes/Samsung_T5/NICERsoft_outputs/1060020113_pipe/ni1060020113_nicersoft_bary.evt'
+event = fits.open(test_data)
+times = event[1].data['TIME']
+
+times_zero = times - times[0]
+counts = np.ones(len(times_zero))
+
+tbin_size = 0.00025
+startt = 0
+endt = int(times_zero[-1])
+t_bins = np.linspace(startt,endt,(endt-startt)*1/tbin_size+1)
+summed_data, bin_edges, binnumber = stats.binned_statistic(times_zero,counts,statistic='sum',bins=t_bins)
+
+no_bins = (endt-startt)/tbin_size
+nicersoft_t_bins = np.arange(no_bins+1,dtype=np.float)*tbin_size
+sums,edges = np.histogram(times_zero,bins=nicersoft_t_bins)
+dat = np.array(sums,np.float32)
+
+print(t_bins[20],summed_data[20])
+print(nicersoft_t_bins[20],sums[20])
+print('--')
+print(t_bins[-20:],summed_data[-20:])
+print(nicersoft_t_bins[-20:],sums[-20:])
+
+plt.plot(t_bins[:100000],summed_data[:100000],'rx-')
+plt.plot(nicersoft_t_bins[:100000],sums[:100000],'bx-')
+plt.show()
+"""
+
+"""
+import Lv3_average_ps_segments
+#### FROM PRESTO
+testdata = '/Volumes/Samsung_T5/NICERsoft_outputs/1060020113_pipe/accelsearch_1000s/ni1060020113_nicersoft_bary_GTI0_1000s.dat'
+presto_bin_data = np.fromfile(testdata,dtype='<f',count=-1)
+binsize = 1000/len(presto_bin_data)
+print(binsize)
+presto_t_bins = np.arange(0,1000,binsize)
+
+plt.figure(1)
+plt.plot(presto_t_bins,presto_bin_data,'rx-')
+#print(presto_t_bins[:20],presto_bin_data[:20])
+#print(presto_t_bins[-20:],presto_bin_data[-20:])
+print('--')
+
+#### FROM MY Lv3_AVERAGE_PS_SEGMENTS!
+#test_data = '/Volumes/Samsung_T5/NICERsoft_outputs/1060020113_pipe/accelsearch_1000s/ni1060020113_nicersoft_bary_GTI0_1000s.evt'
+test_data = '/Volumes/Samsung_T5/NICERsoft_outputs/1060020113_pipe/ni1060020113_nicersoft_bary.evt'
+event = fits.open(test_data)
+times = event[1].data['TIME']
+
+times_zero = times - event[2].data[0][0]
+counts = np.ones(len(times_zero))
+
+time_bins = np.arange(0,int(times_zero[-1]),1)
+summed_threshold,bin_edges,binnumber = stats.binned_statistic(times_zero,counts,statistic='sum',bins=time_bins)
+
+#binned_t,binned_data = Lv3_average_ps_segments.binned_data('1060020113',['TIME','PI','PI_FAST'],0.00025)
+
+#truncated_t = binned_t[(binned_t>=0)&(binned_t<=1000)]
+#truncated_counts = binned_data[(binned_t>=0)&(binned_t<=1000)]
+
+
+#plt.figure(2)
+plt.plot(time_bins[:-1],summed_threshold,'bx-')
+#print(truncated_t[:20],truncated_counts[:20])
+#print(truncated_t[-20:],truncated_counts[-20:])
+
+plt.show()
+"""
+
+obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
+for i in range(len(obsids)):
+    eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/' + obsids[i] + '_pipe/ni' + obsids[i] + '_nicersoft_bary.evt'
+    event = fits.open(eventfile)
     gtis = event[2].data
-    T = gtis[-1][1] - gtis[0][0]
-    print('12002501'+str(i+1).zfill(2),T)
+    print('Observation duration for ' + obsids[i] + ': ' + str(gtis[-1][1]-gtis[0][0]))
 
 timeend = time.time()
 

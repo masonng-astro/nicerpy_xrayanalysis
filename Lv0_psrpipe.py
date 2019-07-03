@@ -56,4 +56,5 @@ def psrpipe(obsid,flags):
 
     return
 
-#psrpipe('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'])
+if __name__ == "__main__":
+    psrpipe('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'])

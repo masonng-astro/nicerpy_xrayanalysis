@@ -94,3 +94,8 @@ def peak_freq(obsid):
     peaks['1034070106'] = ['0.20854272550784736', '0.0003410777890108904']
 
     return peaks[obsid]
+
+if __name__ == "__main__":
+    print(obstime('0034070101'))
+    print(ra_dec('0034070101'))
+    print(peak_freq('0034070101'))

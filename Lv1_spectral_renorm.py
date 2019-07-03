@@ -46,6 +46,7 @@ def renorm_spectra(obsid,bary):
 
     event.writeto(Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/' + obsid + '_renormspec.pi',overwrite=True)
 
-obsids = ['0034070101']#,'0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
-for i in range(len(obsids)):
-    renorm_spectra(obsids[i],True)
+if __name__ == "__main__":
+    obsids = ['0034070101']#,'0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
+    for i in range(len(obsids)):
+        renorm_spectra(obsids[i],True)

@@ -49,4 +49,5 @@ def evt_filename(obsid,name_par_list):
 
     return prefix + add1 + add2 + suffix
 
-#print(evt_filename('0034070101',[True,True,1,500,200,800]))
+if __name__ == "__main__":
+    print(evt_filename('0034070101',[True,True,1,500,200,800]))

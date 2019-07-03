@@ -50,6 +50,8 @@ def get_cat(obsid,par_list):
 
     return data_dict
 
+if __name__ == "__main__":
+    print(get_cat('0034070101',['FILENAME','FORMAT','TYPE']))
 # Variables (TTYPE) from the FITS file headers that I printed
 
 # FILENAME, FORMAT, TYPE, FILECLAS, DESCRIP, FILESIZE, ARCHSIZE, CHECKSUM,

@@ -26,7 +26,8 @@ def auxil(obsid):
         raise TypeError("ObsID should be a string!")
 
     auxil_dir = Lv0_dirs.NICER_DATADIR + obsid + '/auxil/'
-    #subprocess.check_call(['rm','-r',auxil_dir+'ni'+obsid+'.cat']) #Jun 4 - seems like .cat.gz is no longer there?
+    if os.path.exists(auxil_dir+'ni'+obsid+'.cat'):
+        subprocess.check_call(['rm','-r',auxil_dir+'ni'+obsid+'.cat']) #Jun 4 - seems like .cat.gz is no longer there?
     auxil_files = glob.glob(auxil_dir + '*.gz')
     for i in range(len(auxil_files)):
         sh.gunzip(auxil_files[i])
@@ -98,3 +99,6 @@ def unzip_all(obsid):
     hk(obsid)
 
     return
+
+if __name__ == "__main__":
+    unzip_all('1060060127')

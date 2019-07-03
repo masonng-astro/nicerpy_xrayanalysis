@@ -31,8 +31,6 @@ def max_acc(zmax,T,f0):
 
     return zmax*c/(T**2*f0)
 
-#print(max_acc(200,200,230))
-
 def N_trials(tbin,T):
     """
     To obtain the number of trials used in the FFT. Divided by two to get number
@@ -60,8 +58,6 @@ def single_trial_prob(significance,N):
 
     return single_trial, single_trial_signif
 
-#single_trial_prob(3,1e3)
-
 def signal_significance(M,W,Pthreshold):
     """
     Calculating the significance of a particular signal in the power spectrum,
@@ -82,5 +78,9 @@ def signal_significance(M,W,Pthreshold):
     #confidence_level = special.erf(significance/np.sqrt(2))*100
     return significance
 
-sig_sig = signal_significance(45,1,3.90978)
-single_trial_prob(3,2e6)
+if __name__ == "__main__":
+    print(max_acc(200,200,230))
+    sig_sig = signal_significance(1,1,13.2)
+    single_trial_prob(3,4e6)
+    single_trial_prob(2,4e6)
+    single_trial_prob(1,4e6)

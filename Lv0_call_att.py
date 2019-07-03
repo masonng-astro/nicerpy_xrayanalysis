@@ -50,6 +50,9 @@ def get_att(obsid,par_list):
 
     return data_dict
 
+if __name__ == "__main__":
+    print(get_att('0034070101',['TIME','QPARAM','STATE']))
+
 # Variables (TTYPE) from the FITS file headers that I printed
 
 # att
