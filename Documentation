@@ -1303,6 +1303,167 @@ tbin_size - size of the time bin
 threshold - if data is under threshold (in percentage), then don't use the segment!
 starting_freq - frequency to start constructing the histogram of powers from
 
+>>>>>>>>>> Lv2_average_merge_ps_methods <<<<<<<<<<
+
+##### merging(obsids)
+
+-- Given a list of ObsIDs, create a file which merges all the rows in the EVENTS
+extension of the FITS files!
+
+obsids - list (or array) of ObsIDs
+
+##### merging_GTIs(obsids,merged_id)
+
+-- Given a list of ObsIDs and the merged_id, create the final event file, which
+already has all the rows in the EVENTS extension of the FITS files, BUT also
+including the GTI extension of the FITS files!
+
+obsids - list (or array) of ObsIDs
+merged_id - 6-digit ID for the merged event file
+
+##### get_gti_file(merged_id,segment_length)
+
+-- Creating the individual .gti files for my data segments!
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the individual segments for combining power spectra
+
+##### niextract_gti_time(merged_id,segment_length)
+
+-- Using niextract-events to get segmented data based on the [segment_length]-length
+GTIs that were created above!
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the individual segments for combining power spectra
+
+##### niextract_gti_energy(merged_id,PI1,PI2)
+
+-- Using niextract-events to get segmented data based on the energy range
+
+merged_id - 6-digit ID for the merged event file
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+
+##### niextract_gti_time_energy(merged_id,segment_length,PI1,PI2)
+
+-- Using niextract-events to get segmented data based on [segment_length]-length
+GTIs that were created above, AND energy range!
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the individual segments for combining power spectra
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+
+##### do_nicerfits2presto(merged_id,tbin,segment_length)
+
+-- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
+I can always move files to different folders to prevent repeats (especially for large files)
+
+merged_id - 6-digit ID for the merged event file
+tbin - size of the bins in time
+segment_length - length of the individual segments for combining power spectra
+
+##### edit_inf(merged_id,tbin,segment_length)
+
+-- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
+Mainly need to edit the "Number of bins in the time series".
+This is only for when we make segments by time though!
+
+merged_id - 6-digit ID for the merged event file
+tbin - size of the bins in time
+segment_length - length of the individual segments
+
+##### edit_binary(merged_id,tbin,segment_length)
+
+--  To pad the binary file so that it will be as long as the desired segment length.
+The value to pad with for each time bin, is the average count rate in THAT segment!
+Jul 10: Do zero-padding instead... so that number of counts is consistent!
+Again, this is only for when we make segments by time!
+
+merged_id - 6-digit ID for the merged event file
+tbin - size of the bins in time
+segment_length - length of the individual segments
+
+##### realfft(merged_id,segment_length)
+
+-- Performing PRESTO's realfft on the binned data (.dat)
+
+merged_id - 6-digit ID for the merged event file
+
+##### do_demodulate(merged_id,segment_length,par_file)
+
+-- Do orbital demodulation on the original events.
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the segments
+par_file - orbital parameter file for input into binary_psr
+
+Jul 18 - actually, since this is an "average_ps" thing, don't need to
+demodulate the energy truncation event files!
+
+##### presto_dat(merged_id,segment_length,demod,PI1,PI2)
+
+-- Obtain the dat files that were generated from PRESTO
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+
+##### presto_fft(merged_id,segment_length,demod,PI1,PI2)
+
+-- Obtain the FFT files that were generated from PRESTO
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+
+##### segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold)
+
+-- Using the .dat files, rebin them into 1s bins, to weed out the segments below
+some desired threshold. Will return a *list* of *indices*! This is so that I
+can filter out the *sorted* array of .dat and .fft files that are below threshold!
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+tbin_size - size of the time bin
+threshold - if data is under threshold (in percentage), then don't use the segment!
+
+##### average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
+
+-- Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
+data is beyond some threshold, return the averaged power spectrum!
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+tbin_size - size of the time bin
+threshold - if data is under threshold (in percentage), then don't use the segment!
+W - number of consecutive frequency bins to AVERAGE over
+
+##### noise_hist(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
+
+-- Given the average spectrum for an ObsID, return the histogram of powers, such
+that you have N(>P). This is for powers corresponding to frequencies larger
+than some starting frequency (perhaps to avoid red noise).
+
+merged_id - 6-digit ID for the merged event file
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+tbin_size - size of the time bin
+threshold - if data is under threshold (in percentage), then don't use the segment!
+starting_freq - frequency to start constructing the histogram of powers from
+
 ################################################################################
 ################################################################################
 ################################################################################

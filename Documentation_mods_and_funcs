@@ -187,6 +187,25 @@ Functions:
 ##### average_ps(obsid,segment_length,demod,tbin_size,threshold,W)
 ##### noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W)
 
+>>>>>>>>>> Lv2_average_merge_ps_methods <<<<<<<<<<
+
+##### merging(obsids)
+##### merging_GTIs(obsids,merged_id)
+##### get_gti_file(merged_id,segment_length)
+##### niextract_gti_time(merged_id,segment_length)
+##### niextract_gti_energy(merged_id,PI1,PI2)
+##### niextract_gti_time_energy(merged_id,segment_length,PI1,PI2)
+##### do_nicerfits2presto(merged_id,tbin,segment_length)
+##### edit_inf(merged_id,tbin,segment_length)
+##### edit_binary(merged_id,tbin,segment_length)
+##### realfft(merged_id,segment_length)
+##### do_demodulate(merged_id,segment_length,par_file)
+##### presto_dat(merged_id,segment_length,demod,PI1,PI2)
+##### presto_fft(merged_id,segment_length,demod,PI1,PI2)
+##### segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold)
+##### average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
+##### noise_hist(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
+
 --------------------------------------------------------------------------------
 ################################################################################
 --------------------------------------------------------------------------------
