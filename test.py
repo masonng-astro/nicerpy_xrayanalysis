@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
 import matplotlib.gridspec as gridspec
+import subprocess
+import glob
 import Lv0_dirs,Lv0_call_eventcl,Lv1_data_bin
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
@@ -69,7 +71,7 @@ plt.xlim([0,625])
 plt.show()
 """
 
-obsids = ['0034070101','0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
+#obsids = ['0034070101','0034070102','0034070103','0034070104','1034070101','1034070102','1034070103','1034070104','1034070105','1034070106']
 """
 import Lv0_call_ufa
 from scipy.stats import norm
@@ -97,8 +99,8 @@ for i in range(len(obsids)):
 #pis = event[1].data['PI']
 #plt.hist(pis,bins=20,range=(5,15))
 
-workingdir = '/Users/masonng/Documents/MIT/Research/nicer-data/0034070101_test_xsel/xti/event_cl/'
-fitsfile = 'trymodel1.fits'
+#workingdir = '/Users/masonng/Documents/MIT/Research/nicer-data/0034070101_test_xsel/xti/event_cl/'
+#fitsfile = 'trymodel1.fits'
 """
 E,c1,c2,c3,c4 = np.loadtxt(workingdir+fitsfile,skiprows=3,usecols=(0,1,2,3,4),unpack=True)
 plt.semilogy(E,c2,'r-')
@@ -180,9 +182,9 @@ binned_counts, edges, binno = stats.binned_statistic(shifted_t,counts,statistic=
 #plt.show()
 """
 
+#x = [np.linspace(0,100,10001),np.linspace(100,200,10001),np.linspace(200,300,10001),np.linspace(300,400,10001),np.linspace(400,500,10001),np.linspace(500,600,10001)]
+#y = [4*x[0]+34,4*x[1]+34,4*x[2]+34,4*x[3]+34,4*x[4]+34,4*x[5]+34]
 
-x = [np.linspace(0,100,10001),np.linspace(100,200,10001),np.linspace(200,300,10001),np.linspace(300,400,10001),np.linspace(400,500,10001),np.linspace(500,600,10001)]
-y = [4*x[0]+34,4*x[1]+34,4*x[2]+34,4*x[3]+34,4*x[4]+34,4*x[5]+34]
 """
 fig,axes = plt.subplots(1,1,sharex=True)
 axes[0,0].plot(x,y)
@@ -594,12 +596,259 @@ plt.plot(time_bins[:-1],summed_threshold,'bx-')
 plt.show()
 """
 
+"""
 obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
 for i in range(len(obsids)):
     eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/' + obsids[i] + '_pipe/ni' + obsids[i] + '_nicersoft_bary.evt'
     event = fits.open(eventfile)
     gtis = event[2].data
     print('Observation duration for ' + obsids[i] + ': ' + str(gtis[-1][1]-gtis[0][0]))
+"""
+
+"""
+obsid = '1200250101'
+basefile = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/ni' + obsid + '_nicersoft_bary.evt'
+header_card = fits.open(basefile)[0].header
+date_obs = header_card['DATE-OBS']
+date_end = header_card['DATE-END']
+tstart = header_card['TSTART']
+tend = header_card['TSTOP']
+print(date_obs,date_end,tstart,tend)
+"""
+
+"""
+import Lv0_call_nicersoft_eventcl
+import Lv3_average_ps_segments
+
+data_dict = Lv0_call_nicersoft_eventcl.get_eventcl('0034070101',[True,'','','','',''],['PI','TIME'])
+gtis = Lv0_call_nicersoft_eventcl.open_fits('0034070101',[True,'','','','',''])[2].data
+
+times = data_dict['TIME']
+shifted_t = times - gtis[0][0]
+counts = np.ones(len(times))
+startt = shifted_t[0]
+endt = shifted_t[-1]
+tbin_size = 0.00025
+
+print('Binning started.')
+t_bins = np.arange(startt,endt,tbin_size)
+t_bins_paul = np.arange(int((endt-startt)/tbin_size)+1)*tbin_size
+print(len(t_bins))
+print(len(t_bins_paul))
+print(t_bins[:5],t_bins_paul[:5])
+
+summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the counts in the data
+sums,edges = np.histogram(shifted_t,bins=t_bins_paul)
+print('Binning finished.')
+
+print(summed_data[:5],summed_data[-5:],sums[:5],sums[-5:])
+#print(t_bins[399995:400005])
+#print(summed_data[399995:400005])
+
+plt.figure(1)
+#plt.step(t_bins[:-1],summed_data,'r-')
+plt.step(t_bins_paul[:-1],sums,'r-')
+print(t_bins[:5])
+dat_files = Lv3_average_ps_segments.presto_dat('0034070101',100)
+fft_files = Lv3_average_ps_segments.presto_FFT('0034070101',100)
+
+counter = 0
+for i in range(len(dat_files)):
+    counts = np.fromfile(dat_files[i],dtype='<f',count=-1)
+    #t_data = np.arange(shifted_t[0],shifted_t[0]+100,tbin_size)+i*100
+    t_data = np.arange(0,100,tbin_size)+i*100
+    print(t_data[:5],t_data[-5:])
+    print(counts[:5],counts[-5:])
+    plt.step(t_data,counts,'b-')
+
+
+for i in range(399995,400005):
+    print(t_bins[i],summed_data[i],t_bins_paul[i],sums[i])
+
+#print(sum(summed_data[400000:800000]))
+#test2 = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/ni0034070101_nicersoft_bary_GTI1_100s.dat'
+#counts2 = np.fromfile(test2,dtype='<f',count=-1)
+#print(counts2[:5])
+#print(sum(counts2))
+
+for i in range(9):
+    actual_gti = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/100s_GTI'+str(i)+'.gti'
+    actual_gti = fits.open(actual_gti)
+    actual_gti = actual_gti[1].data
+#    print(actual_gti[0][0],actual_gti[0][1])
+
+testgti = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/test.gti'
+testgti = fits.open(testgti)
+testgti = testgti[1].data
+print(testgti[0][0],testgti[0][1],type(testgti[0][0]),type(testgti[0][1]))
+
+gti_paul = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/accelsearch_100s/ni0034070101_nicersoft_bary_GTI0_100s.evt'
+gti_paul = fits.open(gti_paul)
+gti_paul = gti_paul[2].data
+print(gti_paul[0][0])
+print(type(gti_paul[0][0]))
+
+gti_paul = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/accelsearch_100s/ni0034070101_nicersoft_bary_GTI1_100s.evt'
+gti_paul = fits.open(gti_paul)
+gti_paul = gti_paul[2].data
+print(gti_paul[0][0])
+print(type(gti_paul[0][0]))
+
+gti_orig = '/Volumes/Samsung_T5/NICER-data/0034070101/xti/event_cl/ni0034070101_0mpu7_cl_bary.evt'
+gti_orig = fits.open(gti_orig)
+gti_orig = gti_orig[2].data
+print(gti_orig[0][0])
+print(type(gti_orig[0][0]))
+"""
+
+"""
+import Lv3_average_ps_segments
+
+tbin_size = 0.00025
+t_bins_data,counts_data = Lv3_average_ps_segments.binned_data('0034070101',['PI','TIME'],0.00025)
+segments = np.arange(0,1000,100)
+
+dat_files = sorted(Lv3_average_ps_segments.presto_dat('0034070101',100))
+
+for i in range(len(segments)-1):
+    dat_file_data = np.fromfile(dat_files[i],dtype='<f',count=-1)
+    dat_file_times = np.arange((segments[i+1]-segments[i])/tbin_size)*tbin_size+i*100
+    plt.plot(t_bins_data,counts_data,'r')
+    plt.plot(dat_file_times,dat_file_data,'b')
+    plt.xlim([segments[i],segments[i+1]])
+
+    plt.show()
+"""
+
+"""
+To test whether presto's fft and np's fft were the same
+test_dir = '/Users/masonng/Documents/MIT/Research/nicer-data/testing_prestofft/'
+
+binary_dat = np.fromfile(test_dir+'ni0034070101_nicersoft_bary.dat',dtype='<f',count=-1)
+binary_fft = np.fft.fft(binary_dat)
+
+presto_fft = np.fromfile(test_dir+'ni0034070101_nicersoft_bary.fft',dtype='complex64',count=-1)
+
+freqs = np.fft.fftfreq(binary_dat.size,0.00025)
+N = len(freqs)
+
+binary_ps = 2/sum(binary_dat) * np.abs(binary_fft)**2
+presto_ps = 2/sum(binary_dat) * np.abs(presto_fft)**2
+
+plt.plot(freqs[1:int(N/2)],binary_ps[1:int(N/2)],'r-')
+plt.plot(freqs[1:int(N/2)],presto_ps[1:],'b-')
+plt.show()
+"""
+
+"""
+test_dir = '/Users/masonng/Documents/MIT/Research/nicer-data/testing_prestofft/accelsearch_100s/'
+dat_files = sorted(glob.glob(test_dir+'*.dat'))
+fft_files = sorted(glob.glob(test_dir+'*.fft'))
+
+for i in range(len(dat_files)):
+    binary_data = np.fromfile(dat_files[i],dtype='<f',count=-1)
+    no_photons = sum(binary_data)
+    freqs = np.fft.fftfreq(binary_data.size,0.00025)
+    N = len(freqs)
+    binary_ps = 2/no_photons * np.abs(np.fft.fft(binary_data))**2
+
+    fft_data = np.fromfile(fft_files[i],dtype='complex64',count=-1)
+    fft_ps = 2/no_photons * np.abs(fft_data)**2
+
+    #plt.plot(freqs[1:int(N/2)],binary_ps[1:int(N/2)],'r')
+    #plt.plot(freqs[1:int(N/2)],fft_ps[1:],'b')
+    #plt.show()
+"""
+
+"""
+import Lv3_average_ps_segments
+
+fft_dict = Lv3_average_ps_segments.segments_FFT('0034070101',['PI','TIME'],0.00025,100,1)
+dict_keys = sorted(fft_dict.keys())
+
+fft_files = sorted(Lv3_average_ps_segments.presto_FFT('0034070101',100))
+dat_files = sorted(Lv3_average_ps_segments.presto_dat('0034070101',100))
+
+for i in range(len(dict_keys)):
+    dat_file_data = np.fromfile(dat_files[i],dtype='<f',count=-1)
+    fft_data = np.fromfile(fft_files[i],dtype='complex64',count=-1)
+    print('Length of fft data: ' + str(len(fft_data)) + ' , for dat data: ' + str(len(dat_file_data)))
+    ps_data = 2/sum(dat_file_data) * np.abs(fft_data)**2
+
+    freqs = np.fft.fftfreq(ps_data.size,0.00025)
+    N = len(freqs)
+
+    fft_file_freq = fft_dict[dict_keys[i]][0]
+    fft_file_ps = fft_dict[dict_keys[i]][1]
+
+    fft_presto_freq = freqs[1:int(N/2)]
+    fft_presto_ps = ps_data[1:int(N/2)]
+
+    print(len(fft_file_freq),len(fft_presto_freq),len(fft_file_ps),len(fft_presto_ps))
+
+    plt.plot(fft_file_freq,fft_file_ps,'r')
+    plt.plot(fft_presto_freq,fft_presto_ps,'b')
+
+    plt.show()
+"""
+
+"""
+P_orb = np.linspace(0,1)*86400
+a_c = 0.12/(2*np.pi)*P_orb
+plt.figure(1)
+plt.plot(P_orb,a_c,'rx-')
+plt.figure(2)
+plt.plot(P_orb,a_c*3e8,'bx-')
+plt.axhline(y=1.5e11,alpha=0.5,lw=0.5)
+plt.show()
+"""
+
+"""
+### Now test writing to new fits file...
+basedir = '/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/accelsearch_100s/testfits/'
+oldfile = basedir+'ni0034070101_nicersoft_bary_GTI0_100s.evt'
+newfile = basedir+'ni0034070101_nicersoft_bary_GTI0_100s_demod.evt'
+subprocess.check_call(['cp',oldfile,newfile])
+with fits.open(newfile,mode='update') as hdu5:
+    hdu5[1].data['TIME'] = hdu5[1].data['TIME'] + 150000
+    hdu5.flush()
+"""
+
+"""
+test_dir = '/Volumes/Samsung_T5/NICERsoft_outputs/trymerge/'
+evt1 = test_dir + 'ni2060060363_nicersoft_bary.evt'
+evt2 = test_dir + 'ni2060060364_nicersoft_bary.evt'
+evt3 = test_dir + 'ni2060060365_nicersoft_bary.evt'
+
+subprocess.check_call(['ftmerge',evt1+','+evt2+','+evt3,test_dir+'merged1.evt','copyall=YES','clobber=YES'])
+"""
+
+"""
+test_dir = '/Volumes/Samsung_T5/NICERsoft_outputs/trymerge/testdirectories/'
+print(sorted(glob.glob(test_dir+'merged*')))
+"""
+
+"""
+test_dir = '/Volumes/Samsung_T5/NICERsoft_outputs/1200250101_pipe/'
+testfile = test_dir + 'ni1200250101_nicersoft_bary_E250-1200.events'
+openfile = np.fromfile(testfile,dtype='<f',count=-1)
+print(len(openfile))
+"""
+
+"""
+DOES NOT WORK THE WAY I WANT IT TO...
+def testfunction():
+    print('hi')
+    if __name__ == "__main__":
+        print('whatthe')
+
+def testfunction2():
+    print('lolllll')
+    testfunction()
+
+#testfunction()
+testfunction2()
+"""
 
 timeend = time.time()
 

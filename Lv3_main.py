@@ -22,13 +22,14 @@ import matplotlib.pyplot as plt
 #obsids = ['1060020418'] #observation ID. 113 242 418
 #obsids = ['1200250108']
 #obsids = ['1050390101','1050390105','1050390115','1050390122','1050390125','1050390132','1050390138','1050390140','1050390141','1050390142','1050390145','1050390148']
-obsids = ['1034070104']
+#obsids = ['2060060363']
+obsids = ['0034070101']
 #obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
 #obsids = ''
 bary = True #whether the data you want is barycenter-corrected or not
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 
-name_par_list = ['','','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
+name_par_list = [True,'','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
 #name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
 tbin_size = 1 #how you want to bin the light curve data

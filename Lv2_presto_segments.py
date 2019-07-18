@@ -40,16 +40,16 @@ def get_gti_file(obsid,segment_length):
 
     Tobs_start = gtis[0][0] #MJD for the observation start time
     Tobs_end = gtis[-1][1] #MJD for the observation end time
+#    Tobs_start = event[1].data['TIME'][0]
+#    Tobs_end = event[1].data['TIME'][-1]
 
-    segment_times = np.arange(Tobs_start,Tobs_end,segment_length) #array of time values, starting
-
-    #from the observation start time until the observation end time, in steps of 1000s.
-    #This means that you'll get, for a 4392s observation, np.array([0,1000,2000,3000,4000])!
-    #We'd lose 392s worth of counts, but it can't be used in combining the power spectra anyways.
+    segment_times = np.arange(Tobs_start,Tobs_end+segment_length,segment_length) #array of time values, starting
+    #Jul 10: also added Tobs_end+segment_length instead of Tobs_end, to get that final piece of data
 
     output_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
     for i in tqdm(range(len(segment_times)-1)):
         output_file = output_dir + str(segment_length) + 's_GTI' + str(i) + '.gti'
+        #print(str(segment_times[i]),str(segment_times[i+1]))
         subprocess.check_call(['mkgti.py','--gtiname',output_file,str(segment_times[i]),str(segment_times[i+1])] )
         #no need to do 'startmet=', 'stopmet=', but make sure I do it in the right order!
 
@@ -72,11 +72,13 @@ def niextract_gti_time(obsid,segment_length):
 
     Tobs_start = gtis[0][0] #MJD for the observation start time
     Tobs_end = gtis[-1][1] #MJD for the observation end time
+#    Tobs_start = event[1].data['TIME'][0]
+#    Tobs_end = event[1].data['TIME'][-1]
 
-    segment_times = np.arange(Tobs_start,Tobs_end,segment_length) #array of time values, starting
-    #from the observation start time until the observation end time, in steps of 1000s.
-    #This means that you'll get, for a 4392s observation, np.array([0,1000,2000,3000,4000])!
-    #We'd lose 392s worth of counts, but it can't be used in combining the power spectra anyways.
+    segment_times = np.arange(Tobs_start,Tobs_end+segment_length,segment_length) #array of time values, starting
+    #from the observation start time until the observation end time, in steps of segment length.
+    #Also had Tobs_end+segment_length to get the last section of data. It's ok if it's short, will zero-pad in
+    #edit_binary! Done Jul 10.
 
     working_dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/'
     for i in tqdm(range(len(segment_times)-1)):
@@ -120,6 +122,9 @@ def niextract_gti_time_energy(obsid,segment_length,PI1,PI2):
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
     """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+        
     event = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/ni' + obsid + '_nicersoft_bary.evt'
     event = fits.open(event)
     gtis = event[2].data
@@ -127,10 +132,11 @@ def niextract_gti_time_energy(obsid,segment_length,PI1,PI2):
     Tobs_start = gtis[0][0] #MJD for the observation start time
     Tobs_end = gtis[-1][1] #MJD for the observation end time
 
-    segment_times = np.arange(Tobs_start,Tobs_end,segment_length) #array of time values, starting
-    #from the observation start time until the observation end time, in steps of 1000s.
-    #This means that you'll get, for a 4392s observation, np.array([0,1000,2000,3000,4000])!
-    #We'd lose 392s worth of counts, but it can't be used in combining the power spectra anyways.
+#    Tobs_start = event[1].data['TIME'][0]
+#    Tobs_end = event[1].data['TIME'][-1]
+
+    segment_times = np.arange(Tobs_start,Tobs_end+segment_length,segment_length) #array of time values, starting
+    #Jul 10: added Tobs_end + segment_length to ge tthat final piece of data
 
 #    get_gti_file(obsid,segment_length) #to get GTI files...
 
@@ -195,6 +201,9 @@ def edit_inf(obsid,tbin,segment_length):
     tbin - size of the bins in time
     segment_length - length of the individual segments
     """
+    if type(obsid) != str:
+        raise TypeError("ObsID should be a string!")
+
     obs_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
     inf_files = sorted(glob.glob(obs_dir + '*GTI*' + str(segment_length)+'s*.inf')) #not the .evt file; some .evt files will be empty
 
@@ -223,6 +232,7 @@ def edit_binary(obsid,tbin,segment_length):
     """
     To pad the binary file so that it will be as long as the desired segment length.
     The value to pad with for each time bin, is the average count rate in THAT segment!
+    Jul 10: Do zero-padding instead... so that number of counts is consistent!
     Again, this is only for when we make segments by time!
 
     obsid - Observation ID of the object of interest (10-digit str)
@@ -236,14 +246,14 @@ def edit_binary(obsid,tbin,segment_length):
     dat_files = sorted(glob.glob(obsdir+'*GTI*' + str(segment_length) + 's*.dat')) #not that order matters here I think, but just in case
     for i in tqdm(range(len(dat_files))):
         bins = np.fromfile(dat_files[i],dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
-        bins_with_data = len(bins[bins>0]) #number of bins with data (NOT the ones with averaged count rate!)
-        average_count_rate = sum(bins)/len(bins)
+#        bins_with_data = len(bins[bins>0]) #number of bins with data (NOT the ones with averaged count rate!)
+#        average_count_rate = sum(bins)/len(bins)
 
         no_desired_bins = float(segment_length)/float(tbin) #TOTAL number of desired bins for the segment
         no_padded = int(no_desired_bins - len(bins)) #number of bins needed to reach the TOTAL number of desired bins
         if no_padded >= 0:
-            padding = np.ones(no_padded,dtype=np.float32)*average_count_rate #generate the array of (averaged) counts needed to pad the original segment
-            #padding = np.zeros(no_padded,dtype=np.float32) #just in case this is ever needed...
+            #padding = np.ones(no_padded,dtype=np.float32)*average_count_rate #generate the array of (averaged) counts needed to pad the original segment
+            padding = np.zeros(no_padded,dtype=np.float32) #just in case this is ever needed...
             new_bins = np.array(list(bins) + list(padding))
             new_bins.tofile(dat_files[i]) #don't need to do mv since obsdir already has absolute path to the SSD
         else:
@@ -465,14 +475,15 @@ def ps2pdf_segment(obsid,segment_length):
     return
 
 if __name__ == "__main__":
-    get_gti_file('1060060127',100)
-    niextract_gti_time('1060060127',100)
-    niextract_gti_time_energy('0034070101',100,300,800)
-    do_nicerfits2presto('1200250108',0.00025,200)
-    edit_inf('1060060127',0.0005,1000)
-    edit_binary('1060060127',0.0005,1000)
-    realfft('1060060127')
-    accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
-    accelsearch('1060060127',accelsearch_flags)
-    prepfold('0034070101',10,0)
-    ps2pdf('1200250126')
+    get_gti_file('0034070101',100)
+    #get_gti_file('1060060127',100)
+    #niextract_gti_time('1060060127',100)
+    #niextract_gti_time_energy('0034070101',100,300,800)
+    #do_nicerfits2presto('1200250108',0.00025,200)
+    #edit_inf('1060060127',0.0005,1000)
+    #edit_binary('1060060127',0.0005,1000)
+    #realfft('1060060127')
+    #accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
+    #accelsearch('1060060127',accelsearch_flags)
+    #prepfold('0034070101',10,0)
+    #ps2pdf('1200250126')

@@ -66,7 +66,7 @@ def get_eventcl(obsid,name_par_list,par_list):
 
 ################################################################################
 if __name__ == "__main__":
-    datadict = get_eventcl('1050390140',['','','','','',''],['PI','PI_FAST','TIME'])
+    datadict = get_eventcl('0034070101',[True,'',0,100,'',''],['PI','PI_FAST','TIME'])
     times = datadict['TIME']
     pi = datadict['PI']
     print(len(times)) #1170671 counts?

@@ -11,14 +11,18 @@ from __future__ import division, print_function
 import os
 
 def makedir(dir):
-    """ 
+    """
     Creating a folder if it does not exist in the directory.
- 
+
     dir - desired directory (provide FULL path!)
     """
 
-    try:
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-    except OSError:
+    if os.path.exists(dir):
+        return
+    else:
         print('This directory did not exist - creating ' + dir + ' now!')
+        os.makedirs(dir)
+
+if __name__ == "__main__":
+    print('hi')
+    makedir('/Volumes/Samsung_T5/hahaha')

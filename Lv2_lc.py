@@ -61,6 +61,12 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,mode):
     t_bins = np.linspace(0,np.ceil(shifted_t[-1]),np.ceil(shifted_t[-1])*1/tbin_size+1)
     summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
+    #print(len(t_bins[:-1]),len(summed_data))
+    #for i in range(int(257447/50)):
+    #    segments = np.arange(0,5000,1) + i*5000
+    #    truncated = summed_data[(t_bins[:-1]>=segments[0])&(t_bins[:-1]<=segments[-1])]
+        #print(len(truncated[truncated>0])/len(truncated)*100)
+
     obj_name = Lv2_sources.obsid_to_obj(obsid)
     plt.plot(t_bins[:-1],summed_data)
     plt.title('Light curve for ' + obj_name + ', ObsID ' + str(obsid),fontsize=12)

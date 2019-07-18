@@ -142,6 +142,7 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
     mean_corrected = padded_counts-np.mean(counts)
     power_spec = 2.0/sum(counts)*np.abs(np.fft.fft(mean_corrected))**2 #sum(counts) = N_photons
     freqs = np.fft.fftfreq(padded_counts.size,dt)
+    print('Length of power spectrum from Lv2_ps_method is: ' + str(len(power_spec)))
 
     if oversampling[0] == True:
         os_counts = oversample(oversampling[1],counts)

@@ -6,6 +6,8 @@ Created on Sat May 11 7:06pm 2019
 Getting averaged power spectra from M segments to the whole data, where the data
 was pre-processed using NICERsoft!
 
+July 16 - OLD SCRIPT!
+
 """
 from __future__ import division, print_function
 import numpy as np
@@ -36,20 +38,35 @@ def binned_data(obsid,par_list,tbin_size):
 
     data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,[True,'','','','',''],par_list)
     gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,[True,'','','','',''])[2].data
+
+#    merged_data = fits.open('/Volumes/Samsung_T5/NICERsoft_outputs/trymerge/merged.evt')
+#    data_dict = merged_data[1].data
+#    gtis = merged_data[2].data
+
     times = data_dict['TIME']
+#    times_MJDREFI = Lv0_call_nicersoft_eventcl.open_fits(obsid,[True,True,'','',30,200])[1].header['MJDREFI']
+#    times_MJDREFF = Lv0_call_nicersoft_eventcl.open_fits(obsid,[True,True,'','',30,200])[1].header['MJDREFF']
+#    times_MJD = times_MJDREFI + times_MJDREFF + times/86400 #to convert to MJD
+
+#    starting_gti = np.array([gtis[0][0]])/86400 + times_MJDREFI + times_MJDREFF
 
     #demodulating!
-    #times = binary_psr.binary_psr("/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411.par").demodulate_TOAs(times)
+#    times_demod = binary_psr.binary_psr("/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411.par").demodulate_TOAs(times_MJD)
+#    starting_gti_demod = binary_psr.binary_psr("/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411.par").demodulate_TOAs(starting_gti)
+#    times = (times_demod - times_MJDREFI - times_MJDREFF) * 86400
+#    starting_gti = (starting_gti_demod - times_MJDREFI - times_MJDREFF) * 86400
 
+#    truncated_times = times-starting_gti[0]
     truncated_times = times-gtis[0][0]
     counts = np.ones(len(times))
 
-    startt = 0
-    endt = int(truncated_times[-1])
+    startt = truncated_times[0]
+    endt = truncated_times[-1]
 
     print('Binning started.')
-    t_bins = np.linspace(startt,endt,(endt-startt)*1/tbin_size+1) #getting an array of time values for the bins
-    summed_data, bin_edges, binnumber = stats.binned_statistic(truncated_times,counts,statistic='sum',bins=t_bins) #binning the counts in the data
+    t_bins = np.arange(np.ceil((endt-startt)/tbin_size)+1)*tbin_size #getting an array of time values for the bins
+    #summed_data, bin_edges, binnumber = stats.binned_statistic(truncated_times,counts,statistic='sum',bins=t_bins) #binning the counts in the data
+    summed_data,edges = np.histogram(truncated_times,bins=t_bins)
     print('Binning finished.')
 
     return t_bins[:-1], summed_data
@@ -92,20 +109,20 @@ def segments_FFT(obsid,par_list,tbin_size,desired_length,threshold):
     segment_dict = {}
 
     t_bins, summed_data = binned_data(obsid,par_list,tbin_size)
-    time_segments = np.arange(0,t_bins[-1],desired_length)
+
+    time_segments = np.arange(0,t_bins[-1]+desired_length,desired_length)
+
     for i in tqdm(range(len(time_segments)-1)):
         truncated_t = t_bins[(t_bins>=time_segments[i])&(t_bins<=time_segments[i+1])]
         truncated_counts = summed_data[(t_bins>=time_segments[i])&(t_bins<=time_segments[i+1])]
-
         ### applying a threshold
-        t_bins_truncated = np.arange(truncated_t[0],truncated_t[-1],1) #should be 1 second!
+        #t_bins_truncated = np.arange(np.ceil(truncated_t[-1]-truncated_t[0])/1+1)*1+i*100 #should be 1 second!
+        t_bins_truncated = np.arange(desired_length+1)*1+i*desired_length
         summed_truncated, bin_edges_trunc, binnumber_trunc = stats.binned_statistic(truncated_t,truncated_counts,statistic='sum',bins=t_bins_truncated)
 #        plt.plot(t_bins_truncated[:-1],summed_truncated,'bx-')
-#        print(len(summed_truncated[summed_truncated>0])/len(summed_truncated)*100)
-
-
+        print(len(summed_truncated[summed_truncated>0])/len(summed_truncated)*100)
         if len(summed_truncated[summed_truncated>0])/len(summed_truncated)*100 >= threshold:
-            f,ps = Lv2_ps_method.manual(truncated_t,truncated_counts,[False,0,1],[False,1],False,[False,5])
+            f,ps = Lv2_ps_method.manual(truncated_t[:-1],truncated_counts[:-1],[False,0,1],[False,1],False,[False,5])
 
             key = 'segment' + str(i+1).zfill(2)
             segment_dict[key] = (f,ps)
@@ -115,18 +132,6 @@ def segments_FFT(obsid,par_list,tbin_size,desired_length,threshold):
     print('Will therefore use ' + str(len(segment_dict)) + ' out of ' + str(len(time_segments)) + ' segments.')
 
     return segment_dict
-
-test_data = '/Volumes/Samsung_T5/NICERsoft_outputs/1060020113_pipe/ni1060020113_nicersoft_bary.evt'
-event = fits.open(test_data)
-times = event[1].data['TIME']
-
-times_zero = times - event[2].data[0][0]
-counts = np.ones(len(times_zero))
-
-#time_bins = np.arange(0,int(times_zero[-1]),0.00025)
-time_bins = np.arange(0,int(times_zero[-1]),1)
-summed_threshold,bin_edges,binnumber = stats.binned_statistic(times_zero,counts,statistic='sum',bins=time_bins)
-plt.plot(time_bins[:-1],summed_threshold,'rx-')
 
 #segments_FFT('1060020113',['TIME','PI','PI_FAST'],0.00025,1000,20)
 
@@ -177,11 +182,13 @@ def average_ps_presto_segments(obsid,segment_length,threshold):
     print('We used ' + str(segment_no) + ' out of ' + str(len(fft_files)) + ' possible segments.')
     return freqs[1:int(N/2)], averaged_ps[1:int(N/2)]/segment_no
 
+"""
 f,ps = average_ps_presto_segments('1060020113',1000,20)
 print(np.mean(ps[f>1000]))
 plt.figure(3)
 plt.plot(f,ps,'r-')
 plt.show()
+"""
 
 def average_ps_segments(obsid,par_list,tbin_size,desired_length,threshold):
     """
@@ -197,7 +204,9 @@ def average_ps_segments(obsid,par_list,tbin_size,desired_length,threshold):
     segment_dict = segments_FFT(obsid,par_list,tbin_size,desired_length,threshold)
     segment_dict_keys = sorted(segment_dict.keys())
     power_spectra = np.zeros(len(segment_dict[segment_dict_keys[0]][0])) #initialize power spectra
+#    print('Length of power spectra array is: ' + str(len(power_spectra)))
 
+    """
     plt.figure(10)
     freqs1 = segment_dict[segment_dict_keys[0]][0]
     ps1 = segment_dict[segment_dict_keys[0]][1]
@@ -225,10 +234,15 @@ def average_ps_segments(obsid,par_list,tbin_size,desired_length,threshold):
     plt.xlim([1,1000])
     plt.xlabel('Frequency (Hz)',fontsize=12)
     plt.ylabel('Leahy-normalized power',fontsize=12)
+    """
 
     for i in range(len(segment_dict)):
-        key = segment_dict_keys[i]
-        power_spectra = power_spectra + segment_dict[key][1]
+        if i != len(segment_dict)-1:
+            key = segment_dict_keys[i]
+    #        print(key)
+    #        print(power_spectra,len(power_spectra))
+    #        print(segment_dict[key][1],type(segment_dict[key][1]),len(segment_dict[key][1]))
+            power_spectra = power_spectra + segment_dict[key][1]
 
     freqs = segment_dict[segment_dict_keys[0]][0] #the frequencies are all the same, so use first segment's
     averaged_ps = power_spectra/len(segment_dict)
@@ -285,15 +299,14 @@ def get_pulse_profile(obsid,par_list,tbin_size,f_pulse,shift,no_phase_bins):
 
 
 if __name__ == "__main__":
-
-    obsid = '1060020113'
-    #obsid = '1060060170'
-    #obsid = '1200250108' #use threshold of 0.1%...
+    print('no')
+    """
+    obsid = '2060060363'
     par_list = ['TIME','PI']
     tbin_size = 0.00025
-    desired_length = 1000 # seconds
+    desired_length = 5000 # seconds
     shift = 0.3
-    threshold = 20
+    threshold = 3
     no_phase_bins = 50
 
     freqs,ps,averaged_ps = average_ps_segments(obsid,par_list,tbin_size,desired_length,threshold)
@@ -329,6 +342,7 @@ if __name__ == "__main__":
     plt.figure(3)
     plt.plot(freqs,averaged_ps,'b-')
     plt.xlim([1,1000])
+    plt.ylim([0,1.1*np.max(averaged_ps[freqs>1])])
     plt.xlabel('Frequency (Hz)',fontsize=12)
     plt.ylabel('Leahy-normalized power',fontsize=12)
     plt.figure(4)
@@ -338,3 +352,5 @@ if __name__ == "__main__":
 
     plt.show()
     #get_pulse_profile(obsid,par_list,tbin_size,freqs_to_try,shift,no_phase_bins)
+    """
+#    binned_data('2060060364',['TIME','PI'],0.001)

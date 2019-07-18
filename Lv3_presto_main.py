@@ -37,30 +37,37 @@ accelsearch = False
 
 ##### From Lv2_presto_preprocess
 #obsids = ['1034090111']
-obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
+#obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
 #obsids = ['12002501' + str(i).zfill(2) for i in [1,2,3,6,7,8,9,14,15,16,17,18,20,21,24,26]] # Jun 5 prepfold for AT2018cow
 #obsids = ['12002501' + str(i).zfill(2) for i in [6,7,14,15,16,18,20,24,26]] #accelsearch for AT2018cow pulsations in short observation durations
+
+#obsids = ['0060060104','1060060115','1060060129','1060060170','1060060193',
+#        '1060060282','1060060322','2060060301','2060060332','2060060363','2060060364',
+#        '2060060365'] # J1231. Don't use all though...
+
+#obsids = ['0060060104','1060060129','1060060170','1060060322','2060060332','2060060363']
+#obsids = ['2060060364','2060060365']
 
 #obsids = ['1060020113']
 #obsids = ['1060020418']
 #obsids = ['1060060170']#,'1060060322']
-#obsids = ['1034070104']
+obsids = ['0034070101']
 
-nicerl2_flags = ['clobber=YES','overonly_range=0.0-0.5']
-psrpipe_flags = ['--emin','0.3','--emax','12.0','--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
+nicerl2_flags = ['clobber=YES','ang_dist=0.035']#,'overonly_range=0.0-0.5']
+psrpipe_flags = ['--emin','0.3','--emax','12.0','--angdist','0.035']#,'--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
 refframe = 'ICRS' #for barycorr in Lv1_barycorr
-tbin = '0.001' #time bin for PRESTO in seconds
+tbin = '0.00025' #time bin for PRESTO in seconds
 
 ##### From Lv2_presto_all
 ##### For when we analyze the entire data set (no truncations in energy or time)
 accelsearch_flags = ['-numharm','8','-zmax','100','-photon','-flo','1','-fhi','500']
 
 ##### Parameters for prepfold
-prepfold = True
+prepfold = False
 zmax = 100
 
 ##### From Lv2_presto_segments
-segment_lengths = [64] #desired length of segments (and 200)
+segment_lengths = [100] #desired length of segments (and 200)
 ## NOTE: nicerfits2presto tries to find a 'nice number' of bins to bin the data, and
 ## sometimes that will be longer than the segment. I'm not sure what the best remedy is,
 ## but currently, the best thing is just to track the segment size on the terminal, then increase

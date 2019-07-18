@@ -49,5 +49,39 @@ def evt_filename(obsid,name_par_list):
 
     return prefix + add1 + add2 + suffix
 
+def merged_evt_filename(merged_id,name_par_list):
+    """
+    Getting the desired file name for the event file.
+
+    merged_id - 6-digit ID for the merged event file
+    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+
+    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+    """
+    if type(merged_id) != str:
+        raise TypeError("merged_id should be a string!")
+    if len(merged_id) != 6:
+        raise ValueError("merged_id should have 6 digits in the string!")
+    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
+        raise TypeError("name_par_list should either be a list or an array!")
+    if len(name_par_list) != 6:
+        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
+
+    prefix = 'merged' + merged_id + '_nicersoft_bary'
+    suffix = '.evt'
+    if name_par_list[0] == True and name_par_list[2] != '' and name_par_list[3] != '': #i.e., if we have time segments
+        add1 = '_GTI' + str(name_par_list[2]) + '_' + str(name_par_list[3]) + 's'
+    elif name_par_list[0] == True and name_par_list[2] == '' and name_par_list[3] == '':
+        add1 = ''
+    else:
+        add1 = ''
+
+    if name_par_list[1] == True: #i.e., if we have energy segments
+        add2 = '_E' + str(name_par_list[4]) + '-' + str(name_par_list[5])
+    else:
+        add2 = ''
+
+    return prefix + add1 + add2 + suffix
+
 if __name__ == "__main__":
     print(evt_filename('0034070101',[True,True,1,500,200,800]))

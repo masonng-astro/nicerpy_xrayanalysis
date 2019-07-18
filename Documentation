@@ -1204,10 +1204,110 @@ tbin - time bin for PRESTO data in seconds
 
 TEST: preprocess('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'],'ICRS','0.00025')
 
+>>>>>>>>>> Lv2_average_ps_methods <<<<<<<<<<
+
+##### do_demodulate(obsid,segment_length,par_file)
+
+-- Do orbital demodulation on the original events.
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the segments
+par_file - orbital parameter file for input into binary_psr
+
+##### do_nicerfits2presto(obsid,tbin,segment_length)
+
+-- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+segment_length - length of the individual segments for combining power spectra
+
+##### edit_inf(obsid,tbin,segment_length)
+
+-- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
+Mainly need to edit the "Number of bins in the time series".
+This is only for when we make segments by time though!
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+segment_length - length of the individual segments
+
+##### edit_binary(obsid,tbin,segment_length)
+
+-- To pad the binary file so that it will be as long as the desired segment length.
+The value to pad with for each time bin, is the average count rate in THAT segment!
+Jul 10: Do zero-padding instead... so that number of counts is consistent!
+Again, this is only for when we make segments by time!
+
+obsid - Observation ID of the object of interest (10-digit str)
+tbin - size of the bins in time
+segment_length - length of the individual segments
+
+##### realfft_segment(obsid,segment_length)
+
+-- Performing PRESTO's realfft on the binned data (.dat)
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the individual segments
+
+##### presto_dat(obsid,segment_length,demod)
+
+-- Obtain the dat files that were generated from PRESTO
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+
+##### presto_fft(obsid,segment_length,demod)
+
+-- Obtain the FFT files that were generated from PRESTO
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+
+##### segment_threshold(obsid,segment_length,demod,tbin_size,threshold)
+
+-- Using the .dat files, rebin them into 1s bins, to weed out the segments below
+some desired threshold. Will return a *list* of *indices*! This is so that I
+can filter out the *sorted* array of .dat and .fft files that are below threshold!
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+tbin_size - size of the time bin
+threshold - if data is under threshold (in percentage), then don't use the segment!
+
+##### average_ps(obsid,segment_length,demod,tbin_size,threshold,W)
+
+-- Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
+data is beyond some threshold, return the averaged power spectrum!
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+tbin_size - size of the time bin
+threshold - if data is under threshold (in percentage), then don't use the segment!
+W - number of consecutive frequency bins to AVERAGE over
+
+##### noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W)
+
+-- Given the average spectrum for an ObsID, return the histogram of powers, such
+that you have N(>P). This is for powers corresponding to frequencies larger
+than some starting frequency (perhaps to avoid red noise).
+
+obsid - Observation ID of the object of interest (10-digit str)
+segment_length - length of the segments
+demod - whether we're dealing with demodulated data or not!
+tbin_size - size of the time bin
+threshold - if data is under threshold (in percentage), then don't use the segment!
+starting_freq - frequency to start constructing the histogram of powers from
+
 ################################################################################
 ################################################################################
 ################################################################################
 
+################################## LEVEL 3 #####################################
 
 >>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 

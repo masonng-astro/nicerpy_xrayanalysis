@@ -79,8 +79,8 @@ def signal_significance(M,W,Pthreshold):
     return significance
 
 if __name__ == "__main__":
-    print(max_acc(200,200,230))
-    sig_sig = signal_significance(1,1,13.2)
-    single_trial_prob(3,4e6)
-    single_trial_prob(2,4e6)
-    single_trial_prob(1,4e6)
+    #print(max_acc(200,200,230))
+    sig_sig = signal_significance(43,5000,2.02697)
+    single_trial_prob(3,10e6)
+    #single_trial_prob(2,4e6)
+    #single_trial_prob(1,4e6)

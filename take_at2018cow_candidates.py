@@ -49,7 +49,7 @@ plt.figure(1)
 plt.hist(filtered_check_cands,bins=100)
 
 ##### NEXT, DOING THE SHUFFLING OF THE LIGHT CURVES!
-
+"""
 obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
 at2018cow_noise = '/Volumes/Samsung_T5/NICERsoft_outputs/at2018cow_noise/'
 
@@ -82,7 +82,7 @@ with open(logfile,'w') as logtextfile:
     for i in range(len(all_fft_files)):
         logtextfile.write(subprocess.check_output(['accelsearch']+accelsearch_flags+[all_fft_files[i]]))
     logtextfile.close()
-
+"""
 ##### GET THE HISTOGRAMS AGAIN
 at2018cow_noise = '/Volumes/Samsung_T5/NICERsoft_outputs/at2018cow_noise/'
 
