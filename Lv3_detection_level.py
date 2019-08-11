@@ -78,9 +78,28 @@ def signal_significance(M,W,Pthreshold):
     #confidence_level = special.erf(significance/np.sqrt(2))*100
     return significance
 
+def power_for_sigma(significance,N,M,W):
+    """
+    Given some probability (that is, desired significance), what is the corresponding
+    power needed in the power spectrum to claim statistical significance? Use the
+    inverse survival function for this!
+
+    significance - the number of 'sigmas' desired for detection
+    M - number of segments
+    W - number of consecutive bins summed
+    """
+    Q,sigfig = single_trial_prob(significance,N) #single trial probability
+    dof = 2*M*W
+    chi2 = stats.chi2.isf(Q,dof)
+    power_required = chi2/(M*W)
+
+    return power_required
+
+
 if __name__ == "__main__":
     #print(max_acc(200,200,230))
-    sig_sig = signal_significance(43,5000,2.02697)
-    single_trial_prob(3,10e6)
+    #sig_sig = signal_significance(43,5000,2.02697)
+    #sig_sig = signal_significance(43,5000,2.01199)
+    print(power_for_sigma(4,1e5,162,1))
     #single_trial_prob(2,4e6)
     #single_trial_prob(1,4e6)

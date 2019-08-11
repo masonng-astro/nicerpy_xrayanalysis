@@ -227,8 +227,9 @@ def do_nicerfits2presto(merged_id,tbin,segment_length):
     merged_dir = all_merged_dir + 'merged' + merged_id + '/'
     merged_segment = merged_dir + 'accelsearch_' + str(segment_length).zfill(5) +'s/'
 
+    """
     merged_dir_E_files = glob.glob(merged_dir + '*E*.evt')
-    for i in range(len(merged_dir_E_files)):
+    for i in tqdm(range(len(merged_dir_E_files))):
         if not os.path.isfile(merged_dir_E_files[:-3] + 'dat'):
             try:
                 subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),merged_dir_E_files[i]])
@@ -236,10 +237,22 @@ def do_nicerfits2presto(merged_id,tbin,segment_length):
                 pass
 
     merged_segment_files = glob.glob(merged_segment + '*GTI*.evt') #should be sufficient; won't accidentally take in .gti files, and will include GTI AND E files!
-    for i in range(len(merged_segment_files)):
+    for i in tqdm(range(len(merged_segment_files))):
         if not os.path.isfile(merged_segment_files[i][:-3] + 'dat'):
             try:
                 subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),merged_segment_files[i]])
+            except (ValueError,subprocess.CalledProcessError):
+                pass
+    """
+    demod_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged000005/accelsearch_' + str(segment_length).zfill(5) + 's/*demod.evt')
+    demod_dat_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged000005/accelsearch_' + str(segment_length).zfill(5) + 's/*demod.dat')
+    #for i in range(len(demod_dat_files)):
+    #    subprocess.check_call(['rm',demod_dat_files[i]])
+
+    for i in tqdm(range(len(demod_files))):
+        if not os.path.isfile(demod_files[i][:-3] + 'dat'):
+            try:
+                subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),demod_files[i]])
             except (ValueError,subprocess.CalledProcessError):
                 pass
 
@@ -313,7 +326,8 @@ def edit_binary(merged_id,tbin,segment_length):
     all_merged_dir = Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/' #directory for the merged events
     merged_dir = all_merged_dir + 'merged' + merged_id + '/'
     merged_segment = merged_dir + 'accelsearch_' + str(segment_length).zfill(5) +'s/'
-    dat_files = sorted(glob.glob(merged_segment+'*GTI*.dat')) #not that order matters here I think, but just in case
+    #dat_files = sorted(glob.glob(merged_segment+'*GTI*.dat')) #not that order matters here I think, but just in case
+    dat_files = sorted(glob.glob(merged_segment+'*demod.dat'))
 
     print('Editing the binary files now!')
     for i in tqdm(range(len(dat_files))):
@@ -365,12 +379,12 @@ def realfft(merged_id,segment_length):
     logfile_segment = merged_segment + 'realfft_segment.log'
     with open(logfile_segment,'w') as logtextfile:
         for i in range(len(merged_segment_files)):
-            subprocess.check_call(['realfft',merged_segment_files[i]])
+            subprocess.check_output(['realfft',merged_segment_files[i]])
         logtextfile.close()
 
     return
 
-def do_demodulate(merged_id,segment_length,par_file):
+def do_demodulate(merged_id,segment_length,par_file,PI2):
     """
     Do orbital demodulation on the original events.
 
@@ -390,7 +404,7 @@ def do_demodulate(merged_id,segment_length,par_file):
     merged_dir = all_merged_dir + 'merged' + merged_id + '/'
     merged_segment = merged_dir + 'accelsearch_' + str(segment_length).zfill(5) +'s/'
 
-    eventfiles = sorted(glob.glob(merged_segment + '*.evt')) #get absolute paths of all event FITS files
+    eventfiles = sorted(glob.glob(merged_segment + '*'+str(PI2).zfill(4)+'.evt')) #get absolute paths of all event FITS files
     for i in range(len(eventfiles)): #for every event file (e.g., for each segment)
         oldfile = eventfiles[i] #old event FITS file
         newfile = eventfiles[i][:-4]+'_demod.evt' #new event FITS file, to be demodulated
@@ -515,7 +529,7 @@ def segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold
 
     print('Will use ' + str(len(passed_threshold)) + ' out of ' + str(len(dat_files)) + ' segments.')
 
-    return passed_threshold
+    return passed_threshold, len(passed_threshold)
 
 def average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W):
     """
@@ -540,8 +554,9 @@ def average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starti
 
     dat_files = presto_dat(merged_id,segment_length,demod,PI1,PI2) #sorted array of .dat files
     fft_files = presto_fft(merged_id,segment_length,demod,PI1,PI2) #sorted array of .fft files
-    passed_threshold = segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold)
-    #list of indices where the rebinned .dat files are beyond the threshold
+    passed_threshold, M = segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold)
+    #list of indices where the rebinned .dat files are beyond the threshold,
+    #and the number of segments
 
     dat_threshold = dat_files[passed_threshold] #.dat files that passed the threshold
     fft_threshold = fft_files[passed_threshold] #corresponding .fft files that passed the threshold
@@ -574,7 +589,7 @@ def average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starti
             array_greaterthan = ps_to_use[ps_to_use>ps_bins[i]]
             N_greaterthanP.append(len(array_greaterthan))
 
-        return f,ps,ps_bins,N_greaterthanP
+        return f,ps,ps_bins,N_greaterthanP,M
 
     else:
         pre_f = freqs[1:int(N/2)] #frequency array corresponding to W = 1
@@ -587,6 +602,7 @@ def average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starti
         ps = consec_ps
 
         ps_to_use = ps[f>starting_freq]
+        print('For W = ' + str(W) + ', the average power here is ' + str(np.mean(ps_to_use)))
         ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
         N_greaterthanP = []
         print('Creating the noise histogram [N(>P)]...')
@@ -594,7 +610,7 @@ def average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starti
             array_greaterthan = ps_to_use[ps_to_use>ps_bins[i]]
             N_greaterthanP.append(len(array_greaterthan))
 
-        return f,ps,ps_bins,N_greaterthanP
+        return f,ps,ps_bins,N_greaterthanP,M
 
 def noise_hist(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W):
     """

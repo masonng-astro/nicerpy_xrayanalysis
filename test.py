@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
+import binary_psr
 import matplotlib.gridspec as gridspec
 import subprocess
 import glob
@@ -848,6 +849,169 @@ def testfunction2():
 
 #testfunction()
 testfunction2()
+"""
+
+"""
+mergeddir = '/Volumes/Samsung_T5/NICERsoft_outputs/merged_events/merged000002/accelsearch_05000s/'
+data_files = glob.glob(mergeddir + '*0.dat')
+lc = np.zeros(20000000)
+for i in tqdm(range(len(data_files))):
+    dat_file = np.fromfile(data_files[i],dtype='<f',count=-1)
+    lc += dat_file
+
+lc.tofile(mergeddir+'merged_lc.dat')
+"""
+
+"""
+test_parfile = '/Volumes/Samsung_T5/NICERsoft_outputs/testB1957+20.par'
+
+T_asc = 48196.0635242 + 0.04*0.3819666069
+par_contents = open(test_parfile,'r')
+contents = par_contents.read()
+contents = contents.split('\n')
+par_contents.close()
+
+newstring = 'TASC ' + str(T_asc) + '    #  TASC     Epoch of ascending node passage (MJD)'
+par_contents = open(test_parfile,'w')
+for j in range(len(contents)):
+    if j != 13:
+        par_contents.write(contents[j]+'\n')
+    else:
+        par_contents.write(newstring + '\n')
+par_contents.close()
+"""
+"""
+pyfile = 'Lv3_average_ps_main.py'
+pyfile_contents = open(pyfile,'r')
+contents = pyfile_contents.read().split('\n')
+print(contents[116])
+"""
+
+"""
+testspectrum = '/Volumes/Samsung_T5/NGC300_ULX/testdata.txt'
+E,E_error,counts,counts_error = np.genfromtxt(testspectrum,skip_header=3,usecols=(0,1,2,3),unpack=True)
+
+plt.errorbar(E,counts,xerr=E_error,yerr=counts_error,fmt='+')
+plt.xlim([0.3,12])
+plt.xscale('log')
+plt.show()
+"""
+
+"""
+par_file = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957+20.par'
+
+oldfile = '/Volumes/Samsung_T5/NICERsoft_outputs/merged_events/merged000005/merged000005_nicersoft_bary.evt' #old event FITS file
+newfile = oldfile[:-4]+'_demod.evt' #new event FITS file, to be demodulated
+subprocess.check_call(['cp',oldfile,newfile])
+#really to prevent myself from repeating the demodulation multiple times if I run the function again...
+with fits.open(newfile,mode='update') as fitsfile_demod:
+    MJDREFI = fitsfile_demod[1].header['MJDREFI'] #integer for MJD reference
+    MJDREFF = fitsfile_demod[1].header['MJDREFF'] #float decimal for MJD reference
+
+    times = fitsfile_demod[1].data['TIME'] #original time series
+    gtis_start = fitsfile_demod[2].data['START'] #original GTI start times
+    gtis_stop = fitsfile_demod[2].data['STOP'] #original GTI end times
+
+    times_MJD = MJDREFI + MJDREFF + times/86400 #converting METs to MJD
+    gtis_start_MJD = MJDREFI + MJDREFF + gtis_start/86400 #converting GTIs in METs to MJD
+    gtis_stop_MJD = MJDREFI + MJDREFF + gtis_stop/86400 #converting GTIs in METs to MJD
+
+    try:
+        times_demod = binary_psr.binary_psr(par_file).demodulate_TOAs(times_MJD) #demodulated event times
+        gtis_start_demod = binary_psr.binary_psr(par_file).demodulate_TOAs(gtis_start_MJD) #demodulated GTI start times
+        gtis_stop_demod = binary_psr.binary_psr(par_file).demodulate_TOAs(gtis_stop_MJD) #demodulated GTI end times
+
+        fitsfile_demod[1].data['TIME'] = (times_demod - MJDREFI - MJDREFF) * 86400 #convert back to METs
+        fitsfile_demod[2].data['START'] = (gtis_start_demod - MJDREFI - MJDREFF) * 86400 #convert back to METs
+        fitsfile_demod[2].data['STOP'] = (gtis_stop_demod - MJDREFI - MJDREFF) * 86400 #convert back to METs
+
+        fitsfile_demod.flush()
+
+    except ValueError:
+        pass
+"""
+
+"""
+### just reproduce light curve for NGC300 ULX - what Ron sent me
+
+cms = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGcms.ffphot'
+err = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGerr_norm.ffphot'
+norm = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGnorm.ffphot'
+
+A_band,B_band,inband,MJD = np.genfromtxt(norm,usecols=(5,6,9,11),unpack=True)
+A_err,B_err,inband_err,MJD_err = np.genfromtxt(err,usecols=(5,6,9,11),unpack=True)
+
+color_BA = B_band/A_band
+color_BA_err = np.sqrt( (B_err/A_band)**2 + (B_band*A_err/A_band**2)**2)
+
+fig,(ax1,ax2) = plt.subplots(2,1)
+
+ax1.errorbar(x=MJD,y=inband,yerr=inband_err,fmt='^',mfc='none')
+ax1.axhline(y=0,ls='--',lw=0.5,alpha=0.5)
+ax1.set_ylim([-2,4])
+
+ax2.errorbar(x=MJD,y=color_BA,yerr=color_BA_err,fmt='^',mfc='none')
+ax2.set_ylim([0,2])
+
+plt.show()
+"""
+
+
+"""
+obsids = ['12002501' + str(i).zfill(2) for i in range(1,27)]
+for i in range(len(obsids)):
+    event = fits.open(Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/ni' + obsids[i] + '_nicersoft_bary.evt')
+    times = event[1].data['TIME']
+    print(obsids[i] + ': ' + str(times[0]) + ' - ' + str(times[-1]))
+"""
+
+"""
+x = np.linspace(0,1000,10000)
+y = 2 * np.sin(2*np.pi*0.05*x) + np.random.normal(0,1,10000)
+
+y2 = np.array(list(y) + list(np.zeros(10000)))
+y5 = np.array(list(y) + list(np.zeros(40000)))
+y50 = np.array(list(y) + list(np.zeros(490000)))
+
+ps2 = 2/10000 * np.abs(np.fft.fft(y2))**2
+freqs2 = np.fft.fftfreq(len(y2),0.1)
+N2 = len(freqs2)
+
+ps5 = 2/10000 * np.abs(np.fft.fft(y5))**2
+freqs5 = np.fft.fftfreq(len(y5),0.1)
+N5 = len(freqs5)
+
+ps50 = 2/10000 * np.abs(np.fft.fft(y50))**2
+freqs50 = np.fft.fftfreq(len(y50),0.1)
+N50 = len(freqs50)
+
+plt.plot(freqs2[1:int(N2/2)],ps2[1:int(N2/2)],'rx-')
+plt.plot(freqs5[1:int(N5/2)],ps5[1:int(N5/2)],'bx-')
+plt.plot(freqs50[1:int(N50/2)],ps50[1:int(N50/2)],'kx-')
+
+plt.axhline(y=2)
+plt.axhline(y=0.5*np.max(ps2),color='r')
+plt.axhline(y=0.5*np.max(ps5),color='b')
+plt.axhline(y=0.5*np.max(ps50),color='k')
+
+plt.legend(('OS=2','OS=5','OS=50','P=2'),loc='best')
+plt.show()
+"""
+
+"""
+c = 299792458 #speed of light in m/s
+inclin = 60 * np.pi/180 #inclination in radians
+f_0 = 271.453 #pulsation frequency for J1231-1411
+P_orb = 1.86 * 86400 #orbital period in seconds
+G = 6.674e-11 #gravitational constant
+e = 0 #eccentricity ; pretty small Laplace parameters, so just let it be 0
+m_2 = 0.220 * 1.989e30 #"median" mass of companion star
+m_1 = 1.4 * 1.989e30 #assumed mass of neutron star
+a = 2.0426 * c/np.sin(inclin)
+
+K_1 = np.sqrt(G/(1-e**2)) * m_2 * np.sin(inclin)/np.sqrt(a*(m_1+m_2))
+f_dot = f_0 * K_1/c * 2*np.pi/P_orb
+print(f_dot*500**2)
 """
 
 timeend = time.time()

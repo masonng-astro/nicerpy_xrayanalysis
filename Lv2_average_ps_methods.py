@@ -74,7 +74,7 @@ def do_nicerfits2presto(obsid,tbin,segment_length):
         raise TypeError("ObsID should be a string!")
 
     segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    eventfiles = sorted(glob.glob(segment_dir + '*_demod.evt')) #get absolute paths of all demodulated event FITS files
+    eventfiles = sorted(glob.glob(segment_dir + '*.evt')) #get absolute paths of all demodulated event FITS files
     print('Now converting NICER event FITS files into the PRESTO-readable binary format!')
     for i in tqdm(range(len(eventfiles))):
         try:
@@ -100,7 +100,7 @@ def edit_inf(obsid,tbin,segment_length):
         raise TypeError("ObsID should be a string!")
 
     segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    inf_files = sorted(glob.glob(segment_dir + '*_demod.inf')) #not the .evt file; some .evt files will be empty
+    inf_files = sorted(glob.glob(segment_dir + '*.inf')) #not the .evt file; some .evt files will be empty
 
     no_desired_bins = float(segment_length)/float(tbin)
 
@@ -138,7 +138,7 @@ def edit_binary(obsid,tbin,segment_length):
         raise TypeError("ObsID should be a string!")
 
     segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(segment_dir + '*_demod.dat')) #not that order matters here I think, but just in case
+    dat_files = sorted(glob.glob(segment_dir + '*.dat')) #not that order matters here I think, but just in case
     no_desired_bins = float(segment_length)/float(tbin) #TOTAL number of desired bins for the segment
     for i in tqdm(range(len(dat_files))):
         bins = np.fromfile(dat_files[i],dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
@@ -167,9 +167,9 @@ def realfft_segment(obsid,segment_length):
         raise TypeError("ObsID should be a string!")
 
     segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(segment_dir+'*_demod.dat')) #not that order matters here I think, but just in case
+    dat_files = sorted(glob.glob(segment_dir+'*.dat')) #not that order matters here I think, but just in case
     # recall that un-truncated data is "*bary.dat", so "*bary_*.dat" is truncated data!
-    logfile = segment_dir + 'realfft_demod.log'
+    logfile = segment_dir + 'realfft.log'
 
     with open(logfile,'w') as logtextfile:
         for i in range(len(dat_files)):
@@ -241,7 +241,8 @@ def segment_threshold(obsid,segment_length,demod,tbin_size,threshold):
     rebin_t = np.arange(segment_length+1)*1 #1-second bins
 
     passed_threshold = []
-    for i in range(len(dat_files)):
+    print('Now finding the number of segments that can be used...')
+    for i in tqdm(range(len(dat_files))):
         dat_file_data = np.fromfile(dat_files[i],dtype='<f',count=-1)
         data_t = np.arange(len(dat_file_data))*tbin_size
         rebin_sum,rebin_edges,rebin_trunc = stats.binned_statistic(data_t,dat_file_data,statistic='sum',bins=rebin_t)
@@ -251,9 +252,9 @@ def segment_threshold(obsid,segment_length,demod,tbin_size,threshold):
 
     print('Will use ' + str(len(passed_threshold)) + ' out of ' + str(len(dat_files)) + ' segments.')
 
-    return passed_threshold
+    return passed_threshold, len(passed_threshold)
 
-def average_ps(obsid,segment_length,demod,tbin_size,threshold,W):
+def average_ps(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
     """
     Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
     data is beyond some threshold, return the averaged power spectrum!
@@ -272,7 +273,7 @@ def average_ps(obsid,segment_length,demod,tbin_size,threshold,W):
 
     dat_files = presto_dat(obsid,segment_length,demod) #sorted array of .dat files
     fft_files = presto_fft(obsid,segment_length,demod) #sorted array of .fft files
-    passed_threshold = segment_threshold(obsid,segment_length,demod,tbin_size,threshold)
+    passed_threshold,M = segment_threshold(obsid,segment_length,demod,tbin_size,threshold)
     #list of indices where the rebinned .dat files are beyond the threshold
 
     dat_threshold = dat_files[passed_threshold] #.dat files that passed the threshold
@@ -282,7 +283,8 @@ def average_ps(obsid,segment_length,demod,tbin_size,threshold,W):
     N = len(freqs)
 
     average_ps = np.zeros(int(segment_length/(2*tbin_size)))
-    for i in range(len(dat_threshold)):
+    print('Calculating the averaged spectrum...')
+    for i in tqdm(range(len(dat_threshold))):
         dat_threshold_data = np.fromfile(dat_threshold[i],dtype='<f',count=-1)
         no_photons = sum(dat_threshold_data)
 
@@ -293,14 +295,38 @@ def average_ps(obsid,segment_length,demod,tbin_size,threshold,W):
     print('The mean Leahy power of the latter 90% of the power spectrum is ' + str(np.mean(average_ps[np.int(0.1*len(average_ps)):])/len(passed_threshold)))
 
     if W == 1:
-        return freqs[1:int(N/2)],average_ps[1:]/len(passed_threshold)
+        f = freqs[1:int(N/2)]
+        ps = average_ps[1:]/len(passed_threshold)
+
+        ps_to_use = ps[f>starting_freq]
+        ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
+        N_greaterthanP = []
+        print('Creating the noise histogram [N(>P)]...')
+        for i in tqdm(range(len(ps_bins))):
+            array_greaterthan = ps_to_use[ps_to_use>ps_bins[i]]
+            N_greaterthanP.append(len(array_greaterthan))
+
+        return f,ps,ps_bins,N_greaterthanP,M
+
     else:
         pre_f = freqs[1:int(N/2)] #frequency array corresponding to W = 1
         pre_ps = average_ps[1:]/len(passed_threshold) #power array corresponding to W = 1
 
         consec_f = pre_f[::W] #frequency bins AFTER averaging W consecutive frequency bins
         consec_ps,consec_edges,consec_binnumber = stats.binned_statistic(pre_f,pre_ps,statistic='mean',bins=consec_f)
-        return consec_f[:-1], consec_ps
+
+        f = consec_f[:-1]
+        ps = consec_ps
+
+        ps_to_use = ps[f>starting_freq]
+        ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
+        N_greaterthanP = []
+        print('Creating the noise histogram [N(>P)]...')
+        for i in tqdm(range(len(ps_bins))):
+            array_greaterthan = ps_to_use[ps_to_use>ps_bins[i]]
+            N_greaterthanP.append(len(array_greaterthan))
+
+        return f,ps,ps_bins,N_greaterthanP,M
 
 def noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
     """
@@ -323,8 +349,9 @@ def noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
     f,ps = average_ps(obsid,segment_length,demod,tbin_size,threshold,W)
 
     ps_to_use = ps[f>starting_freq]
-    ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),10000)
+    ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
     N_greaterthanP = []
+    print('Creating the noise histogram [N(>P)]...')
     for i in range(len(ps_bins)):
         array_greaterthan = ps_to_use[ps_to_use>ps_bins[i]]
         N_greaterthanP.append(len(array_greaterthan))

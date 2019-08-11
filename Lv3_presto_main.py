@@ -25,36 +25,23 @@ import glob
 Lv0_dirs.global_par()
 nicersoft_dir = Lv0_dirs.NICERSOFT_DATADIR
 
-preprocess = False #I only need to do preprocessing for each ObsID ONCE!!!
+preprocess = True #I only need to do preprocessing for each ObsID ONCE!!!
 process_all = False #whether to process the ENTIRE observation or not
 
-process_segments = True #whether to make truncations to the data
-time_segments = True #truncate by time segments
+process_segments = False #whether to make truncations to the data
+time_segments = False #truncate by time segments
 energy_segments = False #truncate by energy range
 time_energy_segments = False #truncate both by time segments and energy range
 
 accelsearch = False
 
 ##### From Lv2_presto_preprocess
-#obsids = ['1034090111']
-#obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
-#obsids = ['12002501' + str(i).zfill(2) for i in [1,2,3,6,7,8,9,14,15,16,17,18,20,21,24,26]] # Jun 5 prepfold for AT2018cow
-#obsids = ['12002501' + str(i).zfill(2) for i in [6,7,14,15,16,18,20,24,26]] #accelsearch for AT2018cow pulsations in short observation durations
+#obsids = ['1034090111'
+#obsids = ['2060060368','2060060369','2060060370','2060060371']
+obsids = ['10301801'+str(i) for i in range(49,58)]
 
-#obsids = ['0060060104','1060060115','1060060129','1060060170','1060060193',
-#        '1060060282','1060060322','2060060301','2060060332','2060060363','2060060364',
-#        '2060060365'] # J1231. Don't use all though...
-
-#obsids = ['0060060104','1060060129','1060060170','1060060322','2060060332','2060060363']
-#obsids = ['2060060364','2060060365']
-
-#obsids = ['1060020113']
-#obsids = ['1060020418']
-#obsids = ['1060060170']#,'1060060322']
-obsids = ['0034070101']
-
-nicerl2_flags = ['clobber=YES','ang_dist=0.035']#,'overonly_range=0.0-0.5']
-psrpipe_flags = ['--emin','0.3','--emax','12.0','--angdist','0.035']#,'--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
+nicerl2_flags = ['clobber=YES']#,'overonly_range=0.0-0.5']
+psrpipe_flags = ['--emin','0.3','--emax','12.0']#,'--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
 refframe = 'ICRS' #for barycorr in Lv1_barycorr
 tbin = '0.00025' #time bin for PRESTO in seconds
 
@@ -67,7 +54,7 @@ prepfold = False
 zmax = 100
 
 ##### From Lv2_presto_segments
-segment_lengths = [100] #desired length of segments (and 200)
+segment_lengths = [500] #desired length of segments (and 200)
 ## NOTE: nicerfits2presto tries to find a 'nice number' of bins to bin the data, and
 ## sometimes that will be longer than the segment. I'm not sure what the best remedy is,
 ## but currently, the best thing is just to track the segment size on the terminal, then increase

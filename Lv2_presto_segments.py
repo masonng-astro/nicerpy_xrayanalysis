@@ -124,7 +124,7 @@ def niextract_gti_time_energy(obsid,segment_length,PI1,PI2):
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
-        
+
     event = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/ni' + obsid + '_nicersoft_bary.evt'
     event = fits.open(event)
     gtis = event[2].data
