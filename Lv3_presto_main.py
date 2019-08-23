@@ -25,20 +25,20 @@ import glob
 Lv0_dirs.global_par()
 nicersoft_dir = Lv0_dirs.NICERSOFT_DATADIR
 
-preprocess = True #I only need to do preprocessing for each ObsID ONCE!!!
+preprocess = False #I only need to do preprocessing for each ObsID ONCE!!!
 process_all = False #whether to process the ENTIRE observation or not
 
-process_segments = False #whether to make truncations to the data
+process_segments = True #whether to make truncations to the data
 time_segments = False #truncate by time segments
 energy_segments = False #truncate by energy range
-time_energy_segments = False #truncate both by time segments and energy range
+time_energy_segments = True #truncate both by time segments and energy range
 
 accelsearch = False
 
 ##### From Lv2_presto_preprocess
 #obsids = ['1034090111'
-#obsids = ['2060060368','2060060369','2060060370','2060060371']
-obsids = ['10301801'+str(i) for i in range(49,58)]
+obsids = ['20600603' + str(i) for i in range(51,58)]
+#obsids = ['10301801'+str(i) for i in range(49,58)]
 
 nicerl2_flags = ['clobber=YES']#,'overonly_range=0.0-0.5']
 psrpipe_flags = ['--emin','0.3','--emax','12.0']#,'--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
@@ -60,8 +60,8 @@ segment_lengths = [500] #desired length of segments (and 200)
 ## but currently, the best thing is just to track the segment size on the terminal, then increase
 ## accordingly. For example, I tried 100s segments for 0034070101 (Cen X-3), but nicerfits2presto.py
 ## is binning at 100.8s, so I went up to the next nice number - 102..
-PI1 = [30,250]
-PI2 = [250,1200]
+PI1 = [30]
+PI2 = [200]
 
 ##### For Lv3_duty_cycle:
 duty_cycle_bin = 1 #for 1s bins to do duty cycle calculations
@@ -169,7 +169,7 @@ if process_segments == True:
                 inf_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/*_'+str(segment_lengths[j])+'*.inf')
                 events_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/*_'+str(segment_lengths[j])+'*.events')
 
-                accelsearch_dir = Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/accelsearch_' + str(segment_lengths[j]) + 's/'
+                accelsearch_dir = Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/accelsearch_' + str(segment_lengths[j]).zfill(5) + 's/'
                 Lv2_mkdir.makedir(accelsearch_dir)
                 for k in range(len(evt_files)):
                     subprocess.check_call(['mv',evt_files[k],accelsearch_dir])
@@ -178,9 +178,9 @@ if process_segments == True:
                     subprocess.check_call(['mv',inf_files[k],accelsearch_dir])
                     subprocess.check_call(['mv',events_files[k],accelsearch_dir])
 
-                for k in range(len(PI1)):
-                    Lv3_duty_cycle.duty_cycle_tE(obsids[i],tbin,segment_lengths[j],PI1[k],PI2[k],duty_cycle_bin,threshold)
-                    Lv3_duty_cycle.duty_cycle_tE_dist(obsids[i],tbin,segment_lengths[j],PI1[k],PI2[k],duty_cycle_bin,threshold)
+                #for k in range(len(PI1)):
+                #    Lv3_duty_cycle.duty_cycle_tE(obsids[i],tbin,segment_lengths[j],PI1[k],PI2[k],duty_cycle_bin,threshold)
+                #    Lv3_duty_cycle.duty_cycle_tE_dist(obsids[i],tbin,segment_lengths[j],PI1[k],PI2[k],duty_cycle_bin,threshold)
 
     ### Running realfft and accelsearch from PRESTO
     if accelsearch == True:

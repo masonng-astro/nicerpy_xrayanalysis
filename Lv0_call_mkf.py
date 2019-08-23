@@ -53,7 +53,23 @@ def get_mkf(obsid,par_list):
 ################################################################################
 
 if __name__ == "__main__":
-    print(get_mkf('0034070101',['TIME','ELV','MOON_DEC']))
+    #print(get_mkf('0034070101',['TIME','ELV','MOON_DEC']))
+    datadict = get_mkf('1013010105',['NICER_SAA','ATT_MODE','ATT_SUBMODE_AZ','ATT_SUBMODE_EL','ANG_DIST','ELV','BR_EARTH','NUM_FPM_ON','ST_VALID','FPM_UNDERONLY_COUNT','FPM_OVERONLY_COUNT','COR_SAX'])
+    nicersaa = datadict['NICER_SAA']
+    attmode = datadict['ATT_MODE']
+    attsubmodeaz = datadict['ATT_SUBMODE_AZ']
+    attsubmodeel = datadict['ATT_SUBMODE_EL']
+    angdist = datadict['ANG_DIST']
+    elv = datadict['ELV']
+    brearth = datadict['BR_EARTH']
+    numfpmon = datadict['NUM_FPM_ON']
+    stvalid = datadict['ST_VALID']
+    fpmunderonlycount = datadict['FPM_UNDERONLY_COUNT']
+    print(len(fpmunderonlycount[fpmunderonlycount<=200]))
+    fpmoveronlycount = datadict['FPM_OVERONLY_COUNT']
+    corsax = datadict['COR_SAX']
+    #for i in range(len(nicersaa)):
+    #    print(nicersaa[i],attmode[i],attsubmodeaz[i],attsubmodeel[i],angdist[i],elv[i],brearth[i],numfpmon[i],stvalid[i],fpmunderonlycount[i],fpmoveronlycount[i],1.52*corsax[i]**(-0.633))
 # Variables (TTYPE) from the FITS file headers that I printed
 
 # prefilter

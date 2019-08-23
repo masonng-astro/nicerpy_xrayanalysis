@@ -20,16 +20,11 @@ import matplotlib.pyplot as plt
 
 ### parameters used EVERYWHERE
 #obsids = ['1060020418'] #observation ID. 113 242 418
-#obsids = ['1200250108']
-#obsids = ['1050390101','1050390105','1050390115','1050390122','1050390125','1050390132','1050390138','1050390140','1050390141','1050390142','1050390145','1050390148']
-#obsids = ['2060060363']
-obsids = ['1060020113']
-#obsids = ['12002501' + str(i+1).zfill(2) for i in range(26)]
-#obsids = ''
+obsids = ['1013010105']
 bary = True #whether the data you want is barycenter-corrected or not
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 
-name_par_list = [True,'','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
+name_par_list = ['','','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
 #name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
 tbin_size = 0.001 #how you want to bin the light curve data
@@ -37,9 +32,9 @@ Ebin_size = 0.05 #in keV
 mode = 'show'
 truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
 
-lc = True
-ps = True
-phase = False
+lc = False
+ps = False
+phase = True
 color = False
 ###############################################################################
 
@@ -62,15 +57,15 @@ gap = 50
 #for Lv2_ps
 ps_type = 'both' # 'period' (for periodogram) or 'manual' (for FFT) or 'both'
 oversampling = [True,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
-xlims = [True,0,500] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
-vlines = [True,411.061] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
+xlims = [True,0,50] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
+vlines = [True,29.639575] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
 
 #for Lv2_phase
 ### For an unknown observation, one should run JUST Lv2_lc and Lv2_ps first to get
 ### the pulsation frequencies. Pulse profiles come LATER.
-f_pulse = 411.061 #frequency of the pulse
+f_pulse = 29.6396 #frequency of the pulse
 shift = 0.4 # how much to shift the pulse by in the phase axis. It only affects how the pulse profile is 'displaced'.
-no_phase_bins = 21 # number of phase bins desired
+no_phase_bins = 51 # number of phase bins desired
 
 #0034070101 0.20846118761251825
 #0034070102 0.2080718358508059

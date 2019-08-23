@@ -9,6 +9,7 @@ Opening FITS files and obtaining data from the .ufa event files
 from __future__ import division,print_function
 from astropy.io import fits
 import Lv0_dirs
+import matplotlib.pyplot as plt
 import numpy as np
 
 Lv0_dirs.global_par() #obtaining the global parameters
@@ -61,7 +62,11 @@ def get_ufa(obsid,mpu_no,par_list):
 
 ################################################################################
 if __name__ == "__main__":
-    print(get_ufa('0034070101','6',['TIME','PI_FAST'])) 
+    #for i in range(1030180131,1030180149):
+    datadict = get_ufa('1030180153','7',['TIME','DET_ID'])
+    detids = datadict['DET_ID']
+    plt.hist(detids,bins=100)
+    plt.show()
 
 # Variables (TTYPE) from the FITS file headers that I printed
 

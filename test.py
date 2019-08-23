@@ -5,7 +5,6 @@ Created on Jan 5th
 
 @author: masonng
 
-
 """
 from __future__ import division, print_function
 import datetime
@@ -18,7 +17,7 @@ import binary_psr
 import matplotlib.gridspec as gridspec
 import subprocess
 import glob
-import Lv0_dirs,Lv0_call_eventcl,Lv1_data_bin
+import Lv0_dirs,Lv0_call_eventcl,Lv1_data_bin,Lv1_data_gtis,Lv2_phase
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
 from scipy import signal
@@ -1013,6 +1012,115 @@ K_1 = np.sqrt(G/(1-e**2)) * m_2 * np.sin(inclin)/np.sqrt(a*(m_1+m_2))
 f_dot = f_0 * K_1/c * 2*np.pi/P_orb
 print(f_dot*500**2)
 """
+
+"""
+b1957_20_data = np.array(['ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/1030180101.tar.gz', 'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/1030180102.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/1030180103.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/1030180104.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/1030180105.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/1030180106.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180107.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180108.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180109.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180110.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180111.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180112.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_08/1030180113.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_10/1030180114.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_10/1030180115.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_10/1030180116.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_10/1030180117.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_10/1030180118.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180119.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180120.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180121.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180122.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180123.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180124.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_11/1030180125.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180126.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180127.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180128.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180129.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180130.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180131.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180132.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180133.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180134.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_12/1030180135.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180136.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180137.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180138.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180139.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180140.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180141.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_02/1030180142.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180143.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180144.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180145.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180146.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180147.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180148.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180149.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180150.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180151.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180152.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180153.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180154.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180155.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180156.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180157.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180158.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180159.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_03/1030180160.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_04/1030180161.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_04/1030180162.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_04/1030180163.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_04/1030180164.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_04/1030180165.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180166.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180167.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180168.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180169.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180170.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180171.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180172.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180173.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180174.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180175.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180176.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180177.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_07/1030180178.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180179.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180180.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180181.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180182.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180183.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180184.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180185.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180186.tar.gz',
+'ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2018_09/1030180187.tar.gz'])
+
+#for i in range(len(b1957_20_data)):
+#    subprocess.check_call(['wget',b1957_20_data[i]])
+"""
+from PyAstronomy.pyasl import foldAt
+
+gtis = Lv1_data_gtis.raw_gtis('1013010105',True)
+
+MJDREFI = Lv0_call_eventcl.open_fits('1013010105',True)[1].header['MJDREFI']
+MJDREFF = Lv0_call_eventcl.open_fits('1013010105',True)[1].header['MJDREFF']
+datadict = Lv0_call_eventcl.get_eventcl('1013010105',True,['TIME','PI'])
+T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+
+times = datadict['TIME']
+#times = MJDREFI + MJDREFF + times/86400.0 #to convert to MJD
+
+#phase,summed_profile = Lv2_phase.pulse_folding(times,T,48442.5,29.639575,-3.77535E-10,1.1147E-20,100)
+phase,summed_profile = Lv2_phase.pulse_folding(times,T,times[0],29.639575,-3.77535E-10,1.1147E-20,100)
+plt.step(phase,summed_profile,'r')
+
+plt.show()
 
 timeend = time.time()
 

@@ -101,4 +101,6 @@ def unzip_all(obsid):
     return
 
 if __name__ == "__main__":
-    unzip_all('1060060127')
+    for i in range(1030180101,1030180188):
+        unzip_all(str(i))
+    #unzip_all('1060060127')

@@ -8,7 +8,6 @@ Program for doing nicerl2 (mix of nicercal, niprefilter2, nimaketime, nicermerge
 """
 from __future__ import division, print_function
 import numpy as np
-from astropy.io import fits
 import Lv0_dirs
 from tqdm import tqdm
 import os
@@ -41,4 +40,7 @@ def nicerl2(obsid,nicerl2_flags):
     return
 
 if __name__ == "__main__":
-    print('hi') #placeholder. But see Lv2_presto_preprocess for implementation
+    #for i in tqdm(range(1030180101,1030180188)):
+    #    print('Doing ObsID ' + str(i))
+    #    nicerl2(str(i),['clobber=YES'])
+    #nicerl2('1013010105',['ang_dist=0.035'])

@@ -30,10 +30,10 @@ import Lv0_dirs,Lv2_ngc300_color
 Lv0_dirs.global_par()
 
 ### this is for the individual GTIs though! Use later...
-spectra = sorted(glob.glob('/Volumes/Samsung_T5/NGC300_ULX/bgsub_cl50*.txt'))
+spectra = sorted(glob.glob(Lv0_dirs.NGC300 + 'bgsub_cl50*.txt'))
 
 ################################## FOR COLORS ##################################
-bin_size = '01d' #for 1 day
+bin_size = '05d' #for 1 day
 band1 = 'A'
 band2 = 'B'
 band3 = 'C'
@@ -45,8 +45,8 @@ mjds_hard_color,hard_color,hard_color_unc = Lv2_ngc300_color.get_color(bin_size,
 
 ################################# FOR INTENSITY ################################
 intensity_band = 'inband'
-counts_file = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGnorm_' + bin_size + '.ffphot'
-unc_file = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGerr_' + bin_size + '.ffphot'
+counts_file = Lv0_dirs.NGC300 + 'n300_ulx.bgsub_cl50_RGnorm_' + bin_size + '.ffphot'
+unc_file = Lv0_dirs.NGC300 + 'n300_ulx.bgsub_cl50_RGerr_' + bin_size + '.ffphot'
 mjds_band = np.genfromtxt(counts_file,usecols=(0),unpack=True)
 if intensity_band == 'soft1':
     counts_band = np.genfromtxt(counts_file,usecols=(1),unpack=True)
@@ -234,6 +234,8 @@ plt.legend(('58230-58280','58290-58300','58310-58335','58340-58355','58380-58420
 
 plt.xlabel('Soft Color: ' + band2+'/'+band1,fontsize=12)
 plt.ylabel('Intensity (ct/s)',fontsize=12)
+#plt.xlim([-0.1,2.9])
+#plt.ylim([-0.9,1.6])
 
 ################################################################################
 

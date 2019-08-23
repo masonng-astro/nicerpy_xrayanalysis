@@ -244,15 +244,15 @@ def do_nicerfits2presto(merged_id,tbin,segment_length):
             except (ValueError,subprocess.CalledProcessError):
                 pass
     """
-    demod_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged000005/accelsearch_' + str(segment_length).zfill(5) + 's/*demod.evt')
-    demod_dat_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged000005/accelsearch_' + str(segment_length).zfill(5) + 's/*demod.dat')
+    evt_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged' + merged_id + '/accelsearch_' + str(segment_length).zfill(5) + 's/*.evt')
+    dat_files = glob.glob(Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged' + merged_id + '/accelsearch_' + str(segment_length).zfill(5) + 's/*.dat')
     #for i in range(len(demod_dat_files)):
     #    subprocess.check_call(['rm',demod_dat_files[i]])
 
-    for i in tqdm(range(len(demod_files))):
-        if not os.path.isfile(demod_files[i][:-3] + 'dat'):
+    for i in tqdm(range(len(evt_files))):
+        if not os.path.isfile(evt_files[i][:-3] + 'dat'):
             try:
-                subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),demod_files[i]])
+                subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),evt_files[i]])
             except (ValueError,subprocess.CalledProcessError):
                 pass
 
@@ -327,7 +327,7 @@ def edit_binary(merged_id,tbin,segment_length):
     merged_dir = all_merged_dir + 'merged' + merged_id + '/'
     merged_segment = merged_dir + 'accelsearch_' + str(segment_length).zfill(5) +'s/'
     #dat_files = sorted(glob.glob(merged_segment+'*GTI*.dat')) #not that order matters here I think, but just in case
-    dat_files = sorted(glob.glob(merged_segment+'*demod.dat'))
+    dat_files = sorted(glob.glob(merged_segment+'*.dat'))
 
     print('Editing the binary files now!')
     for i in tqdm(range(len(dat_files))):

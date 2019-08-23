@@ -9,6 +9,7 @@ Opening FITS files
 from __future__ import division,print_function
 from astropy.io import fits
 import Lv0_dirs
+import matplotlib.pyplot as plt
 
 Lv0_dirs.global_par() #obtaining the global parameters
 
@@ -62,13 +63,16 @@ def get_eventcl(obsid,bary,par_list):
 
 ################################################################################
 if __name__ == "__main__":
-    datadict = get_eventcl('0034070101',True,['PI','PI_FAST','TIME'])
+    datadict = get_eventcl('1030180160',False,['PI','PI_FAST','TIME','DET_ID'])
     times = datadict['TIME']
+    detids = datadict['DET_ID']
     pi = datadict['PI']
-    print(len(times)) #1170671 counts?
-    print(len(times[(pi>=20)&(pi<=1200)]))
-    print(len(pi))
-    print(type(times[0]))
+    #print(len(times)) #1170671 counts?
+    #print(len(times[(pi>=20)&(pi<=1200)]))
+    #print(len(pi))
+    #print(type(times[0]))
+    plt.hist(detids,bins=100)
+    plt.show()
 
 
 # Variables (TTYPE) from the FITS file headers that I printed

@@ -82,5 +82,7 @@ def nicersoft_barycorr(obsid,refframe):
 
     return
 
+def
+
 if __name__ == "__main__":
     barycorr('1060060127','ICRS')

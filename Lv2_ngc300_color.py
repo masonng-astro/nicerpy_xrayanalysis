@@ -14,7 +14,7 @@ import Lv0_dirs
 
 Lv0_dirs.global_par()
 
-bin_size = '01d' #bins of 1 day!
+bin_size = '03d' #bins of 1 day!
 
 def get_color(bin_size,band1,band2):
     """
@@ -31,8 +31,8 @@ def get_color(bin_size,band1,band2):
     if band2 != 'soft1' and band2 != 'soft2' and band2 != 'A' and band2 != 'B' and band2 != 'C' and band2 != 'D' and band2 != 'inband':
         raise ValueError("Make sure band2 is either of soft1, soft2, A, B, C, D, or inband!")
 
-    binned_counts_file = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGnorm_' + bin_size + '.ffphot'
-    binned_unc_file = '/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGerr_' + bin_size + '.ffphot'
+    binned_counts_file = Lv0_dirs.NGC300 + 'n300_ulx.bgsub_cl50_RGnorm_' + bin_size + '.ffphot'
+    binned_unc_file = Lv0_dirs.NGC300 + 'n300_ulx.bgsub_cl50_RGerr_' + bin_size + '.ffphot'
 
     mjds = np.genfromtxt(binned_counts_file,usecols=(0),unpack=True)
     if band1 == 'soft1':

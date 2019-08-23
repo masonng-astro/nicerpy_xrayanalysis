@@ -42,8 +42,35 @@ def pulse_profile(f_pulse,times,counts,shift,no_phase_bins):
     summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,counts,statistic='sum',bins=phase_bins)
 
     return phases, phase_bins, summed_profile
+    #return phase_bins, phases, counts[:-1] #; lesson from this: USE A BINNED TIME SERIES AND BINNED PULSE PROFILE!!!
 
-def whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode):
+def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
+    """
+    Calculating the pulse profile by also incorporating \dot{f} corrections!
+    Goes from 0 to 2.
+
+    t - array of time values
+    T - sum of all the GTIs
+    T0 - reference epoch
+    f - pulse/folding Frequency
+    fdot - frequency derivative
+    fdotdot - second derivative of frequency
+    no_phase_bins - number of phase bins desired (recommended 20!)
+
+    Returns the pulse profile in counts/s/phase bin vs phase. The number of counts
+    is divided by the exposure time (calculated through total sum of the GTIs)
+    """
+    tau = (t-T0)
+    phase = (f*tau + fdot/2*tau**2 + fdotdot/6*tau**3)%2 #%2 to get phases from 0 to 2!
+
+    counts = np.ones(len(phase))
+    phase_bins = np.linspace(0,2,no_phase_bins*2+1)
+
+    summed_profile,bin_edges,binnumber = stats.binned_statistic(phase,counts,statistic='sum',bins=phase_bins)
+
+    return phase_bins[:-1], summed_profile/T
+
+def whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
     """
     Plot the entire raw pulse profile without any cuts to the data.
 
@@ -55,11 +82,14 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bin
     tbin_size - the size of the time bins (in seconds!)
     >> e.g., tbin_size = 2 means bin by 2s
     >> e.g., tbin_size = 0.05 means bin by 0.05s!
-    f_pulse - the frequency of the pulse
+    pulse_pars - parameters corresponding to the pulse
     shift - how much to shift the pulse by in the phase axis.
     It only affects how the pulse profile is 'displaced'.
     no_phase_bins - number of phase bins desired
     mode - whether we want to show or save the plot.
+
+    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+    pulse_pars will have [f,fdot,fdotdot]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -67,6 +97,8 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bin
         raise ValueError("bary should either be True or False!")
     if type(name_par_list) != list and type(name_par_list) != np.ndarray:
         raise TypeError("name_par_list should either be a list or an array!")
+    if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
+        raise TypeError("pulse_pars should either be a list or an array!")
     if len(name_par_list) != 6:
         raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
@@ -78,17 +110,25 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bin
 
     if all(name_par_list[i] == '' for i in range(len(name_par_list))):
         data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
+        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
     else:
         data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
+        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
 
     times = data_dict['TIME']
-    counts = np.ones(len(times))
 
-    shifted_t = times-times[0]
-    t_bins = np.linspace(0,np.ceil(shifted_t[-1]),np.ceil(shifted_t[-1])*1/tbin_size+1)
-    summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
+    if pulse_pars[1] == 0 and pulse_pars[2] == 0:
+        counts = np.ones(len(times))
+        shifted_t = times-times[0]
+        t_bins = np.linspace(0,np.ceil(shifted_t[-1]),np.ceil(shifted_t[-1])*1/tbin_size+1)
+        summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
-    phases, phase_bins, summed_profile = pulse_profile(f_pulse,t_bins[:-1],summed_data,shift,no_phase_bins)
+        phases, phase_bins, summed_profile = pulse_profile(f_pulse,t_bins[:-1],summed_data,shift,no_phase_bins)
+
+    else:
+        phase_bins, summed_profile = pulse_folding(times,T,times[0],pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
     if mode != 'overlap':
@@ -120,7 +160,7 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bin
 
     return phase_bins[:-1],summed_profile
 
-def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode):
+def partial_t(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode):
     """
     Plot the pulse profile for a desired time interval.
 
@@ -132,7 +172,7 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase
     tbin_size - the size of the time bins (in seconds!)
     >> e.g., tbin_size = 2 means bin by 2s
     >> e.g., tbin_size = 0.05 means bin by 0.05s!
-    f_pulse - the frequency of the pulse
+    pulse_pars - parameters corresponding to the pulse
     shift - how much to shift the pulse by in the phase axis.
     It only affects how it is presented.
     no_phase_bins - number of phase bins desired
@@ -141,6 +181,7 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase
     mode - whether we want to show or save the plot
 
     name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+    pulse_pars will have [f,fdot,fdotdot]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -148,6 +189,8 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase
         raise ValueError("bary should either be True or False!")
     if type(name_par_list) != list and type(name_par_list) != np.ndarray:
         raise TypeError("name_par_list should either be a list or an array!")
+    if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
+        raise TypeError("pulse_pars should either be a list or an array!")
     if len(name_par_list) != 6:
         raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
@@ -159,8 +202,20 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase
     if mode != 'show' and mode != 'save' and mode != 'overlap':
         raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
-    truncated_t, truncated_counts = Lv1_data_bin.binning_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2)
-    phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_counts,shift,no_phase_bins)
+    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
+        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
+        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    else:
+        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
+        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+
+    if pulse_pars[1] == 0 and pulse_pars[2] == 0:
+        truncated_t, truncated_counts = Lv1_data_bin.binning_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2)
+        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_counts,shift,no_phase_bins)
+    else:
+        phase_bins, summed_profile = pulse_folding(truncated_t,T,0,pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
     if mode != 'overlap':
@@ -192,7 +247,7 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase
 
     return phase_bins[:-1],summed_profile
 
-def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode):
+def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode):
     """
     Plot the pulse profile for a desired energy range.
     [Though I don't think this will be used much. Count/s vs energy is pointless,
@@ -211,7 +266,7 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shif
     Ebin_size - the size of the energy bins (in keV!)
     >> e.g., Ebin_size = 0.1 means bin by 0.1keV
     >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-    f_pulse - the frequency of the pulse
+    pulse_pars - parameters corresponding to the pulse
     shift - how much to shift the pulse by in the phase axis.
     It only affects how it is presented.
     no_phase_bins - number of phase bins desired
@@ -219,6 +274,7 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shif
     E2 - upper energy boundary
 
     name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+    pulse_pars will have [f,fdot,fdotdot]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -226,6 +282,8 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shif
         raise ValueError("bary should either be True or False!")
     if type(name_par_list) != list and type(name_par_list) != np.ndarray:
         raise TypeError("name_par_list should either be a list or an array!")
+    if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
+        raise TypeError("pulse_pars should either be a list or an array!")
     if len(name_par_list) != 6:
         raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
@@ -237,8 +295,20 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shif
     if mode != 'show' and mode != 'save' and mode != 'overlap':
         raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
-    truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2)
-    phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
+        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
+        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    else:
+        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
+        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+
+    if pulse_pars[1] == 0 and pulse_pars[2] == 0:
+        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2)
+        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+    else:
+        phase_bins, summed_profile = pulse_folding(truncated_t,T,0,pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
     if mode != 'overlap':
@@ -273,7 +343,7 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shif
 
     return phase_bins[:-1],summed_profile
 
-def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode):
+def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode):
     """
     Plot the pulse profile for a desired time interval and desired energy range.
 
@@ -288,7 +358,7 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shi
     Ebin_size - the size of the energy bins (in keV!)
     >> e.g., Ebin_size = 0.1 means bin by 0.1keV
     >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-    f_pulse - the frequency of the pulse
+    pulse_pars - parameters corresponding to the pulse
     shift - how much to shift the pulse by in the phase axis.
     It only affects how it is presented.
     no_phase_bins - number of phase bins desired
@@ -299,6 +369,7 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shi
     mode - whether we want to show or save the plot
 
     name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+    pulse_pars will have [f,fdot,fdotdot]
     """
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
@@ -306,6 +377,8 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shi
         raise ValueError("bary should either be True or False!")
     if type(name_par_list) != list and type(name_par_list) != np.ndarray:
         raise TypeError("name_par_list should either be a list or an array!")
+    if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
+        raise TypeError("pulse_pars should either be a list or an array!")
     if len(name_par_list) != 6:
         raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
@@ -319,8 +392,21 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shi
     if mode != 'show' and mode != 'save':
         raise ValueError("Mode should either be 'show' or 'save'!")
 
-    truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
-    phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
+        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
+        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    else:
+        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
+        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
+        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+
+    if pulse_pars[1] == 0 and pulse_pars[2] == 0:
+        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
+        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+    else:
+        phase_bins, summed_profile = pulse_folding(truncated_t,T,0,pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
+
 
     obj_name = Lv2_sources.obsid_to_obj(obsid)
     if mode != 'overlap':

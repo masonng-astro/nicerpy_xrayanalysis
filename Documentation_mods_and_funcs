@@ -135,10 +135,11 @@ Functions:
 >>>>>>>>>> Lv2_phase <<<<<<<<<<
 
 ##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
-##### whole(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
-##### partial_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+##### pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins)
+##### whole(obsid,bary,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode)
+##### partial_t(obsid,bary,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode)
+##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode)
+##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode)
 
 >>>>>>>>>> Lv2_color <<<<<<<<<<
 
