@@ -11,6 +11,7 @@ import numpy as np
 import Lv0_dirs
 import subprocess
 import glob
+from tqdm import tqdm
 import os
 import sh
 
@@ -101,6 +102,10 @@ def unzip_all(obsid):
     return
 
 if __name__ == "__main__":
-    for i in range(1030180101,1030180188):
-        unzip_all(str(i))
-    #unzip_all('1060060127')
+    #for i in range(1030180101,1030180188):
+    #    unzip_all(str(i))
+    #obsids = [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113']
+    obsids = [str(i) for i in range(1030180101,1030180188)]
+    for i in tqdm(range(len(obsids))):
+        unzip_all(obsids[i])

@@ -23,6 +23,7 @@ Incorporate Lv2_ngc300_color.py!
 from __future__ import division, print_function
 import numpy as np
 import matplotlib.pyplot as plt
+from mpldatacursor import datacursor
 from tqdm import tqdm
 import glob
 import Lv0_dirs,Lv2_ngc300_color
@@ -72,6 +73,17 @@ if intensity_band == 'inband':
 ################################################################################
 
 boundaries = np.array([58230,58280,58290,58300,58310,58335,58340,58355,58380,58420,58460,58520])
+
+plt.figure(figsize=(16,9))
+plt.errorbar(mjds_band,counts_band,yerr=unc_band,fmt='kx')
+plt.errorbar(mjds_band[0],counts_band[0],yerr=unc_band[0],fmt='rx',markersize=10)
+plt.errorbar(mjds_band[-5],counts_band[-5],yerr=unc_band[-5],fmt='bx',markersize=10)
+plt.legend(('Data','Sample 1','Sample 2'),loc='best',fontsize=12)
+plt.axhline(y=0,ls='--',lw=0.5,alpha=0.5)
+plt.ylabel('Intensity in counts/s \n (0.4-12 keV)',fontsize=12)
+plt.xlabel('Time (MJD)',fontsize=12)
+plt.title('5-day binned data',fontsize=12)
+#plt.show()
 
 fig, (ax1,ax2,ax3) = plt.subplots(3,1,sharex=True)
 ax1.errorbar(mjds_band,counts_band,yerr=unc_band,fmt='^',mfc='none')
@@ -185,7 +197,7 @@ for i in range(len(mjds_soft_color)): #because there are fewer of these...
         intensity_common.append(counts_band[mjds_band==mjds_soft_color[i]][0])
         intensity_unc_common.append(unc_band[mjds_band==mjds_soft_color[i]][0])
 
-plt.figure()
+plt.figure(figsize=(16,9))
 
 mjds_common = np.array(mjds_common)
 soft_color_common = np.array(soft_color_common)
@@ -197,43 +209,82 @@ soft_counts1 = soft_color_common[(mjds_common>=58230)&(mjds_common<=58280)]
 soft_unc_counts1 = soft_color_unc_common[(mjds_common>=58230)&(mjds_common<=58280)]
 intensity1 = intensity_common[(mjds_common>=58230)&(mjds_common<=58280)]
 intensity_unc1 = intensity_unc_common[(mjds_common>=58230)&(mjds_common<=58280)]
+mjds1 = mjds_common[(mjds_common>=58230)&(mjds_common<=58280)]
 
-soft_counts2 = soft_color_common[(mjds_common>=58290)&(mjds_common<=58300)]
-soft_unc_counts2 = soft_color_unc_common[(mjds_common>=58290)&(mjds_common<=58300)]
-intensity2 = intensity_common[(mjds_common>=58290)&(mjds_common<=58300)]
-intensity_unc2 = intensity_unc_common[(mjds_common>=58290)&(mjds_common<=58300)]
+soft_counts2 = soft_color_common[(mjds_common>58280)&(mjds_common<=58310)]
+soft_unc_counts2 = soft_color_unc_common[(mjds_common>58280)&(mjds_common<=58310)]
+intensity2 = intensity_common[(mjds_common>58280)&(mjds_common<=58310)]
+intensity_unc2 = intensity_unc_common[(mjds_common>58280)&(mjds_common<=58310)]
+mjds2 = mjds_common[(mjds_common>58280)&(mjds_common<=58310)]
 
-soft_counts3 = soft_color_common[(mjds_common>=58310)&(mjds_common<=58335)]
-soft_unc_counts3 = soft_color_unc_common[(mjds_common>=58310)&(mjds_common<=58335)]
-intensity3 = intensity_common[(mjds_common>=58310)&(mjds_common<=58335)]
-intensity_unc3 = intensity_unc_common[(mjds_common>=58310)&(mjds_common<=58335)]
+soft_counts3 = soft_color_common[(mjds_common>58310)&(mjds_common<=58340)]
+soft_unc_counts3 = soft_color_unc_common[(mjds_common>58310)&(mjds_common<=58340)]
+intensity3 = intensity_common[(mjds_common>58310)&(mjds_common<=58340)]
+intensity_unc3 = intensity_unc_common[(mjds_common>58310)&(mjds_common<=58340)]
+mjds3 = mjds_common[(mjds_common>58310)&(mjds_common<=58340)]
 
-soft_counts4 = soft_color_common[(mjds_common>=58340)&(mjds_common<=58355)]
-soft_unc_counts4 = soft_color_unc_common[(mjds_common>=58340)&(mjds_common<=58355)]
-intensity4 = intensity_common[(mjds_common>=58340)&(mjds_common<=58355)]
-intensity_unc4 = intensity_unc_common[(mjds_common>=58340)&(mjds_common<=58355)]
+soft_counts4 = soft_color_common[(mjds_common>58340)&(mjds_common<=58355)]
+soft_unc_counts4 = soft_color_unc_common[(mjds_common>58340)&(mjds_common<=58355)]
+intensity4 = intensity_common[(mjds_common>58340)&(mjds_common<=58355)]
+intensity_unc4 = intensity_unc_common[(mjds_common>58340)&(mjds_common<=58355)]
+mjds4 = mjds_common[(mjds_common>58340)&(mjds_common<=58355)]
 
 soft_counts5 = soft_color_common[(mjds_common>=58380)&(mjds_common<=58420)]
 soft_unc_counts5 = soft_color_unc_common[(mjds_common>=58380)&(mjds_common<=58420)]
 intensity5 = intensity_common[(mjds_common>=58380)&(mjds_common<=58420)]
 intensity_unc5 = intensity_unc_common[(mjds_common>=58380)&(mjds_common<=58420)]
+mjds5 = mjds_common[(mjds_common>=58380)&(mjds_common<=58420)]
 
-soft_counts6 = soft_color_common[(mjds_common>=58460)&(mjds_common<=58520)]
-soft_unc_counts6 = soft_color_unc_common[(mjds_common>=58460)&(mjds_common<=58520)]
-intensity6 = intensity_common[(mjds_common>=58460)&(mjds_common<=58520)]
-intensity_unc6 = intensity_unc_common[(mjds_common>=58460)&(mjds_common<=58520)]
+soft_counts6 = soft_color_common[(mjds_common>=58440)&(mjds_common<=58520)]
+soft_unc_counts6 = soft_color_unc_common[(mjds_common>=58440)&(mjds_common<=58520)]
+intensity6 = intensity_common[(mjds_common>=58440)&(mjds_common<=58520)]
+intensity_unc6 = intensity_unc_common[(mjds_common>=58440)&(mjds_common<=58520)]
+mjds6 = mjds_common[(mjds_common>=58440)&(mjds_common<=58520)]
+
+soft_counts7 = soft_color_common[(mjds_common>=58595)&(mjds_common<=58605)]
+soft_unc_counts7 = soft_color_unc_common[(mjds_common>=58595)&(mjds_common<=58605)]
+intensity7 = intensity_common[(mjds_common>=58595)&(mjds_common<=58605)]
+intensity_unc7 = intensity_unc_common[(mjds_common>=58595)&(mjds_common<=58605)]
+mjds7 = mjds_common[(mjds_common>=58595)&(mjds_common<=58605)]
+
+mjds = ['58239','58244','58249','58254','58259','58264','58269','58274','58279',
+        '58284','58289','58294','58309','58314','58324','58329','58334','58339',
+        '58344','58349','58384','58389','58394','58399','58409','58449','58454',
+        '58459','58464','58469','58474','58479','58484','58489','58494','58499',
+        '58504','58509','58514','58599','58604']
+
+mjds = ['58239','58244','58249','58254','58259','58264','58269','58274','58279',
+        '58284','58289','58294','58309','58314','58324','58329','58334','58339',
+        '58344','58349','58384','58389','58394','58409','58449','58454',
+        '58464','58469','58474','58479','58484','58489','58494','58499',
+        '58504','58509','58599','58604']
+
+soft_counts_list = list(soft_counts1)+list(soft_counts2)+list(soft_counts3)+list(soft_counts4)+list(soft_counts5)+list(soft_counts6)+list(soft_counts7)
+soft_counts_unc_list = list(soft_unc_counts1)+list(soft_unc_counts2)+list(soft_unc_counts3)+list(soft_unc_counts4)+list(soft_unc_counts5)+list(soft_unc_counts6)+list(soft_unc_counts7)
+intensity_list = list(intensity1)+list(intensity2)+list(intensity3)+list(intensity4)+list(intensity5)+list(intensity6)+list(intensity7)
+intensity_unc_list = list(intensity_unc1)+list(intensity_unc2)+list(intensity_unc3)+list(intensity_unc4)+list(intensity_unc5)+list(intensity_unc6)+list(intensity_unc7)
+
+for i in range(len(mjds)):
+    if (float(mjds[i]) in mjds_soft_color):
+        print(mjds[i],soft_counts_list[i],soft_counts_unc_list[i],intensity_list[i],intensity_unc_list[i])
+
 
 #plt.errorbar(hard_color_common,soft_color_common,xerr=hard_color_unc_common,yerr=soft_color_unc_common,fmt='^',mfc='none')
-plt.errorbar(soft_counts1,intensity1,xerr=soft_unc_counts1,yerr=intensity_unc1,fmt='^',mfc='none')
-plt.errorbar(soft_counts2,intensity2,xerr=soft_unc_counts2,yerr=intensity_unc2,fmt='^',mfc='none')
-plt.errorbar(soft_counts3,intensity3,xerr=soft_unc_counts3,yerr=intensity_unc3,fmt='^',mfc='none')
-plt.errorbar(soft_counts4,intensity4,xerr=soft_unc_counts4,yerr=intensity_unc4,fmt='^',mfc='none')
-plt.errorbar(soft_counts5,intensity5,xerr=soft_unc_counts5,yerr=intensity_unc5,fmt='^',mfc='none')
-plt.errorbar(soft_counts6,intensity6,xerr=soft_unc_counts6,yerr=intensity_unc6,fmt='^',mfc='none')
-plt.legend(('58230-58280','58290-58300','58310-58335','58340-58355','58380-58420','58460-58520'),loc='best')
-
-plt.xlabel('Soft Color: ' + band2+'/'+band1,fontsize=12)
-plt.ylabel('Intensity (ct/s)',fontsize=12)
+"""
+plt.errorbar(soft_counts1,intensity1,xerr=soft_unc_counts1,yerr=intensity_unc1,fmt='^',mfc='none',label=mjds[i])
+plt.errorbar(soft_counts2,intensity2,xerr=soft_unc_counts2,yerr=intensity_unc2,fmt='^',mfc='none',label=mjds[i])
+plt.errorbar(soft_counts3,intensity3,xerr=soft_unc_counts3,yerr=intensity_unc3,fmt='^',mfc='none',label=mjds[i])
+plt.errorbar(soft_counts4,intensity4,xerr=soft_unc_counts4,yerr=intensity_unc4,fmt='^',mfc='none',label=mjds[i])
+plt.errorbar(soft_counts5,intensity5,xerr=soft_unc_counts5,yerr=intensity_unc5,fmt='^',mfc='none',label=mjds[i])
+plt.errorbar(soft_counts6,intensity6,xerr=soft_unc_counts6,yerr=intensity_unc6,fmt='^',mfc='none',label=mjds[i])
+plt.errorbar(soft_counts7,intensity7,xerr=soft_unc_counts7,yerr=intensity_unc7,fmt='^',mfc='none',label=mjds[i])
+plt.legend(('[58230,58280]','(58280,58310]','(58310,58340]','(58340,58355]','[58380,58420]','[58440-58520]','[58595,58605]'),loc='best')
+"""
+#datacursor(formatter='{label}'.format,bbox=None)
+plt.errorbar(np.array(soft_counts_list),np.array(intensity_list),xerr=np.array(soft_counts_unc_list),yerr=np.array(intensity_unc_list),fmt='^',mfc='none')
+#plt.xlabel('Soft Color: ' + band2+'/'+band1,fontsize=12)
+plt.xlabel('Soft Color: (1-2 keV)/(0.4-1 keV)',fontsize=12)
+plt.ylabel('Intensity in counts/s (0.4-12 keV)',fontsize=12)
 #plt.xlim([-0.1,2.9])
 #plt.ylim([-0.9,1.6])
 

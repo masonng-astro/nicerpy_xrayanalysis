@@ -44,3 +44,14 @@ if __name__ == "__main__":
     #    print('Doing ObsID ' + str(i))
     #    nicerl2(str(i),['clobber=YES'])
     #nicerl2('1013010105',['ang_dist=0.035'])
+    #obsids = [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    #obsids = [str(i) for i in range(1060060224,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113']
+    #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    obsids = [str(i) for i in range(1030180101,1030180188)]
+    bad_ids = [str(i) for i in range(1030180131,1030180148)]
+    for i in tqdm(range(len(obsids))):
+        if obsids[i] not in bad_ids:
+            nicerl2(obsids[i],['clobber=YES','underonly_range=0-1000'])
+        if obsids[i] in bad_ids:
+            nicerl2(obsids[i],['clobber=YES','underonly_range=0-1000','mpulist=0,1,2,4,5,6'])

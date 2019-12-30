@@ -20,11 +20,11 @@ import matplotlib.pyplot as plt
 
 ### parameters used EVERYWHERE
 #obsids = ['1060020418'] #observation ID. 113 242 418
-obsids = ['1013010105']
+obsids = ['1060060293']
 bary = True #whether the data you want is barycenter-corrected or not
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 
-name_par_list = ['','','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
+name_par_list = [True,'','','','',''] #for Lv3_nicersoft_evt_main ; empty list entries here
 #name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
 tbin_size = 0.001 #how you want to bin the light curve data
@@ -58,21 +58,16 @@ gap = 50
 ps_type = 'both' # 'period' (for periodogram) or 'manual' (for FFT) or 'both'
 oversampling = [True,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
 xlims = [True,0,50] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
-vlines = [True,29.639575] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
+vlines = [True,271.453] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
 
 #for Lv2_phase
 ### For an unknown observation, one should run JUST Lv2_lc and Lv2_ps first to get
 ### the pulsation frequencies. Pulse profiles come LATER.
-f_pulse = 29.6396 #frequency of the pulse
+### If I have pulse_pars[1] and pulse_pars[2] != 0, then time binning DOES NOT MATTER, i.e., it'll be counts/s!
+#pulse_pars = [29.639575,-3.77535E-10,1.1147E-20]
+pulse_pars = [271.453019624388,-1.66705E-15,0] #J1231
 shift = 0.4 # how much to shift the pulse by in the phase axis. It only affects how the pulse profile is 'displaced'.
-no_phase_bins = 51 # number of phase bins desired
-
-#0034070101 0.20846118761251825
-#0034070102 0.2080718358508059
-#0034070103 0.20854506857953284
-#0034070104 0.20796037636355533
-#1034070101 0.20799884640430513
-#1034070106 0.20854272550784736
+no_phase_bins = 100 # number of phase bins desired
 
 #for Lv2_color
 E1_data = 0.3 #data is reliable between 0.3 and 12 keV
@@ -100,7 +95,7 @@ for i in range(len(obsids)):
             Lv2_ps.whole(obsids[i],bary,name_par_list,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines) #power spectra
             time.sleep(1)
         if phase == True:
-            Lv2_phase.whole(obsids[i],bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
+            Lv2_phase.whole(obsids[i],bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode)
             time.sleep(1)
         if color == True:
             Lv2_color.plotting(obsids[i],bary,name_par_list,par_list,E_bound,tbin_size,mode)
@@ -114,7 +109,7 @@ for i in range(len(obsids)):
             Lv2_ps.partial_t(obsids[i],bary,name_par_list,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines) #power spectra
             time.sleep(1)
         if phase == True:
-            Lv2_phase.partial_t(obsids[i],bary,name_par_list,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
+            Lv2_phase.partial_t(obsids[i],bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode)
             time.sleep(1)
         if color == True:
             Lv2_color.plotting_t(obsids[i],bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
@@ -129,7 +124,7 @@ for i in range(len(obsids)):
             Lv2_ps.partial_E(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
             time.sleep(1)
         if phase == True:
-            Lv2_phase.partial_E(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
+            Lv2_phase.partial_E(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode)
 
     ################# FOR DESIRED TIME INTERVAL AND ENERGY RANGE #################
     if truncations == 'tE':
@@ -140,7 +135,7 @@ for i in range(len(obsids)):
             Lv2_ps.partial_tE(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
             time.sleep(1)
         if phase == True:
-            Lv2_phase.partial_tE(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+            Lv2_phase.partial_tE(obsids[i],bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode)
             time.sleep(1)
         if color == True:
             Lv2_color.plotting_t(obsids[i],bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)

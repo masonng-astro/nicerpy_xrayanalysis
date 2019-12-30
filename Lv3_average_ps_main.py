@@ -19,9 +19,9 @@ import Lv3_detection_level
 
 import matplotlib.pyplot as plt
 
-demod = False
+demod = True
 merged = True
-preprocessing = False
+preprocessing = True
 time_segments = False
 time_energy_segments = True
 
@@ -38,18 +38,19 @@ if merged == False:
 
 ##### For merged = True:
 if merged == True:
-    obsids = ['20600603'+str(i) for i in range(51,72)]
+    #obsids = ['20600603'+str(i) for i in range(51,72)]
+    obsids = ['10600601'+str(i) for i in range(28,48)]
     #obsids = ['10301801'+str(i) for i in range(49,58)]
 
-    merged_id = '000006' #need to be very careful that I know what the next one is!
+    merged_id = '000007' #need to be very careful that I know what the next one is!
     segment_length = 500 #segment length
     par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par' #parameter file for demodulation
     PI1 = 30 #lower bound for PI
     PI2 = 200 #upper bound for PI
     tbin = 0.00025 #bin size in s
     N = Lv3_detection_level.N_trials(tbin,segment_length) #*100 if doing B1957+20
-    threshold = 20 #threshold for counts in each segment
-    W = 15 #number of consecutive Fourier bins to average over
+    threshold = 10 #threshold for counts in each segment
+    W = 1 #number of consecutive Fourier bins to average over
     starting_freq = 10 #for noise_hist
 
 ################################################################################
@@ -117,8 +118,8 @@ if merged == True:
     plt.xlabel('Frequency (Hz)',fontsize=12)
     plt.ylabel('Leahy-normalized power',fontsize=12)
     #plt.xlim([621.5,622.5])
-    plt.xlim([269,273])
-    plt.ylim([1.8,5])
+    #plt.xlim([269,273])
+    #plt.ylim([1.8,5])
     plt.axvline(x=271.453,lw=0.5,alpha=0.5)
     plt.title('W = ' + str(W) + ', Threshold = ' + str(threshold) + '%' + '\n' + 'Segment Length: ' + str(segment_length) + 's, No. Segments = ' + str(M) + '\n' + 'Demodulated: ' + str(demod) + ' ; St.D = ' + str(np.std(ps)), fontsize=12)
     plt.legend(('Power Spectrum','3 sigma','4 sigma','271.453 Hz'),loc='best')

@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
-import binary_psr
+#import binary_psr
 import matplotlib.gridspec as gridspec
 import subprocess
 import glob
@@ -1104,6 +1104,8 @@ b1957_20_data = np.array(['ftp://legacy.gsfc.nasa.gov/nicer/data/obs/2017_07/103
 #for i in range(len(b1957_20_data)):
 #    subprocess.check_call(['wget',b1957_20_data[i]])
 """
+
+"""
 from PyAstronomy.pyasl import foldAt
 
 gtis = Lv1_data_gtis.raw_gtis('1013010105',True)
@@ -1118,9 +1120,427 @@ times = datadict['TIME']
 
 #phase,summed_profile = Lv2_phase.pulse_folding(times,T,48442.5,29.639575,-3.77535E-10,1.1147E-20,100)
 phase,summed_profile = Lv2_phase.pulse_folding(times,T,times[0],29.639575,-3.77535E-10,1.1147E-20,100)
-plt.step(phase,summed_profile,'r')
+plt.step(phase[:-1],summed_profile,'r')
 
 plt.show()
+"""
+
+"""
+basedir = '/Volumes/Samsung_T5/NGC300_ULX/'
+testfits = basedir + 'test.pha'
+event = fits.open(testfits)
+exposure = 17949.31
+chans = event[1].data['CHANNEL']
+counts = event[1].data['COUNTS']
+grouping = event[1].data['GROUPING']
+counter = 0
+for i in range(len(chans)):
+    counter+=counts[i]
+#    if grouping[i] == 1:
+    print(chans[i],counts[i],counter,grouping[i])
+"""
+
+"""
+spectra_all = '/Volumes/Samsung_T5/NGC300_ULX/get_alldata.txt'
+spectra = np.array(open(spectra_all,'r').read().split('\n'))
+
+separator = list(np.where(spectra=='NO NO NO NO')[0])
+#separator.insert(0,2)
+#separator.insert(len(separator),len(spectra)-1)
+
+energy_data = [float(spectra[i].split(' ')[0]) for i in range(3,separator[0])]
+energy_unc_data = [float(spectra[i].split(' ')[1]) for i in range(3,separator[0])]
+flux_data = [float(spectra[i].split(' ')[2]) for i in range(3,separator[0])]
+flux_unc_data = [float(spectra[i].split(' ')[3]) for i in range(3,separator[0])]
+
+energy_bg_counts = [float(spectra[i].split(' ')[0]) for i in range(separator[0]+1,separator[1])]
+energy_unc_bg_counts = [float(spectra[i].split(' ')[1]) for i in range(separator[0]+1,separator[1])]
+flux_bg_counts = [float(spectra[i].split(' ')[2]) for i in range(separator[0]+1,separator[1])]
+flux_unc_bg_counts = [float(spectra[i].split(' ')[3]) for i in range(separator[0]+1,separator[1])]
+
+energy_bg_rate = [float(spectra[i].split(' ')[0]) for i in range(separator[1]+1,len(spectra)-1)]
+energy_unc_bg_rate = [float(spectra[i].split(' ')[1]) for i in range(separator[1]+1,len(spectra)-1)]
+flux_bg_rate = [float(spectra[i].split(' ')[2]) for i in range(separator[1]+1,len(spectra)-1)]
+flux_unc_bg_rate = [float(spectra[i].split(' ')[3]) for i in range(separator[1]+1,len(spectra)-1)]
+
+plt.errorbar(x=energy_data,y=flux_data,xerr=energy_unc_data,yerr=flux_unc_data,fmt='+-')
+plt.errorbar(x=energy_bg_counts,y=flux_bg_counts,xerr=energy_unc_bg_counts,yerr=flux_unc_bg_counts,fmt='+-')
+plt.errorbar(x=energy_bg_rate,y=flux_bg_rate,xerr=energy_unc_bg_rate,yerr=flux_unc_bg_rate,fmt='+-')
+plt.legend(('Data','BG (counts)','BG (rate)'),loc='best')
+plt.show()
+"""
+
+"""
+writefile = open('/Volumes/Samsung_T5/NICERsoft_outputs/J1231_merge_filenames.txt','w')
+obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+for i in range(len(obsids)):
+    writefile.write('/Volumes/Samsung_T5/NICER-data/' + obsids[i] + '/' + '\n')
+writefile.close()
+"""
+
+"""
+writefile = open('/Volumes/Samsung_T5/NICERsoft_outputs/J1231_merge_cleanfilt.txt','w')
+obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+for i in range(len(obsids)):
+    writefile.write('/Volumes/Samsung_T5/NICERsoft_outputs/' + obsids[i] + '_pipe/ni' + obsids[i] + '_nicersoft_bary.evt' + '\n')
+writefile.close()
+"""
+
+"""
+import pint.toa as toa
+import pint.models as models
+#t = toa.get_TOAs("/Volumes/Samsung_T5/NICERsoft_outputs/1060060293_pipe/ni1060060293_nicersoft_bary.evt")
+m = models.get_model("/Volumes/Samsung_T5/NICERsoft_outputs/1060060293_pipe/J1959+2048_test.par")
+print(m.as_parfile())
+"""
+
+"""
+#vtfile = '/Volumes/Samsung_T5/NICER-data/1013010105/xti/event_cl/ni1013010105_0mpu7_cl_bary.evt'
+evtfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1060060282_pipe/accelsearch_500s/ni1060060282_nicersoft_bary_demod.evt'
+#evtfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1050230107_pipe/ni1050230107_nicersoft_bary_demod.evt'
+#evtfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1060060293_pipe/cleanfilt.evt'
+event = fits.open(evtfile)
+times = event[1].data['TIME']
+#phase = event[1].data['PULSE_PHASE']
+#print(phase[0:100])
+
+gtis = event[2].data
+T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+#print(T)
+
+zerotime_crab = times[0]/86400 + 56658 + 0.000777592592592593
+zerotime_j1231 = times[0]/86400 + 56658 + 0.000777592592592593
+#phase_bins,profile = Lv2_phase.pulse_folding(times,T,zerotime_crab,29.639575,-3.77535E-10,1.1147E-20,50)
+phase_bins,profile = Lv2_phase.pulse_folding(times,T,zerotime_j1231,271.45301962438478,-1.6670366322227105621e-15,0,50)
+#phase_bins,profile = Lv2_phase.pulse_folding(times,T,58211.6,182.06580377,1.4E-12,0,50)
+plt.figure(1)
+plt.step(phase_bins[:-1],profile,'r')
+plt.figure(2)
+plt.plot(phase_bins[:-1],profile,'r-')
+plt.show()
+"""
+
+"""
+data = 'data'
+bgsub_overplot = 'grp_bg_overplot.xcm'
+base_folder = '/Volumes/Samsung_T5/NGC300_ULX/'
+bgsub_files = sorted(glob.glob(base_folder + 'grp*_bg_*pha'))
+
+data_list = []
+for i in range(len(bgsub_files)):
+    data_list.append(str(i+1)+':'+str(i+1))
+    data_list.append(bgsub_files[i])
+
+write_file = open(bgsub_overplot,'w')
+data_string = 'data ' + ' '.join([data_list[i] for i in range(len(data_list))])
+write_file.write(data_string + '\n')
+write_file.write('ignore 0.0-0.285,12.01-**' + '\n')
+write_file.close()
+"""
+
+"""
+ffphot = "/Volumes/Samsung_T5/NGC300_ULX/n300_ulx.bgsub_cl50_RGnorm.ffphot"
+exptime = np.genfromtxt(ffphot,usecols=(1),unpack=True)
+print(sum(exptime))
+"""
+
+"""
+startdir = '/Volumes/Samsung_T5/NICERsoft_outputs/'
+total_exp = 0
+for i in range(1030180149,1030180188):
+    event = fits.open(startdir + str(i) + '_pipe/cleanfilt.evt')
+    exposure = event[1].header['EXPOSURE']
+    total_exp += exposure
+    print(str(i),exposure)
+"""
+
+"""
+eventslist = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957_events_ELL1.txt'
+#orbslist = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957_orbs.txt'
+
+events = open(eventslist,'w')
+#orbs = open(orbslist,'w')
+for i in range(1030180101,1030180188):
+    events.write('/Volumes/Samsung_T5/NICERsoft_outputs/' + str(i) + '_pipe/cleanfilt_phase_ELL1.evt' + '\n')
+#    orbs.write('/Volumes/Samsung_T5/NICERsoft_outputs/' + str(i) + '_pipe/ni' + str(i) + '.orb' + '\n')
+events.close()
+#orbs.close()
+"""
+
+
+"""
+import pint.models as models
+
+#parfile = '/Volumes/Samsung_T5/NICERsoft_outputs/J1959+2048_NUPPI_forPaul.par'
+parfile = '/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411_paul.par'
+m = models.get_model(parfile)
+print(m.as_parfile())
+"""
+
+"""
+jsgrp_files = glob.glob('/Volumes/Samsung_T5/NGC300_ULX/jsgrp*cl*pha')
+for i in range(len(jsgrp_files)):
+    event = fits.open(jsgrp_files[i])
+    print(jsgrp_files[i],event[1].header['BACKFILE'])
+"""
+
+"""
+#mjds = ['58239','58244','58249','58254','58259','58264','58269','58274',
+#        '58289','58309','58314','58324','58329','58334','58339','58389',
+#        '58399','58449','58454','58459','58464','58484','58489','58504',
+#        '58509'] #for 0.4-5 keV
+mjds = ['58239','58244','58249','58254','58259','58264','58269','58274',
+        '58289','58309','58314','58324','58329','58389','58449']
+
+jsgrp_files = sorted(glob.glob('/Volumes/Samsung_T5/NGC300_ULX/jsgrp_58*_cl_*pha'))
+jsgrp_files_spectra = [jsgrp_files[i] for i in range(len(jsgrp_files)) if jsgrp_files[i][-21:-16] in mjds]
+xcm_file = '/Volumes/Samsung_T5/NGC300_ULX/jsgrp_cl_spectralfit_0050_0200.xcm'
+writing = open(xcm_file,'w')
+command1 = 'data '
+for i in range(len(mjds)):
+    writing.write(command1 + str(i+1)+':'+str(i+1) + ' ' + jsgrp_files_spectra[i] + ' ')
+writing.write('\n')
+writing.write('ignore **:0.0-0.485,2.01-**')
+writing.close()
+"""
+
+"""
+ell1_ex = '/Volumes/Samsung_T5/NICERsoft_outputs/1030180121_pipe/cleanfilt_phase_ELL1.evt'
+bt_ex = '/Volumes/Samsung_T5/NICERsoft_outputs/1030180121_pipe/cleanfilt_phase_BT.evt'
+ell1_phase = fits.open(ell1_ex)[1].data['pulse_phase']
+bt_phase = fits.open(bt_ex)[1].data['pulse_phase']
+#for i in range(len(ell1_phase)):
+#    print(np.abs(ell1_phase[i]-bt_phase[i])/ell1_phase[i]*100)
+print(len(ell1_phase),len(bt_phase))
+"""
+
+"""
+from pint.eventstats import sf_z2m,z2m,sig2sigma
+#merged_event = '/Volumes/Samsung_T5/NICERsoft_outputs/merged_events/merged000009/merged000009_cut.evt' #assuming I do a 2.5c/s rate cut
+merged_event = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957_merged_BT/B1957_merged_BT_cut.evt'
+#10/24 for B1957 - lmao no. 40 harmonics needed.... ya...
+phases = fits.open(merged_event)[1].data['PULSE_PHASE']
+
+m = 100
+z_vals = z2m(phases,m=m)
+probs = sf_z2m(z_vals)
+significances = sig2sigma(probs)
+print(significances)
+"""
+
+"""
+parfile = '/Users/masonng/Downloads/test.par'
+contents = open(parfile,'r').read().split('\n')
+for i in range(len(contents)):
+    print('A1' in contents[i])
+"""
+
+"""
+plt.gca().get_xaxis().get_major_formatter().set_useOffset(False)
+
+F0_txt = '/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411_F0.txt'
+freq,harm1,harm2 = np.genfromtxt(F0_txt,dtype='str',skip_footer=1,usecols=(1,4,5),unpack=True)
+freq = [float(freq[i][:-1]) for i in range(len(freq))]
+harm1 = [float(harm1[i][1:]) for i in range(len(harm1))]
+harm2 = [float(harm2[i][:-1]) for i in range(len(harm2))]
+plt.plot(freq,harm1,'rx-')
+plt.plot(freq,harm2,'bx-')
+plt.xlabel('Frequency',fontsize=12)
+plt.ylabel('Significance (sigma)',fontsize=12)
+plt.legend(('1st Harmonic','2nd Harmonic'),loc='best')
+plt.show()
+"""
+
+"""
+from pint.eventstats import sigma2sig
+
+print(sigma2sig(14.5))
+print(sigma2sig(8.25))
+"""
+
+"""
+xmm_newton = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957+20_XMM/P0204910201PNS003TIEVLI0000.FTZ'
+mike = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957+20_XMM/pn.evt9.psrj1959+2048.bary.phase.fits'
+
+event = fits.open(mike)
+pis = event[1].data['PI']
+phases = event[1].data['PULSE_PHASE']
+filtered = pis[(pis>=500)&(pis<=4500)]
+phases_filtered = phases[(pis>=500)&(pis<=4500)]
+
+profbins = np.linspace(0.0,1.0,25+1,endpoint=True)
+plt.hist(phases_filtered,bins=profbins)
+plt.show()
+print(len(filtered))
+print(len(pis))
+"""
+
+"""
+test_lumin = '/Volumes/Samsung_T5/NGC300_ULX/spectral_fit_0040-0500/tbnew-powerlaw_lumin.txt'
+contents = np.array(open(test_lumin,'r').read().split('\n'))
+lumin_lines = [float(contents[i].split(' ')[2]) for i in range(2,len(contents)-1,3)] #lines containing luminosity
+print(lumin_lines)
+print(len(lumin_lines))
+"""
+
+"""
+mjds_used = np.array([58239,58244,58249,58254,58259,58264,58269,58274,58289,
+             58309,58314,58324,58329,58334,58339,58389,58399,58449,
+             58454,58459,58464,58484,58489,58504,58509])
+
+#21
+mjds_used = np.array([58239,58244,58249,58254,58259,58264,58269,58274,
+            58309,58314,58324,58329,58334,58339,58389,58449,
+            58454,58484,58489,58504,58509])
+
+update_hid = '/Volumes/Samsung_T5/NGC300_ULX/soft_color_HID.txt'
+mjd,soft,soft_err,intens,intens_err = np.genfromtxt(update_hid,skip_header=1,unpack=True,usecols=(0,1,2,3,4))
+
+new_mjd = [mjd[i] for i in range(len(mjd)) if mjd[i] in mjds_used]
+new_soft = [soft[i] for i in range(len(mjd)) if mjd[i] in mjds_used]
+new_soft_err = [soft_err[i] for i in range(len(mjd)) if mjd[i] in mjds_used]
+new_intens = [intens[i] for i in range(len(mjd)) if mjd[i] in mjds_used]
+new_intens_err = [intens_err[i] for i in range(len(mjd)) if mjd[i] in mjds_used]
+
+#plt.errorbar(x=soft,y=intens,xerr=soft_err,yerr=intens_err,fmt='rx')
+plt.errorbar(x=new_soft,y=new_intens,xerr=new_soft_err,yerr=new_intens_err,fmt='kx')
+plt.errorbar(x=new_soft[0],y=new_intens[0],xerr=new_soft_err[0],yerr=new_intens_err[0],fmt='rx',markersize=10)
+plt.errorbar(x=new_soft[-1],y=new_intens[-1],xerr=new_soft_err[-1],yerr=new_intens_err[-1],fmt='bx',markersize=10)
+plt.legend(('Data','Sample 1','Sample 2'),loc='best',fontsize=12)
+#plt.xlim([-0.1,2.9])
+#plt.ylim([-0.9,1.6])
+plt.xlabel('Soft Color: (1-2 keV)/(0.4-1 keV)',fontsize=12)
+plt.ylabel('Intensity in counts/s (0.4-12 keV)',fontsize=12)
+plt.show()
+"""
+
+
+"""
+uftxt = '/Volumes/Samsung_T5/NGC300_ULX/spectral_fit_0040-0500_25_original/tbnew-powerlaw_ufspectra.txt'
+print(np.genfromtxt(uftxt,skip_header=3,skip_footer=1,usecols=(tuple(range(4+1))),unpack=True))
+"""
+
+"""
+cleanfile = '/Volumes/Samsung_T5/NICERsoft_outputs/B1957+20_XMM/SAS_DataAnalysisThread/P0204910201PNS003TIEVLI0000_clean.FTZ'
+pis = fits.open(cleanfile)[1].data['PI']
+filtered_pis = pis[(pis>=500)&(pis<=4500)]
+print(len(filtered_pis))
+"""
+
+"""
+exposure = []
+phafiles = sorted(glob.glob('/Volumes/Samsung_T5/NGC300_ULX/jsgrp_58*pha'))
+for i in range(len(phafiles)):
+    event = fits.open(phafiles[i])
+    exptime = event[1].header['EXPOSURE']
+    exposure.append(exptime)
+    print(phafiles[i] + ': ' + str(exptime))
+
+used = np.array([17949.31,39294.18,2934.0,8829.248,6688.78,6437.754,6156.472,
+                6765.789,6232.0,8644.451,2744.0,4581.0,7116.36,6893.0,5685.0,
+                7315.0,6258.0,5094.0,7354.0,10082.0,7088.0])
+print(len(used),sum(used)/21)
+"""
+
+import Lv3_analyze_xspec_pars
+from matplotlib import rc
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+
+powerlaw_vals = Lv3_analyze_xspec_pars.xspec_par('tbnew-powerlaw','0040','0500')
+MJDs_21 = ['58239','58244','58249','58254','58259','58264','58269','58274',
+            '58309','58314','58324','58329','58334','58339','58389','58449',
+            '58454','58484','58489','58504','58509']
+
+x_data = np.array(MJDs_21,dtype='float')
+y_data = powerlaw_vals['powerlaw-PhoIndex']
+y_data_err = powerlaw_vals['powerlaw-PhoIndex_unc']
+
+plt.figure(figsize=(16,9))
+plt.errorbar(x=x_data,y=y_data,yerr=y_data_err,fmt='kx-')
+plt.errorbar(x=x_data[0],y=y_data[0],yerr=y_data_err[0],fmt='rx-',markersize=10)
+plt.errorbar(x=x_data[-1],y=y_data[-1],yerr=y_data_err[-1],fmt='bx-',markersize=10)
+plt.legend(('XSPEC Fit','Sample 1','Sample 2'),fontsize=12,loc='best')
+plt.xlabel('Time (MJD)',fontsize=12)
+plt.ylabel(r'powerlaw - $\Gamma$ ',fontsize=12)
+plt.show()
+
+
+
+"""
+MJDs_21 = ['58239','58244','58249','58254','58259','58264','58269','58274',
+            '58309','58314','58324','58329','58334','58339','58389','58449',
+            '58454','58484','58489','58504','58509']
+
+powerlaw = sorted(glob.glob(Lv0_dirs.NGC300+'spectral_fit_0040-0500/indiv_ratio/tbnew-powerlaw_*.txt'))
+powerlaw_gauss = sorted(glob.glob(Lv0_dirs.NGC300+'spectral_fit_0040-0500/indiv_ratio/tbnew-powerlaw-gauss_*.txt'))
+powerlaw_laor = sorted(glob.glob(Lv0_dirs.NGC300+'spectral_fit_0040-0500/indiv_ratio/tbnew-powerlaw-laor_*.txt'))
+for i in range(len(powerlaw)):
+    pl_e,pl_e_err,pl_r,pl_r_err = np.genfromtxt(powerlaw[i],usecols=(0,1,2,3),unpack=True)
+    pl_gauss_e,pl_gauss_e_err,pl_gauss_r,pl_gauss_r_err = np.genfromtxt(powerlaw_gauss[i],usecols=(0,1,2,3),unpack=True)
+    pl_laor_e,pl_laor_e_err,pl_laor_r,pl_laor_r_err = np.genfromtxt(powerlaw_laor[i],usecols=(0,1,2,3),unpack=True)
+
+    plt.figure(figsize=(16,9))
+    plt.errorbar(x=pl_e,y=pl_r,xerr=pl_e_err,yerr=pl_r_err,fmt='+',alpha=0.5)
+    plt.errorbar(x=pl_gauss_e,y=pl_gauss_r,xerr=pl_gauss_e_err,yerr=pl_gauss_r_err,fmt='+',alpha=0.5)
+    #plt.errorbar(x=pl_laor_e,y=pl_laor_r,xerr=pl_laor_e_err,yerr=pl_laor_r_err,fmt='+',alpha=0.5)
+    plt.legend(('powerlaw','powerlaw-gauss','powerlaw-laor'),fontsize=12)
+    plt.axhline(y=1,lw=0.5,alpha=0.5)
+    plt.xlabel('Energy, E (keV)',fontsize=12)
+    plt.ylabel('ratio (data/model)',fontsize=12)
+    plt.title('MJD ' + MJDs_21[i],fontsize=12)
+
+    plt.show()
+"""
+
+"""
+powerlaw = sorted(glob.glob(Lv0_dirs.NGC300+'spectral_fit_0040-0500/indiv_ratio/tbnew-powerlaw_*.txt'))
+powerlaw_gauss = sorted(glob.glob(Lv0_dirs.NGC300+'spectral_fit_0040-0500/indiv_ratio/tbnew-powerlaw-gauss_*.txt'))
+powerlaw_laor = sorted(glob.glob(Lv0_dirs.NGC300+'spectral_fit_0040-0500/indiv_ratio/tbnew-powerlaw-laor_*.txt'))
+for i in range(len(powerlaw)):
+    pl_e,pl_e_err,pl_chi= np.genfromtxt(powerlaw[i],usecols=(0,1,2),unpack=True)
+    pl_gauss_e,pl_gauss_e_err,pl_gauss_chi = np.genfromtxt(powerlaw_gauss[i],usecols=(0,1,2),unpack=True)
+    pl_laor_e,pl_laor_e_err,pl_laor_chi = np.genfromtxt(powerlaw_laor[i],usecols=(0,1,2),unpack=True)
+
+    plt.figure(figsize=(16,9))
+    plt.axhline(y=1,lw=0.5,alpha=0.5)
+    plt.step(x=pl_e,y=pl_chi)
+    plt.step(x=pl_gauss_e,y=pl_gauss_chi)
+    plt.step(x=pl_laor_e,y=pl_laor_chi)
+    plt.legend(('y=0','powerlaw','powerlaw-gauss','powerlaw_laor'),fontsize=12)
+    plt.xlabel('Energy, E (keV)',fontsize=12)
+    plt.ylabel('ratio (data/model)',fontsize=12)
+    plt.title(MJDs_21[i],fontsize=12)
+
+    plt.show()
+"""
+
+"""
+mjd58239 = '/Volumes/Samsung_T5/NGC300_ULX/spectral_fit_0040-0500/indiv_spectra/tbnew-powerlaw_ufspectra_58239.txt'
+mjd58504 = '/Volumes/Samsung_T5/NGC300_ULX/spectral_fit_0040-0500/indiv_spectra/tbnew-powerlaw_ufspectra_58504.txt'
+
+day1_E,day1_E_err,day1_flux,day1_flux_err,day1_model = np.genfromtxt(mjd58239,usecols=(0,1,2,3,4),unpack=True)
+day2_E,day2_E_err,day2_flux,day2_flux_err,day2_model = np.genfromtxt(mjd58504,usecols=(0,1,2,3,4),unpack=True)
+
+plt.figure(figsize=(16,9))
+plt.yscale('log')
+plt.xscale('log')
+
+plt.errorbar(x=day1_E,y=day1_flux,xerr=day1_E_err,yerr=day1_flux_err,fmt='+',color='r')
+plt.errorbar(x=day2_E,y=day2_flux,xerr=day2_E_err,yerr=day2_flux_err,fmt='+',color='b')
+
+plt.errorbar(x=day1_E,y=day1_model,xerr=day1_E_err,fmt='-',color='k')
+plt.errorbar(x=day2_E,y=day2_model,xerr=day2_E_err,fmt='-',color='k')
+
+plt.legend(('Sample 1','Sample 2','powerlaw'),loc='best',fontsize=12)
+plt.xlabel('Energy, E (keV)',fontsize=12)
+plt.ylabel('Flux (photons/cm^2/s/keV)',fontsize=12)
+plt.xlim([0.4,5])
+
+#plt.annotate('For 21 spectra, chi-squared is 3910/2729 (1.43)',(0.5,1e-5))
+
+plt.show()
+"""
 
 timeend = time.time()
 

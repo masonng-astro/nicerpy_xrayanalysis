@@ -10,7 +10,8 @@ Lv2_presto_all.
 from __future__ import division, print_function
 import numpy as np
 from astropy.io import fits
-import Lv0_dirs,Lv0_scp,Lv0_nicerl2,Lv2_presto_preprocess,Lv2_presto_segments,Lv2_presto_all,Lv2_mkdir
+import Lv0_dirs,Lv0_scp,Lv0_nicerl2
+import Lv2_presto_preprocess,Lv2_presto_segments,Lv2_presto_all,Lv2_mkdir
 import Lv3_duty_cycle
 from tqdm import tqdm
 import time
@@ -25,23 +26,25 @@ import glob
 Lv0_dirs.global_par()
 nicersoft_dir = Lv0_dirs.NICERSOFT_DATADIR
 
-preprocess = False #I only need to do preprocessing for each ObsID ONCE!!!
+preprocess = True #I only need to do preprocessing for each ObsID ONCE!!!
 process_all = False #whether to process the ENTIRE observation or not
 
-process_segments = True #whether to make truncations to the data
+process_segments = False #whether to make truncations to the data
 time_segments = False #truncate by time segments
 energy_segments = False #truncate by energy range
-time_energy_segments = True #truncate both by time segments and energy range
+time_energy_segments = False #truncate both by time segments and energy range
 
 accelsearch = False
 
 ##### From Lv2_presto_preprocess
-#obsids = ['1034090111'
-obsids = ['20600603' + str(i) for i in range(51,58)]
-#obsids = ['10301801'+str(i) for i in range(49,58)]
+#obsids = ['1034090111']
+#obsids = ['20600603' + str(i) for i in range(51,58)]
+obsids = [str(i) for i in range(1030180101,1030180188)]
+#obsids = [str(i) for i in range(1050230101,1050230108)]
+#obsids = ['2070050114']
 
-nicerl2_flags = ['clobber=YES']#,'overonly_range=0.0-0.5']
-psrpipe_flags = ['--emin','0.3','--emax','12.0']#,'--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
+nicerl2_flags = ['clobber=YES','underonly_range=0-1000','mpulist=0,1,2,4,5,6']#,'overonly_range=0.0-0.5']
+psrpipe_flags = ['--emin','0.3','--emax','12.0','--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
 refframe = 'ICRS' #for barycorr in Lv1_barycorr
 tbin = '0.00025' #time bin for PRESTO in seconds
 

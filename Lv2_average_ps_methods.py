@@ -362,13 +362,16 @@ if __name__ == "__main__":
     #print(presto_dat('0034070101',100,False))
     #print(presto_fft('0034070101',100,False))
     #print(segment_threshold('0034070101',100,False,0.00025,3))
-    f,ps = average_ps('0034070101',100,False,0.00025,10,3)
+    #f,ps = average_ps('0034070101',100,False,0.00025,10,3)
 
-    plt.figure(1)
-    plt.plot(f,ps,'r-')
+    #plt.figure(1)
+    #plt.plot(f,ps,'r-')
 
-    plt.figure(2)
-    ps_bins, N_greaterthanP = noise_hist('0034070101',100,False,0.00025,10,10,3)
-    plt.semilogy(ps_bins,N_greaterthanP,'rx')
+    #plt.figure(2)
+    #ps_bins, N_greaterthanP = noise_hist('0034070101',100,False,0.00025,10,10,3)
+    #plt.semilogy(ps_bins,N_greaterthanP,'rx')
 
-    plt.show()
+    #plt.show()
+
+    #do_demodulate('1060060293',500,'/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411_paul.par')
+    do_demodulate('1060060282',500,'/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411_paul.par')

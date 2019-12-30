@@ -11,7 +11,7 @@ Updated on Mon Jun 3 - Added name_par_list for NICERsoft segments
 from __future__ import division, print_function
 from astropy.io import fits
 import numpy as np
-import Lv0_dirs,Lv0_call_eventcl,Lv0_call_nicersoft_eventcl,Lv1_data_bin,Lv2_sources,Lv2_mkdir
+import Lv0_dirs,Lv0_call_eventcl,Lv0_call_nicersoft_eventcl,Lv1_data_bin,Lv1_data_gtis,Lv2_sources,Lv2_mkdir
 from scipy import stats
 from PyAstronomy.pyasl import foldAt
 import matplotlib.gridspec as gridspec
@@ -38,7 +38,7 @@ def pulse_profile(f_pulse,times,counts,shift,no_phase_bins):
     phases = list(phases[index_sort]) + list(phases[index_sort]+1)
     counts = list(counts[index_sort])*2
 
-    phase_bins = np.linspace(0,2,no_phase_bins)
+    phase_bins = np.linspace(0,2,no_phase_bins*2+1)
     summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,counts,statistic='sum',bins=phase_bins)
 
     return phases, phase_bins, summed_profile
@@ -51,7 +51,7 @@ def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
 
     t - array of time values
     T - sum of all the GTIs
-    T0 - reference epoch
+    T0 - reference epoch in MJD
     f - pulse/folding Frequency
     fdot - frequency derivative
     fdotdot - second derivative of frequency
@@ -60,15 +60,25 @@ def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
     Returns the pulse profile in counts/s/phase bin vs phase. The number of counts
     is divided by the exposure time (calculated through total sum of the GTIs)
     """
-    tau = (t-T0)
-    phase = (f*tau + fdot/2*tau**2 + fdotdot/6*tau**3)%2 #%2 to get phases from 0 to 2!
+    MJDREFI = 56658
+    MJDREFF = 0.000777592592592593
+    t_MJDs =  MJDREFI + MJDREFF + t/86400
+
+    tau = (t_MJDs-T0)*86400
+    phase = (f*tau + fdot/2 *tau**2 + fdotdot/6*tau**3)%1
 
     counts = np.ones(len(phase))
-    phase_bins = np.linspace(0,2,no_phase_bins*2+1)
+    phase_bins = np.linspace(0,1,no_phase_bins+1)
 
     summed_profile,bin_edges,binnumber = stats.binned_statistic(phase,counts,statistic='sum',bins=phase_bins)
 
-    return phase_bins[:-1], summed_profile/T
+    phase_bins_pad = np.linspace(1,2,no_phase_bins+1)
+    summed_profile_pad = summed_profile
+
+    phase_bins_total = np.array(list(phase_bins[:-1]) + list(phase_bins_pad))
+    summed_profile_total = np.array(list(summed_profile) + list(summed_profile_pad))
+
+    return phase_bins_total, summed_profile_total/T
 
 def whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
     """

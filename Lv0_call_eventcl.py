@@ -9,6 +9,7 @@ Opening FITS files
 from __future__ import division,print_function
 from astropy.io import fits
 import Lv0_dirs
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 Lv0_dirs.global_par() #obtaining the global parameters
@@ -63,16 +64,25 @@ def get_eventcl(obsid,bary,par_list):
 
 ################################################################################
 if __name__ == "__main__":
-    datadict = get_eventcl('1030180160',False,['PI','PI_FAST','TIME','DET_ID'])
-    times = datadict['TIME']
-    detids = datadict['DET_ID']
-    pi = datadict['PI']
+    #datadict = get_eventcl('1030180131',False,['PI','PI_FAST','TIME','DET_ID','EVENT_FLAGS'])
+    #times = datadict['TIME']
+    #detids = datadict['DET_ID']
+    #pi = datadict['PI']
+    #flags = datadict['EVENT_FLAGS']
     #print(len(times)) #1170671 counts?
     #print(len(times[(pi>=20)&(pi<=1200)]))
     #print(len(pi))
     #print(type(times[0]))
-    plt.hist(detids,bins=100)
-    plt.show()
+    #for i in range(100):
+    #    print(flags[i])
+    obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    counter = 0
+    for i in tqdm(range(len(obsids))):
+        gtis = open_fits(obsids[i],True)[2].data
+        interval = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis))])
+        counter += interval
+
+    print(counter/1000)
 
 
 # Variables (TTYPE) from the FITS file headers that I printed

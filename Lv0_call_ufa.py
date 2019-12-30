@@ -11,6 +11,7 @@ from astropy.io import fits
 import Lv0_dirs
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 
 Lv0_dirs.global_par() #obtaining the global parameters
 
@@ -63,10 +64,21 @@ def get_ufa(obsid,mpu_no,par_list):
 ################################################################################
 if __name__ == "__main__":
     #for i in range(1030180131,1030180149):
-    datadict = get_ufa('1030180153','7',['TIME','DET_ID'])
-    detids = datadict['DET_ID']
-    plt.hist(detids,bins=100)
-    plt.show()
+    #datadict = get_ufa('1030180153','7',['TIME','DET_ID'])
+    #detids = datadict['DET_ID']
+    #plt.hist(detids,bins=100)
+    #plt.show()
+
+    obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    counter = 0
+    for i in tqdm(range(len(obsids))):
+        gtis = open_fits(obsids[i],'7')[2].data
+        interval = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis))])
+        #if interval == 0:
+        #    print(obsids[i])
+        counter += interval
+
+    print(counter/1000)
 
 # Variables (TTYPE) from the FITS file headers that I printed
 

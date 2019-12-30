@@ -1,0 +1,205 @@
+2019-04-25_V006
+INFO: Initializing the data object [nicer.NicerFileSet]
+INFO: Found clean event files: 
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_cl/ni1060060301_0mpu7_cl.evt [nicer.NicerFileSet]
+INFO: Found merged unfiltered event files: 
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_cl/ni1060060301_0mpu7_ufa.evt [nicer.NicerFileSet]
+INFO: Found raw unfiltered event files: 
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu0_uf.evt    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu1_uf.evt    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu2_uf.evt    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu3_uf.evt    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu4_uf.evt    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu5_uf.evt    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_uf/ni1060060301_0mpu6_uf.evt [nicer.NicerFileSet]
+INFO: Found the orbit file: /Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.orb [nicer.NicerFileSet]
+INFO: Found the MPU housekeeping files: 
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu0.hk	
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu1.hk	
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu2.hk	
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu3.hk	
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu4.hk	
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu5.hk	
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu6.hk [nicer.NicerFileSet]
+INFO: Applying TIMEZERO of -1.0 to mktable in NicerFileSet [nicer.NicerFileSet]
+INFO: MET Range 143080025.0 to 143153661.0 [nicer.latloninterp]
+INFO: Applying TIMEZERO of -1.0 to self.gtitable in NicerFileSet [nicer.NicerFileSet]
+INFO: Got the good times from GTI [nicer.NicerFileSet]
+INFO: Discarding GTI shorter than 16 seconds! [nicer.NicerFileSet]
+      START               STOP             DURATION     
+        s                  s                  s         
+------------------ ------------------ ------------------
+ 143080283.7657435  143081987.3640235 1703.5982800126076
+ 143085843.7637854  143086721.7593891   877.995603710413
+ 143091936.7637057 143093651.33165997 1714.5679542720318
+143097378.76598147 143098261.75754955  882.9915680885315
+143103147.76739597 143104210.20277283 1062.4353768527508
+143113663.76512042 143115625.37540093 1961.6102805137634
+ 143119567.7673154 143121184.23627204 1616.4689566493034
+143135965.76322863 143137079.73410344 1113.9708748161793
+ 143141767.7681401 143142641.75909021  873.9909501075745
+143147023.76743907 143148021.75870872  997.9912696480751
+143152583.76537442 143153661.75576758 1077.9903931617737
+INFO: CMD: ftmerge @/var/folders/qn/xx50sq_50q5d2tpkgtlvtfr80000gn/T/tmpPSgG29/evfiles.txt outfile=/var/folders/qn/xx50sq_50q5d2tpkgtlvtfr80000gn/T/tmpPSgG29/merged.evt clobber=yes [nicer.fitsutils]
+INFO: Applying TIMEZERO of -1.0 to etable in filtallandmerge [nicer.fitsutils]
+INFO: Event MET Range : 143080021.007 to 143153661.746 [nicer.NicerFileSet]
+INFO: TSTART 143080022.0  TSTOP 143153662.756 (Span 73640.755713 seconds) [nicer.NicerFileSet]
+INFO: DATE Range 2018-07-15T00:27:00 to 2018-07-15T20:54:20 [nicer.NicerFileSet]
+INFO: OBS_ID 1060060301 [nicer.NicerFileSet]
+INFO: Extracting overshoots from /Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf, binning by 16.0 sec, saving to file 1060060301_pipe/1060060301_prefilt_ovbin.fits [nicer.NicerFileSet]
+INFO: CMD: fcurve infile="/Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf[1]" outfile="1060060301_pipe/1060060301_prefilt_ovbin.fits" gtifile="-" timecol="TIME" columns="FPM_OVERONLY_COUNT" binsz="16.0" lowval="INDEF" highval="INDEF" binmode="MEAN" clobber=yes [nicer.NicerFileSet]
+INFO: Masking IDS [14, 34, 54] [__main__]
+INFO: Filtering... [__main__]
+INFO: Exposure : 13883.61 [__main__]
+INFO: Building Rejected Event Light curve [nicer.bkg_plots]
+INFO: Building overshoot plot [nicer.bkg_plots]
+INFO: Building undershoot plot [nicer.bkg_plots]
+INFO: Building Sun / Moon / Earth angle Plot [nicer.bkg_plots]
+INFO: Writing bkg plot 1060060301_pipe/1060060301_prefilt [__main__]
+INFO: Detector Count Mean 785.696428571, std 305.674425284 [nicer.plotutils]
+INFO: No counts for det 11 [nicer.plotutils]
+INFO: No counts for det 14 [nicer.plotutils]
+INFO: No counts for det 20 [nicer.plotutils]
+INFO: No counts for det 22 [nicer.plotutils]
+INFO: No counts for det 34 [nicer.plotutils]
+INFO: No counts for det 54 [nicer.plotutils]
+INFO: No counts for det 60 [nicer.plotutils]
+INFO: Computing reset rates [nicer.eng_plots]
+INFO: Detector Count Mean 785.696428571, std 305.674425284 [nicer.plotutils]
+INFO: max_id 67 [nicer.eng_plots]
+INFO: Writing eng plot 1060060301_pipe/1060060301_prefilt [__main__]
+INFO: Building fast/slow subplot [nicer.sci_plots]
+INFO: Counting slow and fast [nicer.plotutils]
+INFO: Using only SLOW+FAST events for ratio plot [nicer.plotutils]
+INFO: Computing ratio [nicer.plotutils]
+INFO: Applying ratio filter using trumpet [nicer.sci_plots]
+INFO: Building light curve [nicer.sci_plots]
+INFO: Building energy spectrum [nicer.sci_plots]
+INFO: Building pulse profile [nicer.sci_plots]
+INFO: Writing sci plot 1060060301_pipe/1060060301_prefilt [__main__]
+INFO: I'M THE MAP I'M THE MAP I'M THE MAAAAP [__main__]
+INFO: Getting SAA data [nicer.cartographer]
+INFO: plotting map [nicer.cartographer]
+INFO: Writing MAP 1060060301_pipe/1060060301_prefilt [__main__]
+nimaketime 1.4
+--------------------------------------------------------
+   Running maketime
+INFO: Reading files [__main__]
+INFO: Reading file 1060060301_pipe/cleanfilt.evt [__main__]
+INFO: Concatenating files [__main__]
+INFO: Applying TIMEZERO of -1.0 to etable [__main__]
+INFO: Applying TIMEZERO of -1.0 to self.gtitable in NicerFileSet [__main__]
+INFO: Got the good times from GTI [__main__]
+   START        STOP    DURATION
+     s           s         s    
+----------- ----------- --------
+143080310.0 143081276.0    966.0
+143081278.0 143081433.0    155.0
+143081435.0 143081814.0    379.0
+143085844.0 143086055.0    211.0
+143086083.0 143086164.0     81.0
+143086198.0 143086300.0    102.0
+143086309.0 143086344.0     35.0
+143086346.0 143086721.0    375.0
+143091962.0 143091983.0     21.0
+143091985.0 143092039.0     54.0
+        ...         ...      ...
+143120369.0 143120399.0     30.0
+143120401.0 143120538.0    137.0
+143120567.0 143120630.0     63.0
+143120635.0 143120653.0     18.0
+143120661.0 143121139.0    478.0
+143136539.0 143136803.0    264.0
+143141792.0 143141900.0    108.0
+143147047.0 143147692.0    645.0
+143152603.0 143152885.0    282.0
+143152887.0 143153426.0    539.0
+Length = 38 rows
+INFO: Got the good times from GTI [__main__]
+INFO: Event MET Range : 143080310.119 to 143153425.234 [__main__]
+INFO: TSTART 143080311  TSTOP 143153427 (Span 73116 seconds) [__main__]
+INFO: DATE Range 2018-07-15T00:27:00 to 2018-07-15T20:54:20 [__main__]
+INFO: OBS_ID 1060060301 [__main__]
+INFO: Applying TIMEZERO of -1.0 to mktable in nicerql [__main__]
+INFO: Reading overshoots file present...Getting from 1060060301_pipe/1060060301_prefilt_ovbin.fits [__main__]
+INFO: Filtering... [__main__]
+INFO: Exposure : 9863.00 [__main__]
+INFO: Building Rejected Event Light curve [nicer.bkg_plots]
+INFO: Building overshoot plot [nicer.bkg_plots]
+INFO: Building undershoot plot [nicer.bkg_plots]
+INFO: Building Sun / Moon / Earth angle Plot [nicer.bkg_plots]
+INFO: Writing bkg plot 1060060301_pipe/1060060301_cleanfilt [__main__]
+INFO: Detector Count Mean 230.267857143, std 89.1999141318 [nicer.plotutils]
+INFO: No counts for det 11 [nicer.plotutils]
+INFO: No counts for det 14 [nicer.plotutils]
+INFO: No counts for det 20 [nicer.plotutils]
+INFO: No counts for det 22 [nicer.plotutils]
+INFO: No counts for det 34 [nicer.plotutils]
+INFO: No counts for det 54 [nicer.plotutils]
+INFO: No counts for det 60 [nicer.plotutils]
+INFO: Computing reset rates [nicer.eng_plots]
+INFO: Detector Count Mean 230.267857143, std 89.1999141318 [nicer.plotutils]
+INFO: max_id 53 [nicer.eng_plots]
+INFO: Writing eng plot 1060060301_pipe/1060060301_cleanfilt [__main__]
+INFO: Building fast/slow subplot [nicer.sci_plots]
+INFO: Counting slow and fast [nicer.plotutils]
+INFO: Using only SLOW+FAST events for ratio plot [nicer.plotutils]
+INFO: Computing ratio [nicer.plotutils]
+INFO: Building light curve [nicer.sci_plots]
+INFO: Building energy spectrum [nicer.sci_plots]
+INFO: Building pulse profile [nicer.sci_plots]
+INFO: Writing sci plot 1060060301_pipe/1060060301_cleanfilt [__main__]
+INFO:  [__main__]
+INFO: Writing all spectral plot 1060060301_pipe/1060060301_cleanfilt [__main__]
+INFO:  [__main__]
+INFO: Writing all lightcurve plot 1060060301_pipe/1060060301_cleanfilt [__main__]
+extractor v5.35     2 Aug 2018
+ Getting FITS WCS Keywords
+ Doing file: 1060060301_pipe/cleanfilt.evt
+ 10% completed 20% completed 30% completed 40% completed 50% completed 60% completed 70% completed 80% completed 90% completed100% completed
+          Total      Good    Bad: Time     Phase     Grade       Cut
+          12895     12895            0         0         0         0
+===============================================================================
+    Grand Total      Good    Bad: Time     Phase     Grade       Cut
+          12895     12895            0         0         0         0
+   in  10480.     seconds
+ Fits light curve has    12895 counts for  1.230     counts/sec
+ Thresholding removed significant counts
+ Try exposure=0.0 on the extract command in xselect
+ or lcthresh=0.0 if running extractor stand-alone
+ Thresholding removed more than half the bins
+ Try exposure=0.0 on the extract command in xselect
+ or lcthresh=0.0 if running extractor stand-alone
+ Spectrum         has    12895 counts for  1.230     counts/sec
+Keyword TSTART has two values: 143080021.882667 and 143080311
+Keyword TSTOP has two values: 143153662.755768 and 143153427
+ ... written the PHA data Extension
+INFO: Making initial QL plots [__main__]
+INFO: Cleaned Event Files: 
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/event_cl/ni1060060301_0mpu7_cl.evt [__main__]
+INFO: MKF File: /Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf [__main__]
+INFO: CMD: nicerql.py --save --filtall --lcbinsize 4.0 --lclog --useftools --filterbinsize 16.0 --emin 0.3 --emax 12.0 --sci --eng --bkg --map --obsdir /Volumes/Samsung_T5/NICER-data/1060060301 --basename 1060060301_pipe/1060060301_prefilt --mask 14 34 54 [__main__]
+INFO: ['nicerql.py', '--save', '--filtall', '--lcbinsize', '4.0', '--lclog', '--useftools', '--filterbinsize', '16.0', '--emin', '0.3', '--emax', '12.0', '--sci', '--eng', '--bkg', '--map', '--obsdir', '/Volumes/Samsung_T5/NICER-data/1060060301', '--basename', '1060060301_pipe/1060060301_prefilt', '--mask', '14', '34', '54'] [__main__]
+INFO: Orbit File: /Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.orb [__main__]
+INFO: ATT HK File: /Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.att [__main__]
+INFO: MPU HK Files: 
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu0.hk    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu1.hk    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu2.hk    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu3.hk    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu4.hk    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu5.hk    
+/Volumes/Samsung_T5/NICER-data/1060060301/xti/hk/ni1060060301_0mpu6.hk [__main__]
+INFO: CMD: nimaketime infile=/Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf outfile=1060060301_pipe/tot.gti nicersaafilt=YES underonly_range=0-400 saafilt=NO trackfilt=YES ang_dist=0.015 elv=20.0 br_earth=30.0 cor_range=- min_fpm=38 ingtis=NONE clobber=yes expr=(ST_VALID.eq.1) outexprfile=1060060301_pipe/psrpipe_expr.txt [__main__]
+INFO: ['nimaketime', 'infile=/Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf', 'outfile=1060060301_pipe/tot.gti', 'nicersaafilt=YES', 'underonly_range=0-400', 'saafilt=NO', 'trackfilt=YES', 'ang_dist=0.015', 'elv=20.0', 'br_earth=30.0', 'cor_range=-', 'min_fpm=38', 'ingtis=NONE', 'clobber=yes', 'expr=(ST_VALID.eq.1)', 'outexprfile=1060060301_pipe/psrpipe_expr.txt'] [__main__]
+INFO: CMD: niextract-events filename=@1060060301_pipe/evfiles.txt[PI=30:1200,EVENT_FLAGS=bx1x000] eventsout=1060060301_pipe/intermediate.evt timefile=1060060301_pipe/tot.gti gti=GTI clobber=yes [__main__]
+INFO: ['niextract-events', 'filename=@1060060301_pipe/evfiles.txt[PI=30:1200,EVENT_FLAGS=bx1x000]', 'eventsout=1060060301_pipe/intermediate.evt', 'timefile=1060060301_pipe/tot.gti', 'gti=GTI', 'clobber=yes'] [__main__]
+INFO: CMD: ftcopy 1060060301_pipe/intermediate.evt[(EVENT_FLAGS==bx1x000).and.(DET_ID!=14).and.(DET_ID!=34).and.(DET_ID!=54)] 1060060301_pipe/cleanfilt.evt clobber=yes history=yes [__main__]
+INFO: ['ftcopy', '1060060301_pipe/intermediate.evt[(EVENT_FLAGS==bx1x000).and.(DET_ID!=14).and.(DET_ID!=34).and.(DET_ID!=54)]', '1060060301_pipe/cleanfilt.evt', 'clobber=yes', 'history=yes'] [__main__]
+INFO: Applying the GTI filtering to the *mkf file [__main__]
+INFO: CMD: fltime infile=/Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf[1] gtifile=1060060301_pipe/tot.gti outfile=1060060301_pipe/cleanfilt.mkf clobber=yes [__main__]
+INFO: ['fltime', 'infile=/Volumes/Samsung_T5/NICER-data/1060060301/auxil/ni1060060301.mkf[1]', 'gtifile=1060060301_pipe/tot.gti', 'outfile=1060060301_pipe/cleanfilt.mkf', 'clobber=yes'] [__main__]
+INFO: CMD: nicerql.py --save --orb 1060060301_pipe/ni1060060301.orb --sci --eng 1060060301_pipe/cleanfilt.evt --allspec --alllc --lcbinsize 4.0 --filterbinsize 16.0 --mkf 1060060301_pipe/cleanfilt.mkf --bkg --basename 1060060301_pipe/1060060301_cleanfilt [__main__]
+INFO: ['nicerql.py', '--save', '--orb', '1060060301_pipe/ni1060060301.orb', '--sci', '--eng', '1060060301_pipe/cleanfilt.evt', '--allspec', '--alllc', '--lcbinsize', '4.0', '--filterbinsize', '16.0', '--mkf', '1060060301_pipe/cleanfilt.mkf', '--bkg', '--basename', '1060060301_pipe/1060060301_cleanfilt'] [__main__]
+INFO: CMD: extractor 1060060301_pipe/cleanfilt.evt eventsout=none imgfile=none phafile=1060060301_pipe/cleanfilt.pha fitsbinlc=1060060301_pipe/cleanfilt.lc binlc=4.0 regionfile=none timefile=none xcolf=RAWX ycolf=RAWY tcol=TIME ecol=PI xcolh=RAWX ycolh=RAWY gti=GTI [__main__]
+INFO: ['extractor', '1060060301_pipe/cleanfilt.evt', 'eventsout=none', 'imgfile=none', 'phafile=1060060301_pipe/cleanfilt.pha', 'fitsbinlc=1060060301_pipe/cleanfilt.lc', 'binlc=4.0', 'regionfile=none', 'timefile=none', 'xcolf=RAWX', 'ycolf=RAWY', 'tcol=TIME', 'ecol=PI', 'xcolh=RAWX', 'ycolh=RAWY', 'gti=GTI'] [__main__]

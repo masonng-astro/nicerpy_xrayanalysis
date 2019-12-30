@@ -18,7 +18,7 @@ def makedir(dir):
     """
 
     if os.path.exists(dir):
-        return
+        raise ValueError('The path already exists! Change the merged_id.')
     else:
         print('This directory did not exist - creating ' + dir + ' now!')
         os.makedirs(dir)

@@ -66,12 +66,29 @@ def get_eventcl(obsid,name_par_list,par_list):
 
 ################################################################################
 if __name__ == "__main__":
-    datadict = get_eventcl('0034070101',[True,'',0,100,'',''],['PI','PI_FAST','TIME'])
-    times = datadict['TIME']
-    pi = datadict['PI']
-    print(len(times)) #1170671 counts?
-    print(len(times[(pi>=20)&(pi<=1200)]))
-    print(len(pi))
+    #counter = 0
+    #for i in range(1030180101,1030180188):
+    #    datadict = get_eventcl(str(i),[True,'','','','',''],['PI','PI_FAST','TIME'])
+    #    times = datadict['TIME']
+    #    print(len(times))
+    #    counter += len(times)
+    #print(counter)
+    #pi = datadict['PI']
+    #print(len(times)) #1170671 counts?
+    #print(len(times[(pi>=20)&(pi<=1200)]))
+    #print(len(pi))
+
+    #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    obsids = ['1030180' + str(i) for i in range(101,188)]
+    counter = 0
+    for i in range(len(obsids)):
+        gtis = open_fits(obsids[i],[True,'','','','',''])[2].data
+        interval = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis))])
+        if interval == 0:
+            print(obsids[i])
+        counter += interval
+
+    print(counter/1000)
 
 
 # Variables (TTYPE) from the FITS file headers that I printed

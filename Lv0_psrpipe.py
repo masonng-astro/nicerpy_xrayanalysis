@@ -10,6 +10,7 @@ from __future__ import division, print_function
 import numpy as np
 import Lv0_dirs
 import os
+from tqdm import tqdm
 import subprocess
 
 Lv0_dirs.global_par()
@@ -58,6 +59,21 @@ def psrpipe(obsid,flags):
 
 if __name__ == "__main__":
     #psrpipe('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'])
-    for i in range(1030180133,1030180137):
+
+    for i in range(1030180101,1030180188):
         psrpipe(str(i),['--emin','0.3','--emax','12.0','--mask','14','34','54'])
+    #obsids = [str(i) for i in range(1060060101,1060060200)]# + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    #obsids = [str(i) for i in range(1060060251,1060060300)]
+    #[str(i) for i in range(1060060301,1060060313)] +
+    #for i in range(len(obsids)):
+    #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113']
+    #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
+    #logfile = 'psrpipe_merge.log'
+    #with open(logfile,'w') as logtextfile:
+    #    logtextfile.write(subprocess.check_output(['psrpipe.py',Lv0_dirs.NICER_DATADIR+obsids[0],'--emin','0.3','--emax','8','--mask','14','34','54','--cormin','1.5','--merge','--crcut']))
+    #    logtextfile.close()
+
+    #for i in tqdm(range(len(obsids))):
+    #    psrpipe(obsids[i],['--emin','0.3','--emax','12.0','--mask','14','34','54','--cormin','1.5'])
+
     #psrpipe('1013010105',['--emin','0.3','--emax','12.0'])

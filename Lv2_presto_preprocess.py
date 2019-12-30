@@ -37,13 +37,19 @@ def preprocess(obsid,nicerl2_flags,psrpipe_flags,refframe,tbin):
         raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
 
     nicersoft_dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/' #absolute path for the $OBSID_pipe folder
+    b1957_20 = ['10301801'+str(i).zfill(2) for i in range(1,88)]
 
     Lv0_gunzip.unzip_all(obsid) #unzipping the contents within the observation
     Lv0_nicerl2.nicerl2(obsid,nicerl2_flags)
     Lv0_psrpipe.psrpipe(obsid,psrpipe_flags) #applying custom cuts (though no need --shrinkelv after HEASOFT 6.26)
 
-    Lv1_barycorr.nicerdata_barycorr(obsid,refframe) #applying barycenter corrections to the cleaned data file from NICER!
-    Lv1_barycorr.nicersoft_barycorr(obsid,refframe) #applying barycenter corrections to the cut data
+    if obsid in b1957_20:
+        print('Doing a special barycenter correction for B1957+20, taking into account proper motion effects!')
+        Lv1_barycorr.B1957_20_barycorr(obsid)
+        Lv1_barycorr.B1957_20_nicersoft_barycorr(obsid)
+    else:
+        Lv1_barycorr.nicerdata_barycorr(obsid,refframe) #applying barycenter corrections to the cleaned data file from NICER!
+        Lv1_barycorr.nicersoft_barycorr(obsid,refframe) #applying barycenter corrections to the cut data
 #    subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),nicersoft_dir+'ni'+obsid+'_nicersoft_bary.evt']) #converting to the PRESTO data format
 
     subprocess.check_call(['mv',obsid+'_psrpipe.log',Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/']) #copying the psrpipe log file to the $OBSID_pipe folder
@@ -52,9 +58,12 @@ def preprocess(obsid,nicerl2_flags,psrpipe_flags,refframe,tbin):
 #    subprocess.check_call(['mv','ni'+obsid+'_nicersoft_bary.inf',Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/'])
 
 if __name__ == "__main__":
-    obsid = '1060060127'
+    #obsid = '1060060127'
+    obsids = ['220083010' + str(i) for i in range(1,9)]
     psrpipe_flags = ['--emin','0.3','--emax','12.0'] #for psrpipe in Lv0_psrpipe
+    nicerl2_flags = ['clobber=YES']
     refframe = 'ICRS' #for barycorr in Lv1_barycorr
     tbin = '0.00025' #time bin for PRESTO in seconds
 
-    preprocess(obsid,psrpipe_flags,refframe,tbin)
+    for i in range(len(obsids)):
+        preprocess(obsids[i],nicerl2_flags,psrpipe_flags,refframe,tbin)
