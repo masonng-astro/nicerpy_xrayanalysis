@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Jan 14 11:18am 2019
@@ -15,13 +15,12 @@ from PyAstronomy.pyasl import foldAt
 import matplotlib.pyplot as plt
 import os
 
-def E_bound(obsid,bary,par_list,E1,E2,cut_type,bound):
+def E_bound(eventfile,par_list,E1,E2,cut_type,bound):
     """
     Gives the energy bound corresponding to either a custom cut or a median cut.
     Could add more cuts in the future!
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    bary - Whether the data is barycentered. True/False
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     >> e.g., tbin_size = 2 means bin by 2s
@@ -31,10 +30,6 @@ def E_bound(obsid,bary,par_list,E1,E2,cut_type,bound):
     cut_type - 'manual' or 'median'
     bound - boundary energy for when cut_type = 'manual'
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
     if 'PI' and 'TIME' not in par_list:
         raise ValueError("You should have BOTH 'PI' and 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -50,11 +45,13 @@ def E_bound(obsid,bary,par_list,E1,E2,cut_type,bound):
         return bound
 
     if cut_type == 'median':
-        t_cut,E_cut = Lv1_data_filter.filter_energy(obsid,bary,par_list,E1,E2)
+        t_cut,E_cut = Lv1_data_filter.filter_energy(eventfile,par_list,E1,E2)
         boundary_index = int(len(E_cut)/2)
         boundary_E = E_cut[boundary_index]
 
         return boundary_E
 
 if __name__ == "__main__":
-    print(E_bound('0034070104',True,['PI','TIME','PI_FAST'],0.0,20,'median',2.7)) 
+    obsid = '1034070101'
+    eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl_bary.evt'
+    print(E_bound(eventfile,['PI','TIME','PI_FAST'],0.0,20,'median',2.7))

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Wed May 29 9:59pm 2019
@@ -22,14 +22,14 @@ import glob
 
 Lv0_dirs.global_par()
 
-def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
+def duty_cycle(eventfile,tbin,segment_length,duty_cycle_bin,threshold):
     """
     To determine the percentage of "data used"/total amount of data. Have two
     types of values:
     1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
     2) % of bins with data over the GTIs
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_length - length of the individual segments
     duty_cycle_bin - binning used to calculate the duty cycle
@@ -38,12 +38,10 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
 
-    obsdir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(obsdir+'*GTI*'+str(segment_length)+'s*.dat')) #grab the .dat files with a specified segment length
+    parent_folder = str(pathlib.Path(eventfile).parent)
+    dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*GTI*'+str(segment_length)+'s*.dat')) #grab the .dat files with a specified segment length
 
-    event = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/ni' + obsid + '_nicersoft_bary.evt'
-    event = fits.open(event)
-    gtis = event[2].data
+    gtis = fits.open(eventfile)[2].data
     obs_duration = gtis[-1][1] - gtis[0][0] #to get the duration of the ENTIRE observation
 
     total_gti = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis))])
@@ -78,22 +76,20 @@ def duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
 
     return
 
-def duty_cycle_dist(obsid,tbin,segment_length,duty_cycle_bin,threshold):
+def duty_cycle_dist(eventfile,tbin,segment_length,duty_cycle_bin,threshold):
     """
     To get the distribution of duty cycles over all segments, given an ObsID and
     a desired segment length!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_length - length of the individual segments
     duty_cycle_bin - binning used to calculate the duty cycle
     threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
 
-    obsdir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(obsdir+'*GTI*'+str(segment_length)+'s*.dat')) #grab the .dat files with a specified segment length
+    dat_files = sorted(glob.glob(parent_folder+'/accelsearch_' + str(segment_length) + 's/*GTI*'+str(segment_length)+'s*.dat')) #grab the .dat files with a specified segment length
 
     duty_cycle_array = []
     print('Calculating the duty cycle!')
@@ -127,14 +123,14 @@ def duty_cycle_dist(obsid,tbin,segment_length,duty_cycle_bin,threshold):
 
     return np.array(duty_cycle_array)
 
-def duty_cycle_tE(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
+def duty_cycle_tE(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
     """
     To determine the percentage of "data used"/total amount of data. Have two
     types of values:
     1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
     2) % of bins with data over the GTIs
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_length - length of the individual segments
     PI1 - lower energy boundary (in units of PI)
@@ -142,15 +138,11 @@ def duty_cycle_tE(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
     duty_cycle_bin - binning used to calculate the duty cycle
     threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
 
-    obsdir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(obsdir+'*GTI*'+str(segment_length)+'s*'+str(PI1)+'-'+str(PI2)+'*.dat')) #grab the .dat files with a specified segment length
+    dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length)+'s/*GTI*'+str(segment_length)+'s*'+str(PI1)+'-'+str(PI2)+'*.dat')) #grab the .dat files with a specified segment length
 
-    event = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/ni' + obsid + '_nicersoft_bary.evt'
-    event = fits.open(event)
-    gtis = event[2].data
+    gtis = fits.open(eventfile)[2].data
     obs_duration = gtis[-1][1] - gtis[0][0] #to get the duration of the ENTIRE observation
 
     total_gti = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis))])
@@ -184,12 +176,12 @@ def duty_cycle_tE(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
 
     return
 
-def duty_cycle_tE_dist(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
+def duty_cycle_tE_dist(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold):
     """
     To get the distribution of duty cycles over all segments, given an ObsID and
     a desired segment length!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     PI1 - lower energy boundary (in units of PI)
     PI2 - upper energy boundary (in units of PI)
@@ -197,11 +189,10 @@ def duty_cycle_tE_dist(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshol
     duty_cycle_bin - binning used to calculate the duty cycle
     threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
 
     obsdir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(obsdir+'*GTI*'+str(segment_length)+'s*'+str(PI1)+'-'+str(PI2)+'*.dat')) #grab the .dat files with a specified segment length
+    dat_files = sorted(glob.glob(parent_folder+'/accelsearch_' + str(segment_length) + 's/*GTI*'+str(segment_length)+'s*'+str(PI1)+'-'+str(PI2)+'*.dat')) #grab the .dat files with a specified segment length
 
     duty_cycle_array = []
     print('Calculating the duty cycle!')
@@ -235,23 +226,22 @@ def duty_cycle_tE_dist(obsid,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshol
 
     return np.array(duty_cycle_array)
 
-def compare_segment_lengths(obsid,tbin,segment_lengths,duty_cycle_bin):
+def compare_segment_lengths(eventfile,tbin,segment_lengths,duty_cycle_bin):
     """
     To get the distribution of duty cycles over all segments, given an ObsID and
     a desired segment length! Compare through different thresholds!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_lengths - array of length of the individual segments
     duty_cycle_bin - binning used to calculate the duty cycle
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
 
     thresholds = np.array([0.05,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9])
     store_threshold_y = []
     for i in range(len(seg_lengths)):
-        duty_cycle_array = duty_cycle_dist(obsid,tbin,segment_lengths[i],duty_cycle_bin,thresholds[i])
+        duty_cycle_array = duty_cycle_dist(eventfile,tbin,segment_lengths[i],duty_cycle_bin,thresholds[i])
         above5 = len(duty_cycle_array[duty_cycle_array>0.05])/len(duty_cycle_array)
         above10 = len(duty_cycle_array[duty_cycle_array>0.1])/len(duty_cycle_array)
         above20 = len(duty_cycle_array[duty_cycle_array>0.2])/len(duty_cycle_array)
@@ -270,10 +260,8 @@ def compare_segment_lengths(obsid,tbin,segment_lengths,duty_cycle_bin):
     plt.xlabel('Threshold',fontsize=12)
     plt.ylabel('Fraction of segments (for a given segment length)',fontsize=12)
     plt.legend((tuple(str(seg_lengths[i]) for i in range(len(seg_lengths)))),loc='best')
-    plt.savefig('threshold_segmentlength.pdf',dpi=900,format='pdf')
+    plt.savefig(parent_folder+'threshold_segmentlength.pdf',dpi=900,format='pdf')
     plt.close()
-
-    subprocess.check_call(['mv','threshold_segmentlength.pdf',Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'])
 
 if __name__ == "__main__":
     duty_cycle('1060020113',0.00025,1000,1,20)

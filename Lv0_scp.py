@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon May 27 10:17am 2019
@@ -23,7 +23,7 @@ def scp(obsid):
     if type(obsid) != str:
         raise TypeError("ObsID should be a string!")
 
-    obsid_dir = 'masonng@ciri:/nfs/ciri/nicer/decrypted/' + obsid
+    obsid_dir = 'masonng@ciri.mit.edu:/nfs/ciri/nicer/decrypted/' + obsid
     nicer_dir = Lv0_dirs.NICER_DATADIR
 
     if os.path.isdir(nicer_dir+obsid): #to prevent duplicate files ; not likely to be the case, but just in case...
@@ -36,7 +36,8 @@ if __name__ == "__main__":
     #scp('1060060127')
     #scp('1060060312')
     #obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113']
-    obsids = [str(i) for i in range(1030180134,1030180188)]
+    #obsids = [str(i) for i in range(1030180134,1030180188)]
+    obsids = ['1050150149']
     for i in range(len(obsids)):
         scp(obsids[i])
 

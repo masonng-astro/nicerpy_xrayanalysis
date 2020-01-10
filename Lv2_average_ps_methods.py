@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Tues Jul 16 1:48pm 2019
@@ -14,6 +14,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import binary_psr
+import pathlib
 import subprocess
 import os
 import glob
@@ -21,23 +22,32 @@ import Lv0_dirs
 
 Lv0_dirs.global_par()
 
-def do_demodulate(obsid,segment_length,par_file):
+def do_demodulate(eventfile,segment_length,mode,par_file):
     """
     Do orbital demodulation on the original events.
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     par_file - orbital parameter file for input into binary_psr
+    mode - "all", "t" or "E" ; basically to tell the function where to access files to run do_demodulate
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    TIMEZERO = -1
+    if mode == "all":
+        parent_folder = str(pathlib.Path(eventfile).parent) + '/'
+    elif mode == "t":
+        parent_folder = str(pathlib.Path(eventfile).parent) + '/accelsearch_' + str(segment_length) + 's/'
+    elif mode == "E":
+        parent_folder = str(pathlib.Path(eventfile).parent) + '/accelsearch_E/'
+    else:
+        raise ValueError("mode should either of 'all', 't', or 'E'!")
 
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    eventfiles = sorted(glob.glob(segment_dir + '*.evt')) #get absolute paths of all event FITS files
+    eventfiles = sorted(glob.glob(parent_folder + '*.evt')) #get absolute paths of all event FITS files
     for i in range(len(eventfiles)): #for every event file (e.g., for each segment)
         oldfile = eventfiles[i] #old event FITS file
+        if len(fits.open(oldfile)[1].data['TIME']) == 0:
+            continue
         newfile = eventfiles[i][:-4]+'_demod.evt' #new event FITS file, to be demodulated
-        subprocess.check_call(['cp',oldfile,newfile])
+        subprocess.run(['cp',oldfile,newfile])
         with fits.open(newfile,mode='update') as fitsfile_demod:
             MJDREFI = fitsfile_demod[1].header['MJDREFI'] #integer for MJD reference
             MJDREFF = fitsfile_demod[1].header['MJDREFF'] #float decimal for MJD reference
@@ -46,9 +56,9 @@ def do_demodulate(obsid,segment_length,par_file):
             gtis_start = fitsfile_demod[2].data['START'] #original GTI start times
             gtis_stop = fitsfile_demod[2].data['STOP'] #original GTI end times
 
-            times_MJD = MJDREFI + MJDREFF + times/86400 #converting METs to MJD
-            gtis_start_MJD = MJDREFI + MJDREFF + gtis_start/86400 #converting GTIs in METs to MJD
-            gtis_stop_MJD = MJDREFI + MJDREFF + gtis_stop/86400 #converting GTIs in METs to MJD
+            times_MJD = MJDREFI + MJDREFF + (TIMEZERO+times)/86400 #converting METs to MJD
+            gtis_start_MJD = MJDREFI + MJDREFF + (TIMEZERO+gtis_start)/86400 #converting GTIs in METs to MJD
+            gtis_stop_MJD = MJDREFI + MJDREFF + (TIMEZERO+gtis_stop)/86400 #converting GTIs in METs to MJD
 
             times_demod = binary_psr.binary_psr(par_file).demodulate_TOAs(times_MJD) #demodulated event times
             gtis_start_demod = binary_psr.binary_psr(par_file).demodulate_TOAs(gtis_start_MJD) #demodulated GTI start times
@@ -62,45 +72,47 @@ def do_demodulate(obsid,segment_length,par_file):
 
     return
 
-def do_nicerfits2presto(obsid,tbin,segment_length):
+def do_nicerfits2presto(eventfile,tbin,segment_length):
     """
     Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_length - length of the individual segments for combining power spectra
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    eventfiles = sorted(glob.glob(segment_dir + '*.evt')) #get absolute paths of all demodulated event FITS files
+    eventfiles = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.evt')) #get absolute paths of all demodulated event FITS files
     print('Now converting NICER event FITS files into the PRESTO-readable binary format!')
     for i in tqdm(range(len(eventfiles))):
         try:
-            subprocess.check_call(['nicerfits2presto.py','--dt='+str(tbin),eventfiles[i]])
+            subprocess.run(['nicerfits2presto.py','--dt='+str(tbin),eventfiles[i]])
         except (ValueError,subprocess.CalledProcessError):
             pass
 
     obsid_files = glob.glob('*'+obsid+'*')
     for i in range(len(obsid_files)):
-        subprocess.check_call(['mv',obsid_files[i],segment_dir])
+        subprocess.run(['mv',obsid_files[i],parent_folder+'/accelsearch_'+str(segment_length)+'s/'])
 
-def edit_inf(obsid,tbin,segment_length):
+def edit_inf(eventfile,tbin,segment_length):
     """
     Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
     Mainly need to edit the "Number of bins in the time series".
     This is only for when we make segments by time though!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_length - length of the individual segments
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    inf_files = sorted(glob.glob(segment_dir + '*.inf')) #not the .evt file; some .evt files will be empty
+    inf_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.inf')) #not the .evt file; some .evt files will be empty
 
     no_desired_bins = float(segment_length)/float(tbin)
 
@@ -123,22 +135,23 @@ def edit_inf(obsid,tbin,segment_length):
 
     return
 
-def edit_binary(obsid,tbin,segment_length):
+def edit_binary(eventfile,tbin,segment_length):
     """
     To pad the binary file so that it will be as long as the desired segment length.
     The value to pad with for each time bin, is the average count rate in THAT segment!
     Jul 10: Do zero-padding instead... so that number of counts is consistent!
     Again, this is only for when we make segments by time!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     tbin - size of the bins in time
     segment_length - length of the individual segments
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
+    parent_folder = str(pathlib.Path(eventfile).parent)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(segment_dir + '*.dat')) #not that order matters here I think, but just in case
+    dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.dat')) #not that order matters here I think, but just in case
     no_desired_bins = float(segment_length)/float(tbin) #TOTAL number of desired bins for the segment
     for i in tqdm(range(len(dat_files))):
         bins = np.fromfile(dat_files[i],dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
@@ -156,88 +169,84 @@ def edit_binary(obsid,tbin,segment_length):
 
     return
 
-def realfft_segment(obsid,segment_length):
+def realfft(eventfile,segment_length):
     """
     Performing PRESTO's realfft on the binned data (.dat)
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the individual segments
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(segment_dir+'*.dat')) #not that order matters here I think, but just in case
+    parent_folder = str(pathlib.Path(eventfile).parent)
+    dat_files = sorted(glob.glob(parent_folder+'/accelsearch_' + str(segment_length) + 's/*.dat')) #not that order matters here I think, but just in case
     # recall that un-truncated data is "*bary.dat", so "*bary_*.dat" is truncated data!
-    logfile = segment_dir + 'realfft.log'
+    logfile = parent_folder + '/accelsearch_' + str(segment_length) + 's/realfft.log'
 
     with open(logfile,'w') as logtextfile:
         for i in range(len(dat_files)):
-            logtextfile.write(subprocess.check_output(['realfft',dat_files[i]]))
+            output = subprocess.run(['realfft',dat_files[i]],capture_output=True,text=True)
+            logtextfile.write(output.stdout)
+            logtextfile.write('*------------------------------* \n')
+            logtextfile.write(output.stderr)
         logtextfile.close()
 
     return
 
-def presto_dat(obsid,segment_length,demod):
+def presto_dat(eventfile,segment_length,demod):
     """
     Obtain the dat files that were generated from PRESTO
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    dat_files = sorted(glob.glob(segment_dir + '*.dat'))
-    demod_files = sorted(glob.glob(segment_dir + '*demod.dat'))
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.dat'))
+    demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*demod.dat'))
     if demod == True:
         return np.array(demod_files)
     else:
         return np.array([datfile for datfile in dat_files if datfile not in set(demod_files)])
 
-def presto_fft(obsid,segment_length,demod):
+def presto_fft(eventfile,segment_length,demod):
     """
     Obtain the FFT files that were generated from PRESTO
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    segment_dir = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/accelsearch_' + str(segment_length) + 's/'
-    fft_files = sorted(glob.glob(segment_dir + '*.fft'))
-    demod_files = sorted(glob.glob(segment_dir + '*demod.fft'))
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    fft_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.fft'))
+    demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*demod.fft'))
     if demod == True:
         return np.array(demod_files)
     else:
         return np.array([fftfile for fftfile in fft_files if fftfile not in set(demod_files)])
 
-def segment_threshold(obsid,segment_length,demod,tbin_size,threshold):
+def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold):
     """
     Using the .dat files, rebin them into 1s bins, to weed out the segments below
     some desired threshold. Will return a *list* of *indices*! This is so that I
     can filter out the *sorted* array of .dat and .fft files that are below threshold!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    dat_files = presto_dat(obsid,segment_length,demod)
+    dat_files = presto_dat(eventfile,segment_length,demod)
     rebin_t = np.arange(segment_length+1)*1 #1-second bins
 
     passed_threshold = []
@@ -254,26 +263,24 @@ def segment_threshold(obsid,segment_length,demod,tbin_size,threshold):
 
     return passed_threshold, len(passed_threshold)
 
-def average_ps(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
+def average_ps(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W):
     """
     Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
     data is beyond some threshold, return the averaged power spectrum!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
     W - number of consecutive frequency bins to AVERAGE over
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    dat_files = presto_dat(obsid,segment_length,demod) #sorted array of .dat files
-    fft_files = presto_fft(obsid,segment_length,demod) #sorted array of .fft files
-    passed_threshold,M = segment_threshold(obsid,segment_length,demod,tbin_size,threshold)
+    dat_files = presto_dat(eventfile,segment_length,demod) #sorted array of .dat files
+    fft_files = presto_fft(eventfile,segment_length,demod) #sorted array of .fft files
+    passed_threshold,M = segment_threshold(eventfile,segment_length,demod,tbin_size,threshold)
     #list of indices where the rebinned .dat files are beyond the threshold
 
     dat_threshold = dat_files[passed_threshold] #.dat files that passed the threshold
@@ -328,25 +335,23 @@ def average_ps(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
 
         return f,ps,ps_bins,N_greaterthanP,M
 
-def noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
+def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W):
     """
     Given the average spectrum for an ObsID, return the histogram of powers, such
     that you have N(>P). This is for powers corresponding to frequencies larger
     than some starting frequency (perhaps to avoid red noise).
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
     starting_freq - frequency to start constructing the histogram of powers from
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    f,ps = average_ps(obsid,segment_length,demod,tbin_size,threshold,W)
+    f,ps = average_ps(eventfile,segment_length,demod,tbin_size,threshold,W)
 
     ps_to_use = ps[f>starting_freq]
     ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
@@ -359,19 +364,8 @@ def noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W):
     return ps_bins, N_greaterthanP
 
 if __name__ == "__main__":
-    #print(presto_dat('0034070101',100,False))
-    #print(presto_fft('0034070101',100,False))
-    #print(segment_threshold('0034070101',100,False,0.00025,3))
-    #f,ps = average_ps('0034070101',100,False,0.00025,10,3)
-
-    #plt.figure(1)
-    #plt.plot(f,ps,'r-')
-
-    #plt.figure(2)
-    #ps_bins, N_greaterthanP = noise_hist('0034070101',100,False,0.00025,10,10,3)
-    #plt.semilogy(ps_bins,N_greaterthanP,'rx')
-
-    #plt.show()
-
-    #do_demodulate('1060060293',500,'/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411_paul.par')
-    do_demodulate('1060060282',500,'/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411_paul.par')
+    eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+    mode = 't'
+    segment_length = 100
+    par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par'
+    do_demodulate(eventfile,segment_length,mode,par_file)

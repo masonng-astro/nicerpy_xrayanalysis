@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Jan 14 9:56am 2019
@@ -11,9 +11,10 @@ Updated on Mon Jun 3 - Added name_par_list for NICERsoft segments
 from __future__ import division, print_function
 from astropy.io import fits
 import numpy as np
-import Lv0_dirs,Lv0_call_eventcl,Lv0_call_nicersoft_eventcl,Lv1_data_bin,Lv1_data_gtis,Lv2_sources,Lv2_mkdir
+import Lv0_dirs,Lv0_fits2dict,Lv1_data_bin,Lv2_mkdir
 from scipy import stats
 from PyAstronomy.pyasl import foldAt
+import pathlib
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import os
@@ -42,7 +43,6 @@ def pulse_profile(f_pulse,times,counts,shift,no_phase_bins):
     summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,counts,statistic='sum',bins=phase_bins)
 
     return phases, phase_bins, summed_profile
-    #return phase_bins, phases, counts[:-1] #; lesson from this: USE A BINNED TIME SERIES AND BINNED PULSE PROFILE!!!
 
 def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
     """
@@ -59,10 +59,13 @@ def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
 
     Returns the pulse profile in counts/s/phase bin vs phase. The number of counts
     is divided by the exposure time (calculated through total sum of the GTIs)
+
+    Also added a "TIMEZERO" manually in the script since it'd be inconvenient to call the eventfile here.
     """
     MJDREFI = 56658
     MJDREFF = 0.000777592592592593
-    t_MJDs =  MJDREFI + MJDREFF + t/86400
+    TIMEZERO = -1
+    t_MJDs =  MJDREFI + MJDREFF + (TIMEZERO+t)/86400
 
     tau = (t_MJDs-T0)*86400
     phase = (f*tau + fdot/2 *tau**2 + fdotdot/6*tau**3)%1
@@ -80,13 +83,11 @@ def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
 
     return phase_bins_total, summed_profile_total/T
 
-def whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
+def whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
     """
     Plot the entire raw pulse profile without any cuts to the data.
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    bary - Whether the data is barycentered. True/False
-    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -98,19 +99,12 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_
     no_phase_bins - number of phase bins desired
     mode - whether we want to show or save the plot.
 
-    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     pulse_pars will have [f,fdot,fdotdot]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
-    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
-        raise TypeError("name_par_list should either be a list or an array!")
+    if type(eventfile) != str:
+        raise TypeError("eventfile should be a string!")
     if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
         raise TypeError("pulse_pars should either be a list or an array!")
-    if len(name_par_list) != 6:
-        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
         raise ValueError("You should have 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -118,29 +112,27 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_
     if mode != 'show' and mode != 'save' and mode != 'overlap':
         raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
-    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
-        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
-    else:
-        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
-        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    data_dict = Lv0_fits2dict.fits2dict(eventfile,1,par_list)
+    gtis = Lv0_fits2dict.fits2dict(eventfile,2,['START','STOP'])
+    T = sum([ (gtis['STOP'][i]-gtis['START'][i]) for i in range(len(gtis['START'])) ])
 
     times = data_dict['TIME']
 
-    if pulse_pars[1] == 0 and pulse_pars[2] == 0:
+    if pulse_pars[1] == 0 and pulse_pars[2] == 0: #i.e., if both \dot{f} and \ddot{f} are zero; that is, if we have no frequency derivatives
         counts = np.ones(len(times))
         shifted_t = times-times[0]
         t_bins = np.linspace(0,np.ceil(shifted_t[-1]),np.ceil(shifted_t[-1])*1/tbin_size+1)
         summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
-
-        phases, phase_bins, summed_profile = pulse_profile(f_pulse,t_bins[:-1],summed_data,shift,no_phase_bins)
-
+        phases, phase_bins, summed_profile = pulse_profile(pulse_pars[0],t_bins[:-1],summed_data,shift,no_phase_bins)
     else:
         phase_bins, summed_profile = pulse_folding(times,T,times[0],pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
+
     if mode != 'overlap':
         plt.figure()
         plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid),fontsize=12)
@@ -152,31 +144,17 @@ def whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_
     if mode == 'show':
         plt.show()
     elif mode == 'save':
-        if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-            dir = Lv0_dirs.BASE_DIR+'outputs/' + obsid + '/pp/'
-            if bary == True:
-                filename = dir + obsid + '_bary_bin' + str(tbin_size) + 's.pdf'
-            elif bary == False:
-                filename = dir + obsid + '_bin' + str(tbin_size) + 's.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
-        else:
-            dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
-            filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
+        filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's.pdf'
+        plt.savefig(parent_folder+filename,dpi=900)
+        plt.close()
 
     return phase_bins[:-1],summed_profile
 
-def partial_t(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode):
+def partial_t(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode):
     """
     Plot the pulse profile for a desired time interval.
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    bary - Whether the data is barycentered. True/False
-    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -190,19 +168,12 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_ph
     t2 - upper time boundary
     mode - whether we want to show or save the plot
 
-    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     pulse_pars will have [f,fdot,fdotdot]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
-    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
-        raise TypeError("name_par_list should either be a list or an array!")
+    if type(eventfile) != str:
+        raise TypeError("eventfile should be a string!")
     if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
         raise TypeError("pulse_pars should either be a list or an array!")
-    if len(name_par_list) != 6:
-        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
         raise ValueError("You should have 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -212,22 +183,23 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_ph
     if mode != 'show' and mode != 'save' and mode != 'overlap':
         raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
-    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
-        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
-    else:
-        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
-        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    data_dict = Lv0_fits2dict.fits2dict(eventfile,1,par_list)
+    gtis = Lv0_fits2dict.fits2dict(eventfile,2,['START','STOP'])
+    T = sum([ (gtis['STOP'][i]-gtis['START'][i]) for i in range(len(gtis['START'])) ])
 
     if pulse_pars[1] == 0 and pulse_pars[2] == 0:
-        truncated_t, truncated_counts = Lv1_data_bin.binning_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2)
-        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_counts,shift,no_phase_bins)
+        truncated_t, truncated_counts = Lv1_data_bin.binning_t(eventfile,par_list,tbin_size,t1,t2)
+        phases, phase_bins, summed_profile = pulse_profile(pulse_pars[0],truncated_t[:-1],truncated_counts,shift,no_phase_bins)
     else:
+        truncated_t, truncated_counts = Lv1_data_bin.binning_t(eventfile,par_list,tbin_size,t1,t2)
         phase_bins, summed_profile = pulse_folding(truncated_t,T,0,pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
+
     if mode != 'overlap':
         plt.figure()
         plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid) + '\n Time interval: ' + str(t1) + 's - ' + str(t2) + 's',fontsize=12)
@@ -239,25 +211,13 @@ def partial_t(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_ph
     if mode == 'show':
         plt.show()
     elif mode == 'save':
-        if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-            dir = Lv0_dirs.BASE_DIR+'outputs/' + obsid + '/pp/'
-            if bary == True:
-                filename = dir + obsid + '_bary_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
-            elif bary == False:
-                filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
-        else:
-            dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
-            filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
+        filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's.pdf'
+        plt.savefig(parent_folder+filename,dpi=900)
+        plt.close()
 
     return phase_bins[:-1],summed_profile
 
-def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode):
+def partial_E(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode):
     """
     Plot the pulse profile for a desired energy range.
     [Though I don't think this will be used much. Count/s vs energy is pointless,
@@ -265,9 +225,7 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,s
     So we're just doing a count/s vs time with an energy cut to the data.]
     INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    bary - Whether the data is barycentered. True/False
-    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -283,19 +241,12 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,s
     E1 - lower energy boundary
     E2 - upper energy boundary
 
-    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     pulse_pars will have [f,fdot,fdotdot]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
-    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
-        raise TypeError("name_par_list should either be a list or an array!")
+    if type(eventfile) != str:
+        raise TypeError("eventfile should be a string!")
     if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
         raise TypeError("pulse_pars should either be a list or an array!")
-    if len(name_par_list) != 6:
-        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
         raise ValueError("You should have 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -305,22 +256,22 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,s
     if mode != 'show' and mode != 'save' and mode != 'overlap':
         raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
-    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
-        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
-    else:
-        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
-        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    data_dict = Lv0_fits2dict.fits2dict(eventfile,1,par_list)
+    gtis = Lv0_fits2dict.fits2dict(eventfile,2,['START','STOP'])
+    T = sum([ (gtis['STOP'][i]-gtis['START'][i]) for i in range(len(gtis['START'])) ])
 
     if pulse_pars[1] == 0 and pulse_pars[2] == 0:
-        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2)
-        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2)
+        phases, phase_bins, summed_profile = pulse_profile(pulse_pars[0],truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
     else:
         phase_bins, summed_profile = pulse_folding(truncated_t,T,0,pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
+
     if mode != 'overlap':
         plt.figure()
 #    plt.plot(phase_bins[:-1], summed_profile,'-')
@@ -335,31 +286,17 @@ def partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,s
     if mode == 'show':
         plt.show()
     elif mode == 'save':
-        if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-            dir = Lv0_dirs.BASE_DIR+'outputs/' + obsid + '/pp/'
-            if bary == True:
-                filename = dir + obsid + '_bary_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            elif bary == False:
-                filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
-        else:
-            dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
-            filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
+        filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
+        plt.savefig(parent_folder+filename,dpi=900)
+        plt.close()
 
     return phase_bins[:-1],summed_profile
 
-def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode):
+def partial_tE(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode):
     """
     Plot the pulse profile for a desired time interval and desired energy range.
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    bary - Whether the data is barycentered. True/False
-    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -378,19 +315,12 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,
     E2 - upper energy boundary
     mode - whether we want to show or save the plot
 
-    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     pulse_pars will have [f,fdot,fdotdot]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
-    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
-        raise TypeError("name_par_list should either be a list or an array!")
+    if type(eventfile) != str:
+        raise TypeError("eventfile should be a string!")
     if type(pulse_pars) != list and type(pulse_pars) != np.ndarray:
         raise TypeError("pulse_pars should either be a list or an array!")
-    if len(name_par_list) != 6:
-        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
     if 'TIME' not in par_list:
         raise ValueError("You should have 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -402,23 +332,22 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,
     if mode != 'show' and mode != 'save':
         raise ValueError("Mode should either be 'show' or 'save'!")
 
-    if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-        data_dict = Lv0_call_eventcl.get_eventcl(obsid,bary,par_list)
-        gtis = Lv1_data_gtis.raw_gtis(obsid,bary)
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
-    else:
-        data_dict = Lv0_call_nicersoft_eventcl.get_eventcl(obsid,name_par_list,par_list)
-        gtis = Lv0_call_nicersoft_eventcl.open_fits(obsid,name_par_list)[2].data
-        T = sum([ (gtis[i][1]-gtis[i][0]) for i in range(len(gtis)) ])
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    data_dict = Lv0_fits2dict.fits2dict(eventfile,1,par_list)
+    gtis = Lv0_fits2dict.fits2dict(eventfile,2,['START','STOP'])
+    T = sum([ (gtis['STOP'][i]-gtis['START'][i]) for i in range(len(gtis['START'])) ])
 
     if pulse_pars[1] == 0 and pulse_pars[2] == 0:
-        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
-        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
+        phases, phase_bins, summed_profile = pulse_profile(pulse_pars[0],truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
     else:
         phase_bins, summed_profile = pulse_folding(truncated_t,T,0,pulse_pars[0],pulse_pars[1],pulse_pars[2],no_phase_bins)
 
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
     if mode != 'overlap':
         plt.figure()
         plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid)+ '\n Time interval: ' + str(t1) + 's - ' + str(t2) + 's'+ '\n Energy range: ' + str(E1) + 'keV - ' + str(E2) + 'keV',fontsize=12)
@@ -429,29 +358,18 @@ def partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,
 
     if mode == 'show':
         plt.show()
+
     elif mode == 'save':
-        if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-            dir = Lv0_dirs.BASE_DIR+'outputs/' + obsid + '/pp/'
-            if bary == True:
-                filename = dir + obsid + '_bary_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            elif bary == False:
-                filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-                Lv2_mkdir.makedir(dir)
-                plt.savefig(filename,dpi=900)
-                plt.close()
-        else:
-            dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
-            filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
+        filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
+        plt.savefig(parent_folder+filename,dpi=900)
+        plt.close()
 
     return phase_bins[:-1],summed_profile
 
 ################################################################################
 ### SUBPLOTS
 
-def partial_subplots_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,subplot_Es,E1,E2,mode):
+def partial_subplots_E(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,subplot_Es,E1,E2,mode):
     """
     Plot the pulse profile for a desired energy range.
     [Though I don't think this will be used much. Count/s vs energy is pointless,
@@ -459,9 +377,7 @@ def partial_subplots_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_p
     So we're just doing a count/s vs time with an energy cut to the data.]
     INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    bary - Whether the data is barycentered. True/False
-    name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     par_list - A list of parameters we'd like to extract from the FITS file
     (e.g., from eventcl, PI_FAST, TIME, PI,)
     tbin_size - the size of the time bins (in seconds!)
@@ -477,17 +393,9 @@ def partial_subplots_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_p
     subplot_Es - list of tuples defining energy boundaries for pulse profiles
     E1 - lower energy boundary
     E2 - upper energy boundary
-
-    name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
-    if type(name_par_list) != list and type(name_par_list) != np.ndarray:
-        raise TypeError("name_par_list should either be a list or an array!")
-    if len(name_par_list) != 6:
-        raise ValueError("There seems to be fewer or more values in the list/array than there should be! You should have [GTI_true, E_true, GTIno, segment length, PI1, PI2]")
+    if type(eventfile) != str:
+        raise TypeError("eventfile should be a string!")
     if 'TIME' not in par_list:
         raise ValueError("You should have 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -497,16 +405,22 @@ def partial_subplots_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_p
     if mode != 'show' and mode != 'save' and mode != 'overlap':
         raise ValueError("Mode should either be 'show' or 'save' or 'overlap'!")
 
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
     #should find a way to generalize calling p10,p20,etc in the future..!
     fig,(p10,p20,p30,p40,p50,p60) = plt.subplots(6,1)
     gs = gridspec.GridSpec(6,1)
 
     for i in range(len(subplot_Es)): #for each tuple of energy boundaries
-        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,subplot_Es[i][0],subplot_Es[i][1])
-        phases, phase_bins, summed_profile = pulse_profile(f_pulse,truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
+        truncated_t, truncated_t_counts, truncated_E, truncated_E_counts = Lv1_data_bin.binning_E(eventfile,par_list,tbin_size,Ebin_size,subplot_Es[i][0],subplot_Es[i][1])
+        phases, phase_bins, summed_profile = pulse_profile(pulse_pars[0],truncated_t[:-1],truncated_t_counts,shift,no_phase_bins)
         plt.subplot(gs[i]).plot(phase_bins[:-1],summed_profile,'-')
+
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
+
     fig.suptitle(str(obsid),fontsize=12)
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
 
     if mode != 'overlap':
         plt.figure()
@@ -519,29 +433,16 @@ def partial_subplots_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_p
     if mode == 'show':
         plt.show()
     elif mode == 'save':
-        if all(name_par_list[i] == '' for i in range(len(name_par_list))):
-            dir = Lv0_dirs.BASE_DIR+'outputs/' + obsid + '/pp/'
-            if bary == True:
-                filename = dir + obsid + '_bary_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            elif bary == False:
-                filename = dir + obsid + '_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
-        else:
-            dir = Lv0_dirs.NICERSOFT_DATADIR+obsid+'_pipe/outputs/pp/'
-            filename = dir + obsid + '_nicersoft_bin' + str(tbin_size) + 's_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            Lv2_mkdir.makedir(dir)
-            plt.savefig(filename,dpi=900)
-            plt.close()
+        filename = 'pp_subplots_' + obsid + '_bin' + str(tbin_size) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
+        plt.savefig(parent_folder+filename,dpi=900)
+        plt.close()
 
     return phase_bins[:-1],summed_profile
 
 if __name__ == "__main__":
-    whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.2081,0.4,51,'show')
+    eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/ni1034070101_nicersoft_bary.evt'
 
-    partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.2081,0.4,51,0,100,'show')
-
-    partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.05,0.2081,0.4,51,3,8,'show')
-
-    partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.05,0.2081,0.4,51,0,100,3,8,'show')
+    #whole(eventfile,['TIME','PI','PI_FAST'],0.01,[0.20801275,0,0],0.4,21,'show')
+    #partial_t(eventfile,['TIME','PI','PI_FAST'],1,[0.2081,0,0],0.4,21,0,400,'show')
+    #partial_E(eventfile,['TIME','PI','PI_FAST'],1,0.05,[0.2081,0,0],0.4,21,0.3,12,'show')
+    #partial_tE(eventfile,['TIME','PI','PI_FAST'],1,0.05,[0.2081,0,0],0.4,21,0,400,0.3,12,'show')

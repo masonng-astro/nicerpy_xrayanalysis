@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon Jan 7 12:02pm 2019
@@ -17,4 +17,3 @@ def global_par():
     NICER_DATADIR = '/Volumes/Samsung_T5/NICER-data/'
     NICERSOFT_DATADIR = '/Volumes/Samsung_T5/NICERsoft_outputs/'
     NGC300 = '/Volumes/Samsung_T5/NGC300_ULX/'
-    #NICER_DATADIR = '/Users/masonng/Documents/MIT/Research/nicer-data/'

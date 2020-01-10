@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Fri Jun 7 11:01am 2019
@@ -54,7 +54,7 @@ def single_trial_prob(significance,N):
     single_trial = 1 - (1 - prob)**(1/N)
     single_trial_signif = special.erfinv(1-single_trial)*np.sqrt(2)
 
-    print('The single trial probability required for a ' + str(significance) + ' sigma detection with ' + str(int(N)) + ' trials is ' + str(single_trial) + ', i.e., a significance of ' + str(single_trial_signif))
+    #print('The single trial probability required for a ' + str(significance) + ' sigma detection with ' + str(int(N)) + ' trials is ' + str(single_trial) + ', i.e., a significance of ' + str(single_trial_signif))
 
     return single_trial, single_trial_signif
 
@@ -74,7 +74,7 @@ def signal_significance(M,W,Pthreshold):
     Q_chi2_dof = 1-stats.chi2.cdf(chi2,dof) #stats.chi2 is from 0 to chi2, so do the complement if we want chi2 to infinity
     ## Q(M*W*Pthreshold|2*M*W) ; where Q(chi^2|nu) = 1/[2^(nu/2)*Gamma(nu/2)] * \int_{chi^2}^\infty t^{nu/2 - 1} e^{-t/2} dt
     significance = special.erfinv(1-Q_chi2_dof)*np.sqrt(2)
-    print('The signal has a significance of ' + str(significance) + ' sigma.')
+    #print('The signal has a significance of ' + str(significance) + ' sigma.')
     #confidence_level = special.erf(significance/np.sqrt(2))*100
     return significance
 
@@ -100,6 +100,6 @@ if __name__ == "__main__":
     #print(max_acc(200,200,230))
     #sig_sig = signal_significance(43,5000,2.02697)
     #sig_sig = signal_significance(43,5000,2.01199)
-    print(power_for_sigma(4,1e5,162,1))
+    print(power_for_sigma(5,4000,1,1))
     #single_trial_prob(2,4e6)
     #single_trial_prob(1,4e6)

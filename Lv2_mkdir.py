@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Thurs Jan 10 3:50pm 2019
@@ -18,7 +18,8 @@ def makedir(dir):
     """
 
     if os.path.exists(dir):
-        raise ValueError('The path already exists! Change the merged_id.')
+        print('The path already exists!')
+        return
     else:
         print('This directory did not exist - creating ' + dir + ' now!')
         os.makedirs(dir)

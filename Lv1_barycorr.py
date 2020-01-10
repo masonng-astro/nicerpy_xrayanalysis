@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Mon May 27 1:37pm 2019
@@ -9,217 +9,104 @@ Program for barycorr - doing barycenter corrections to the data
 from __future__ import division, print_function
 import numpy as np
 from astropy.io import fits
-from tqdm import tqdm
-import Lv0_dirs,Lv0_call_eventcl,Lv0_call_nicersoft_eventcl
+import Lv0_dirs
 import subprocess
 
 Lv0_dirs.global_par()
 
-def get_ra_dec(obsid):
+def get_ra_dec(eventfile):
     """
     Obtain the RA_OBJ and DEC_OBJ corresponding to the observation!
 
     obsid - Observation ID of the object of interest (10-digit str)
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-
-    event = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/cleanfilt.evt'
-    event = fits.open(event)
+    event = fits.open(eventfile)
     event_header = event[1].header
 
     return event_header['RA_OBJ'], event_header['DEC_OBJ']
 
-def nicerdata_barycorr(obsid,refframe):
+def read_par(parfile):
     """
-    Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+    Function that reads a par file. In particular, for the purposes of barycorr,
+    it will return POSEPOCH, RAJ, DECJ, PMRA, and PMDEC.
+
+    Step 1: Read par file line by line, where each line is stored as a string in the 'contents' array
+    Step 2a: For PSRJ, RAJ, DECJ, PMRA, and PMDEC, those lines are teased out
+    Step 2b: The corresponding strings are split up without whitespace
+    Step 3: Extract the values accordingly
+    """
+    if parfile[-4:] != '.par':
+        raise ValueError("parfile is neither an empty string nor a .par file. Is this right?")
+
+    contents = open(parfile,'r').read().split('\n')
+    posepoch = [contents[i] for i in range(len(contents)) if 'POSEPOCH' in contents[i]][0].split()
+    raj = [contents[i] for i in range(len(contents)) if 'RAJ' in contents[i]][0].split()[1].split(':')
+    decj = [contents[i] for i in range(len(contents)) if 'DECJ' in contents[i]][0].split()[1].split(':')
+    pmra = [contents[i] for i in range(len(contents)) if 'PMRA' in contents[i]][0].split()[1] #milliarcsec per year
+    pmdec = [contents[i] for i in range(len(contents)) if 'PMDEC' in contents[i]][0].split()[1] #milliarcsec per year
+
+    ra_deg = np.float(raj[0])*15 + np.float(raj[1])/60 * 15 + np.float(raj[2])/3600 * 15 #RA in HH:MM:SS to deg
+    dec_deg = np.float(decj[0]) + np.float(decj[1])/60 + np.float(decj[2])/3600 #DEC in HH:MM:SS to deg
+
+    return posepoch[1], ra_deg, dec_deg, pmra, pmdec #returns object name, RA, DEC, PMRA, PMDEC
+
+def barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder):
+    """
+    General function to perform the barycenter corrections for an event file
 
     obsid - Observation ID of the object of interest (10-digit str)
     refframe - reference frame for barycenter corrections (usually ICRS)
+    parfile - name of the .par file
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if refframe != 'ICRS' and refframe != 'FK5':
         raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
 
-    event = Lv0_call_eventcl.open_fits(obsid,False)
-    event_header = event[1].header
-    ra,dec = event_header['RA_OBJ'], event_header['DEC_OBJ']
-
-    output_folder = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/'
-    infile = output_folder + 'ni' + obsid + '_0mpu7_cl.evt'
-    outfile = output_folder + 'ni' + obsid + '_0mpu7_cl_bary.evt'
-    orbit_file = Lv0_dirs.NICER_DATADIR + obsid + '/auxil/' + 'ni' + obsid + '.orb'
+    TIMEZERO = fits.open(eventfile)[1].header['TIMEZERO']
     logfile = output_folder + 'barycorr_notes.txt'
 
-    with open(logfile,'w') as logtextfile:
-        logtextfile.write(subprocess.check_output(['barycorr',infile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(ra),'dec='+str(dec),'refframe='+str(refframe),'clobber=YES']))
-        logtextfile.close()
+    if parfile[-4:] == '.par': #i.e., if we have a par file:
+        posepoch,old_ra,old_dec,PMRA,PMDEC = read_par(parfile)
+        #get epoch of position, old RA, old DEC, and PMRA/PMDEC proper motion corrections
 
-    return
+        gti_card = fits.open(eventfile)[2]
+        gtis = gti_card.data #aim is to get start/stop times of observation to get time of middle of observation
+        MJDREFI = gti_card.header['MJDREFI']
+        MJDREFF = gti_card.header['MJDREFF']
+        centroid_time = (gtis[-1][1]-gtis[0][0])/2 #not going to take TIMEZERO into account because difference is small? Plus it's a -1 - (-1) thing
 
-def nicersoft_barycorr(obsid,refframe):
-    """
-    Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+        centroid_MJD = (MJDREFI+MJDREF) + (TIMEZERO+centroid_time)/86400 #convert centroid MET to MJD
+        time_elapsed = centroid_MJD-POSEPOCH #centroid_MJD is later than POSEPOCH!
 
-    obsid - Observation ID of the object of interest (10-digit str)
-    refframe - reference frame for barycenter corrections (usually ICRS)
-    """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if refframe != 'ICRS' and refframe != 'FK5':
-        raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
+        new_ra = old_ra + (PMRA/np.cos(old_dec*np.pi/180) * 1E-3/3600) * time_elapsed/365.2425 #365.2425 days in a year
+        new_dec = old_dec + (PMDEC*1E-3/3600) * time_elapsed/365.2425
 
-    ra,dec = get_ra_dec(obsid)
-    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
-    infile = nicersoft_output_folder + 'cleanfilt.evt'
-    outfile = nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary.evt'
-    orbit_file = nicersoft_output_folder + 'ni' + obsid + '.orb'
-    logfile = nicersoft_output_folder + 'barycorr_notes.txt'
+        with open(logfile,'w') as logtextfile:
+            output = subprocess.run(['barycorr',eventfile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(new_ra),'dec='+str(new_dec),'refframe='+str(refframe),'clobber=YES'],capture_output=True,text=True)
+            logtextfile.write(output.stdout)
+            logtextfile.write('*------------------------------* \n')
+            logtextfile.write(output.stderr)
+            logtextfile.close()
 
-    with open(logfile,'w') as logtextfile:
-        logtextfile.write(subprocess.check_output(['barycorr',infile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(ra),'dec='+str(dec),'refframe='+str(refframe),'clobber=YES']))
-        logtextfile.close()
+    elif parfile == '':
+        ra,dec = get_ra_dec(eventfile)
+        with open(logfile,'w') as logtextfile:
+            output = subprocess.run(['barycorr',eventfile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(ra),'dec='+str(dec),'refframe='+str(refframe),'clobber=YES'],capture_output=True,text=True)
+            logtextfile.write(output.stdout)
+            logtextfile.write('*------------------------------* \n')
+            logtextfile.write(output.stderr)
+            logtextfile.close()
 
-    return
-
-def B1957_20_barycorr(obsid):
-    """
-    Applying barycenter corrections to the B1957+20 event files! Want to do barycenter
-    corrections ObsID by ObsID, i.e., take into account PMRA, PMDEC when using the RA
-    and DEC for barycenter corrections.
-
-    obsid - Observation ID of the object of interest (10-digit str)
-    """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-
-    POSEPOCH = 58000 #reference epoch for position
-    old_ra = 19*15 + 59/60 * 15 + 36.7404469/3600 * 15 # 299.90317048875
-    old_dec = 20 + 48/60 + 14.42810/3600 # 20.804141347222224
-    PMRA = -15.428307750281743369
-    PMDEC = -24.933123414972509821
-
-    gti_card = Lv0_call_eventcl.open_fits(obsid,False)
-
-    MJDREFI = gti_card[2].header['MJDREFI']
-    MJDREFF = gti_card[2].header['MJDREFF']
-
-    gtis = gti_card[2].data #for GTIs
-    centroid_time = (gtis[-1][1]-gtis[0][0])/2
-
-    time_elapsed = centroid_time-POSEPOCH
-
-    new_ra = old_ra + (PMRA/np.cos(old_dec*np.pi/180) * 1E-3/3600) * time_elapsed/365.2425 #365.2425 days in a year
-    new_dec = old_dec + (PMDEC*1E-3/3600) * time_elapsed/365.2425
-
-    refframe = 'ICRS'
-    output_folder = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/'
-    infile = output_folder + 'ni' + obsid + '_0mpu7_cl.evt'
-    outfile = output_folder + 'ni' + obsid + '_0mpu7_cl_bary.evt'
-    orbit_file = Lv0_dirs.NICER_DATADIR + obsid + '/auxil/' + 'ni' + obsid + '.orb'
-    logfile = output_folder + 'barycorr_notes.txt'
-
-    with open(logfile,'w') as logtextfile:
-        logtextfile.write(subprocess.check_output(['barycorr',infile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(new_ra),'dec='+str(new_dec),'refframe='+str(refframe),'clobber=YES']))
-        logtextfile.close()
-
-    return
-
-def B1957_20_nicersoft_barycorr(obsid):
-    """
-    Applying barycenter corrections to the B1957+20 event files! Want to do barycenter
-    corrections ObsID by ObsID, i.e., take into account PMRA, PMDEC when using the RA
-    and DEC for barycenter corrections.
-
-    obsid - Observation ID of the object of interest (10-digit str)
-    """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-
-    POSEPOCH = 58000 #reference epoch for position
-    old_ra = 19*15 + 59/60 * 15 + 36.7404469/3600 * 15 # 299.90317048875
-    old_dec = 20 + 48/60 + 14.42810/3600 # 20.804141347222224
-    PMRA = -15.428307750281743369
-    PMDEC = -24.933123414972509821
-
-    gti_card = Lv0_call_eventcl.open_fits(obsid,False)
-
-    MJDREFI = gti_card[2].header['MJDREFI']
-    MJDREFF = gti_card[2].header['MJDREFF']
-
-    gtis = gti_card[2].data #for GTIs
-    centroid_time = (gtis[-1][1]-gtis[0][0])/2
-
-    time_elapsed = centroid_time-POSEPOCH
-
-    new_ra = old_ra + (PMRA/np.cos(old_dec*np.pi/180) * 1E-3/3600) * time_elapsed/365.2425 #365.2425 days in a year
-    new_dec = old_dec + (PMDEC*1E-3/3600) * time_elapsed/365.2425
-
-    refframe = 'ICRS'
-    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
-    infile = nicersoft_output_folder + 'cleanfilt.evt'
-    outfile = nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary.evt'
-    orbit_file = nicersoft_output_folder + 'ni' + obsid + '.orb'
-    logfile = nicersoft_output_folder + 'barycorr_notes.txt'
-
-    with open(logfile,'w') as logtextfile:
-        logtextfile.write(subprocess.check_output(['barycorr',infile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(new_ra),'dec='+str(new_dec),'refframe='+str(refframe),'clobber=YES']))
-        logtextfile.close()
-
-    return
-
-def J1231_nicersoft_barycorr(obsid):
-    """
-    Applying barycenter corrections to the J1231-1411 event files! Want to do barycenter
-    corrections ObsID by ObsID, i.e., take into account PMRA, PMDEC when using the RA
-    and DEC for barycenter corrections.
-
-    obsid - Observation ID of the object of interest (10-digit str)
-    """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-
-    POSEPOCH = 55000 #reference epoch for position
-    old_ra = 12*15 + 31/60 * 15 + 11.31331900/3600 * 15
-    old_dec = -14 + 11/60 + 43.63908325/3600
-    PMRA = -62.6015823614
-    PMDEC = 6.75015701922
-
-    gti_card = Lv0_call_eventcl.open_fits(obsid,False)
-
-    MJDREFI = gti_card[2].header['MJDREFI']
-    MJDREFF = gti_card[2].header['MJDREFF']
-
-    gtis = gti_card[2].data #for GTIs
-    centroid_time = (gtis[-1][1]-gtis[0][0])/2
-
-    time_elapsed = centroid_time-POSEPOCH
-
-    new_ra = old_ra + (PMRA/np.cos(old_dec*np.pi/180) * 1E-3/3600) * time_elapsed/365.2425 #365.2425 days in a year
-    new_dec = old_dec + (PMDEC*1E-3/3600) * time_elapsed/365.2425
-
-    refframe = 'ICRS'
-    nicersoft_output_folder = Lv0_dirs.NICERSOFT_DATADIR + obsid + '_pipe/'
-    infile = nicersoft_output_folder + 'cleanfilt.evt'
-    outfile = nicersoft_output_folder + 'ni' + obsid + '_nicersoft_bary.evt'
-    orbit_file = nicersoft_output_folder + 'ni' + obsid + '.orb'
-    logfile = nicersoft_output_folder + 'barycorr_notes.txt'
-
-    with open(logfile,'w') as logtextfile:
-        logtextfile.write(subprocess.check_output(['barycorr',infile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(new_ra),'dec='+str(new_dec),'refframe='+str(refframe),'clobber=YES']))
-        logtextfile.close()
-
-    return
+    else:
+        raise ValueError("parfile is neither an empty string nor a .par file. Is this right?")
 
 if __name__ == "__main__":
-    #obsids = ['10301801'+str(i).zfill(2) for i in range(1,32)] + ['10301801'+str(i) for i in range(49,88)]
-    #for i in range(len(obsids)):
-    #    B1957_20_barycorr(obsids[i])
-    #    B1957_20_nicersoft_barycorr(obsids[i])
-    #barycorr('1060060127','ICRS')
-    obsids = ['0060060101','0060060102','0060060103','0060060104','0060060105','0060060106','0060060107','0060060108','0060060109','0060060110','0060060111','0060060112','0060060113'] + [str(i) for i in range(1060060101,1060060200)] + [str(i) for i in range(1060060201,1060060300)] + [str(i) for i in range(1060060301,1060060313)]
-    for i in tqdm(range(len(obsids))):
-        #nicerdata_barycorr(obsids[i],'ICRS')
-        #nicersoft_barycorr(obsids[i],'ICRS')
-        J1231_nicersoft_barycorr(obsids[i])
+    #print(read_par('/Users/masonng/Downloads/test.par'))
+    obsid = '1911212213'
+    eventfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt.evt'
+    outfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt_bary.evt'
+    orbitfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209.orb'
+    parfile = ''
+    output_folder = Lv0_dirs.NICER_DATADIR + 'rxj0209/'
+    refframe = 'ICRS'
+
+    barycorr(eventfile,outfile,refframe,orbitfile,parfile,output_folder)

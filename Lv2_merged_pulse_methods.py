@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Fri Aug 23 5:18pm 2019
@@ -64,6 +64,7 @@ def do_demodulate(merging,data_id,par_file,E_trunc,PI1,PI2):
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
     """
+    TIMEZERO = -1
     if type(data_id) != str:
         raise TypeError("data_id should be a string!")
     if len(data_id) != 6 and len(data_id) != 10:
@@ -97,9 +98,9 @@ def do_demodulate(merging,data_id,par_file,E_trunc,PI1,PI2):
         gtis_start = fitsfile_demod[2].data['START'] #original GTI start times
         gtis_stop = fitsfile_demod[2].data['STOP'] #original GTI end times
 
-        times_MJD = MJDREFI + MJDREFF + times/86400 #converting METs to MJD
-        gtis_start_MJD = MJDREFI + MJDREFF + gtis_start/86400 #converting GTIs in METs to MJD
-        gtis_stop_MJD = MJDREFI + MJDREFF + gtis_stop/86400 #converting GTIs in METs to MJD
+        times_MJD = MJDREFI + MJDREFF + (times+TIMEZERO)/86400 #converting METs to MJD
+        gtis_start_MJD = MJDREFI + MJDREFF + (gtis_start+TIMEZERO)/86400 #converting GTIs in METs to MJD
+        gtis_stop_MJD = MJDREFI + MJDREFF + (gtis_stop+TIMEZERO)/86400 #converting GTIs in METs to MJD
 
         try:
             times_demod = binary_psr.binary_psr(par_file).demodulate_TOAs(times_MJD) #demodulated event times

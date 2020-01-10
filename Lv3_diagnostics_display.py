@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Sat Jan 12 2:54pm 2019
@@ -9,18 +9,17 @@ the clutter in Lv3_diagnostics.
 """
 from __future__ import division, print_function
 import numpy as np
-import Lv0_dirs,Lv1_data_bin,Lv2_sources
-import Lv0_call_eventcl,Lv0_call_att,Lv0_call_hk
-import Lv0_call_mkf,Lv0_call_orb,Lv0_call_uf,Lv0_call_ufa
+import Lv0_dirs,Lv1_data_bin
+from astropy.io import fits
 from scipy import stats
 import matplotlib.pyplot as plt
 
-def display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype):
+def display_all(eventfile,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype):
     """
     To display the plots for desired time interval. Whether to save or show the
     plots is determined in Lv3_diagnostics.
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     diag_var - the diagnostic variable we are looking at
     lc_t - array corresponding to time values for the light curve
     lc_counts - array corresponding to counts for the light curve
@@ -28,13 +27,14 @@ def display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype):
     diag_counts - array corresponding to counts for the diagnostic variable
     filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if type(diag_var) != str:
         raise TypeError("diag_var should be a string!")
     if filetype not in ['.att','.mkf','.cl'] and type(filetype) != list and type(filetype) != np.ndarray:
         raise ValueError("filetype should be one of '.att','.mkf','.hk','.eventcl'! Or filetype = ['.hk',mpuno]")
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
+
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,8))
     if filetype == '.att' or filetype == '.mkf' or filetype == '.cl':
@@ -52,7 +52,7 @@ def display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype):
 
     plt.subplots_adjust(hspace=0.2)
 
-def display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype):
+def display_t(eventfile,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype):
     """
     To display the plots for desired time interval. Whether to save or show the
     plots is determined in Lv3_diagnostics.
@@ -67,15 +67,16 @@ def display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype):
     diag_counts - array corresponding to counts for the diagnostic variable
     filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
     if type(diag_var) != str:
         raise TypeError("diag_var should be a string!")
     if t2<t1:
         raise ValueError("t2 should be greater than t1!")
     if filetype not in ['.att','.mkf','.cl'] and type(filetype) != list and type(filetype) != np.ndarray:
         raise ValueError("filetype should be one of '.att','.mkf','.hk','.eventcl'! Or filetype = ['.hk',mpuno]")
-    obj_name = Lv2_sources.obsid_to_obj(obsid)
+
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
     fig, (ax1,ax2) = plt.subplots(2,1,figsize=(10,8))
     if filetype == '.att' or filetype == '.mkf' or filetype == '.cl':

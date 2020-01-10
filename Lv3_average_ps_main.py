@@ -1,9 +1,14 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Thurs Jul 18 11:00am 2019
 
 Time to execute the programs for averaged power spectra!
+
+1/9/2020 - I was so confused before as to why I didn't have niextract for merged = False,
+then I realized it was because I probably did the segments in presto_subroutines
+(or presto_segments in the previous version). Will put it in this time because of
+the integration with Lv3_quicklook.py!
 
 """
 from __future__ import division, print_function
@@ -14,41 +19,47 @@ import subprocess
 from tqdm import tqdm
 
 import Lv0_dirs
-import Lv2_average_ps_methods,Lv2_average_merge_ps_methods
+import Lv2_average_ps_methods,Lv2_presto_subroutines,Lv2_merging_events
 import Lv3_detection_level
 
 import matplotlib.pyplot as plt
+
+Lv0_dirs.global_par()
 
 demod = True
 merged = True
 preprocessing = True
 time_segments = False
-time_energy_segments = True
+time_energy_segments = False
 
 ##### For merged = False:
 if merged == False:
-    obsid = '0034070101' #observation ID
-    segment_length = 100 #segment length
+    #eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+    eventfile = Lv0_dirs.NICER_DATADIR + '/rxj0209/rxj0209kgfilt_bary.evt'
+    segment_length = 10000 #segment length
+    PI1 = 30 #lower bound for PI
+    PI2 = 200 #upper bound for PI
     par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par' #parameter file for demodulation
-    tbin = 0.00025 #bin size in s
+    tbin = 0.025 #bin size in s
     N = Lv3_detection_level.N_trials(tbin,segment_length)
-    threshold = 20 #threshold for counts in each segment
-    W = 2 #number of consecutive Fourier bins to average over
-    starting_freq = 10 #for noise_hist
+    threshold = 10 #threshold for counts in each segment
+    W = 1 #number of consecutive Fourier bins to average over
+    starting_freq = 1 #for noise_hist
+    mode = 't'
 
 ##### For merged = True:
 if merged == True:
-    #obsids = ['20600603'+str(i) for i in range(51,72)]
-    obsids = ['10600601'+str(i) for i in range(28,48)]
-    #obsids = ['10301801'+str(i) for i in range(49,58)]
+    obsids = ['20600603'+str(i) for i in range(61,66)]
 
-    merged_id = '000007' #need to be very careful that I know what the next one is!
+    merged_id = '000013' #need to be very careful that I know what the next one is!
+    eventfile = Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged' + merged_id + '/merged' + merged_id + '_nicersoft_bary.evt'
     segment_length = 500 #segment length
+    mode = 't'
     par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par' #parameter file for demodulation
     PI1 = 30 #lower bound for PI
     PI2 = 200 #upper bound for PI
     tbin = 0.00025 #bin size in s
-    N = Lv3_detection_level.N_trials(tbin,segment_length) #*100 if doing B1957+20
+    N = Lv3_detection_level.N_trials(tbin,segment_length)
     threshold = 10 #threshold for counts in each segment
     W = 1 #number of consecutive Fourier bins to average over
     starting_freq = 10 #for noise_hist
@@ -57,14 +68,21 @@ if merged == True:
 
 if merged == False:
     if preprocessing == True:
-        if demod == True:
-            Lv2_average_ps_methods.do_demodulate(obsid,segment_length,par_file)
-        Lv2_average_ps_methods.do_nicerfits2presto(obsid,tbin,segment_length)
-        Lv2_average_ps_methods.edit_inf(obsid,tbin,segment_length)
-        Lv2_average_ps_methods.edit_binary(obsid,tbin,segment_length)
-        Lv2_average_ps_methods.realfft_segment(obsid,segment_length)
+        Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
+        if time_segments == True:
+            Lv2_presto_subroutines.niextract_gti_time(eventfile,segment_length)
+        if time_energy_segments == True:
+            Lv2_presto_subroutines.niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
 
-    f,ps,ps_bins,N_greaterthanP,M = Lv2_average_ps_methods.average_ps(obsid,segment_length,demod,tbin,threshold,starting_freq,W)
+        if demod == True:
+            Lv2_average_ps_methods.do_demodulate(eventfile,segment_length,mode,par_file)
+
+        Lv2_average_ps_methods.do_nicerfits2presto(eventfile,tbin,segment_length)
+        Lv2_average_ps_methods.edit_inf(eventfile,tbin,segment_length)
+        Lv2_average_ps_methods.edit_binary(eventfile,tbin,segment_length)
+        Lv2_average_ps_methods.realfft(eventfile,segment_length)
+
+    f,ps,ps_bins,N_greaterthanP,M = Lv2_average_ps_methods.average_ps(eventfile,segment_length,demod,tbin,threshold,starting_freq,W)
 
     power_required_3 = Lv3_detection_level.power_for_sigma(3,N,M,W) #power required for significance
     power_required_4 = Lv3_detection_level.power_for_sigma(4,N,M,W) #power required for significance
@@ -73,7 +91,7 @@ if merged == False:
     plt.plot(f,ps,'rx-')
     plt.axhline(y=power_required_3,lw=0.8,alpha=0.5,color='b')
     plt.axhline(y=power_required_4,lw=0.8,alpha=0.5,color='k')
-    plt.xlim([0.3,0.5])
+    plt.xlim([0.1,5])
     plt.ylim([0,800])
     plt.xlabel('Frequency (Hz)',fontsize=12)
     plt.ylabel('Leahy-normalized power',fontsize=12)
@@ -90,23 +108,23 @@ if merged == False:
 
 if merged == True:
     if preprocessing == True:
-        Lv2_average_merge_ps_methods.merging(obsids)
-        Lv2_average_merge_ps_methods.merging_GTIs(obsids,merged_id)
-        Lv2_average_merge_ps_methods.get_gti_file(merged_id,segment_length)
-        if time_segments == True:
-            Lv2_average_merge_ps_methods.niextract_gti_time(merged_id,segment_length)
-        if time_energy_segments == True:
-            Lv2_average_merge_ps_methods.niextract_gti_time_energy(merged_id,segment_length,PI1,PI2)
+        #Lv2_merging_events.merging(obsids)
+        #Lv2_merging_events.merging_GTIs(obsids,merged_id)
+        #Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
+        #if time_segments == True:
+    #        Lv2_presto_subroutines.niextract_gti_time(eventfile,segment_length)
+    #    if time_energy_segments == True:
+    #        Lv2_presto_subroutines.niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
 
         if demod == True:
-            Lv2_average_merge_ps_methods.do_demodulate(merged_id,segment_length,par_file,PI2)
+            Lv2_average_ps_methods.do_demodulate(eventfile,segment_length,mode,par_file)
 
-        Lv2_average_merge_ps_methods.do_nicerfits2presto(merged_id,tbin,segment_length)
-        Lv2_average_merge_ps_methods.edit_inf(merged_id,tbin,segment_length)
-        Lv2_average_merge_ps_methods.edit_binary(merged_id,tbin,segment_length)
-        Lv2_average_merge_ps_methods.realfft(merged_id,segment_length)
+        Lv2_average_ps_methods.do_nicerfits2presto(eventfile,tbin,segment_length)
+        Lv2_average_ps_methods.edit_inf(eventfile,tbin,segment_length)
+        Lv2_average_ps_methods.edit_binary(eventfile,tbin,segment_length)
+        Lv2_average_ps_methods.realfft(eventfile,segment_length)
 
-    f,ps,ps_bins,N_greaterthanP,M = Lv2_average_merge_ps_methods.average_ps(merged_id,segment_length,demod,PI1,PI2,tbin,threshold,starting_freq,W)
+    f,ps,ps_bins,N_greaterthanP,M = Lv2_average_ps_methods.average_ps(eventfile,segment_length,demod,tbin,threshold,starting_freq,W)
 
     power_required_3 = Lv3_detection_level.power_for_sigma(3,N,M,W) #power required for significance
     power_required_4 = Lv3_detection_level.power_for_sigma(4,N,M,W) #power required for significance

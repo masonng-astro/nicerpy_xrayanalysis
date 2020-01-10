@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Jan 5th
@@ -1442,6 +1442,7 @@ used = np.array([17949.31,39294.18,2934.0,8829.248,6688.78,6437.754,6156.472,
 print(len(used),sum(used)/21)
 """
 
+"""
 import Lv3_analyze_xspec_pars
 from matplotlib import rc
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
@@ -1464,7 +1465,7 @@ plt.legend(('XSPEC Fit','Sample 1','Sample 2'),fontsize=12,loc='best')
 plt.xlabel('Time (MJD)',fontsize=12)
 plt.ylabel(r'powerlaw - $\Gamma$ ',fontsize=12)
 plt.show()
-
+"""
 
 
 """
@@ -1541,6 +1542,7 @@ plt.xlim([0.4,5])
 
 plt.show()
 """
+
 
 timeend = time.time()
 
