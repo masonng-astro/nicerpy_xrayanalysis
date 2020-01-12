@@ -10,7 +10,7 @@ from __future__ import division, print_function
 from astropy.io import fits
 import numpy as np
 import pathlib
-import Lv0_dirs,Lv0_fits2dict,Lv1_data_bin,Lv2_mkdir,Lv2_ps_method
+import Lv0_dirs,Lv0_fits2dict,Lv1_data_bin,Lv2_mkdir,Lv2_ps_method,Lv3_detection_level
 from scipy import stats, signal
 import matplotlib.pyplot as plt
 import os

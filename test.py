@@ -17,7 +17,7 @@ import time
 import matplotlib.gridspec as gridspec
 import subprocess
 import glob
-import Lv0_dirs,Lv0_call_eventcl,Lv1_data_bin,Lv1_data_gtis,Lv2_phase
+import Lv0_dirs,Lv1_data_bin,Lv2_phase
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
 from scipy import signal
@@ -1543,6 +1543,10 @@ plt.xlim([0.4,5])
 plt.show()
 """
 
+efsearch_results = '/Volumes/Samsung_T5/NICER-data/rxj0209/testefsearch.fes'
+data = fits.open(efsearch_results)
+print(data)
+print(len(data))
 
 timeend = time.time()
 

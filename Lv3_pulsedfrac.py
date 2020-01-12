@@ -10,6 +10,7 @@ from __future__ import division, print_function
 import numpy as np
 import Lv0_dirs,Lv2_phase
 from scipy import stats
+import pathlib
 from PyAstronomy.pyasl import foldAt
 import matplotlib.pyplot as plt
 import os
@@ -140,10 +141,6 @@ def pf_tE(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,
     E2 - upper energy boundary
     mode - whether we want to show or save the plot
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-    if bary != True and bary != False:
-        raise ValueError("bary should either be True or False!")
     if 'TIME' not in par_list:
         raise ValueError("You should have 'TIME' in the parameter list!")
     if type(par_list) != list and type(par_list) != np.ndarray:
@@ -164,4 +161,4 @@ def pf_tE(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,
 
 if __name__ == "__main__":
     eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
-    print(pf_tE(eventfile,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0,500,0.3,12,'show'))
+    print(pf_tE(eventfile,['TIME','PI','PI_FAST'],0.01,0.05,[0.20801725,0,0],0.4,50,0,500,1,6,'show'))

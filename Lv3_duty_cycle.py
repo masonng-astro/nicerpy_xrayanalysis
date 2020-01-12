@@ -16,6 +16,7 @@ import Lv0_dirs
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import os
+import pathlib
 from scipy import stats
 import subprocess
 import glob
@@ -35,10 +36,11 @@ def duty_cycle(eventfile,tbin,segment_length,duty_cycle_bin,threshold):
     duty_cycle_bin - binning used to calculate the duty cycle
     threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
     """
-    if type(obsid) != str:
-        raise TypeError("ObsID should be a string!")
-
     parent_folder = str(pathlib.Path(eventfile).parent)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
+
     dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*GTI*'+str(segment_length)+'s*.dat')) #grab the .dat files with a specified segment length
 
     gtis = fits.open(eventfile)[2].data
@@ -63,8 +65,8 @@ def duty_cycle(eventfile,tbin,segment_length,duty_cycle_bin,threshold):
         print(usable_data,len(summed_data))
         if usable_data/len(summed_data)*100 >= threshold:
             useful_data += usable_data
-            print(usable_data)
-        print('--')
+            #print(usable_data)
+        #print('--')
 
     print('ObsID: ' + str(obsid))
     print('Segment Length: ' + str(segment_length) + 's')
@@ -118,7 +120,7 @@ def duty_cycle_dist(eventfile,tbin,segment_length,duty_cycle_bin,threshold):
     ax2.set_ylabel('Number of segments',fontsize=12)
 
     plt.title('Segment length = ' + str(segment_length) + 's \n Number of segments here: ' + str(len(dat_files)),fontsize=12)
-    plt.savefig(obsdir+str(segment_length)+'s_dutycycle.pdf',dpi=900,format='pdf')
+    plt.savefig(parent_folder + '/' +str(segment_length)+'s_dutycycle.pdf',dpi=900,format='pdf')
     plt.close()
 
     return np.array(duty_cycle_array)
@@ -139,6 +141,9 @@ def duty_cycle_tE(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold
     threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
     """
     parent_folder = str(pathlib.Path(eventfile).parent)
+    event_header = fits.open(eventfile)[1].header
+    obj_name = event_header['OBJECT']
+    obsid = event_header['OBS_ID']
 
     dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length)+'s/*GTI*'+str(segment_length)+'s*'+str(PI1)+'-'+str(PI2)+'*.dat')) #grab the .dat files with a specified segment length
 
@@ -221,7 +226,7 @@ def duty_cycle_tE_dist(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,thre
     ax2.set_ylabel('Number of segments',fontsize=12)
 
     plt.title('Segment length = ' + str(segment_length) + 's \n Number of segments here: ' + str(len(dat_files)),fontsize=12)
-    plt.savefig(obsdir+str(segment_length)+'s_dutycycle.pdf',dpi=900,format='pdf')
+    plt.savefig(parent_folder + '/' +str(segment_length)+'s_dutycycle.pdf',dpi=900,format='pdf')
     plt.close()
 
     return np.array(duty_cycle_array)
@@ -260,14 +265,15 @@ def compare_segment_lengths(eventfile,tbin,segment_lengths,duty_cycle_bin):
     plt.xlabel('Threshold',fontsize=12)
     plt.ylabel('Fraction of segments (for a given segment length)',fontsize=12)
     plt.legend((tuple(str(seg_lengths[i]) for i in range(len(seg_lengths)))),loc='best')
-    plt.savefig(parent_folder+'threshold_segmentlength.pdf',dpi=900,format='pdf')
+    plt.savefig(parent_folder+'/threshold_segmentlength.pdf',dpi=900,format='pdf')
     plt.close()
 
 if __name__ == "__main__":
-    duty_cycle('1060020113',0.00025,1000,1,20)
+    eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+    #duty_cycle(eventfile,0.00025,100,1,10)
     ### REMEMBER, tbin is NOT from Lv3_average_segments, but it's from nicerfits2presto!
 
-    #duty_cycle_tE('1200250108',0.00025,200,30,250,1,10)
+    duty_cycle_tE(eventfile,0.00025,100,30,200,1,10)
 
     #seg_lengths = [200,300,500,800,1000,1500,2000]
     #for i in range(len(seg_lengths)):

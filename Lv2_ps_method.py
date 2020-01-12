@@ -158,7 +158,7 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
 #    print(np.mean(checkmean))
     ####freqs = np.linspace(0,1/(2.0*dt),int(len(test_times)/2)) #correct method! Same as that of fftfreq
     if toplot == True:
-        plt.semilogy(freqs[1:int(N/2)],power_spec[1:int(N/2)],'rx-')#/np.mean(power_spec[1:int(N/2)]),'rx-')
+        plt.semilogy(freqs[1:int(N/2)],power_spec[1:int(N/2)],'r-')#/np.mean(power_spec[1:int(N/2)]),'rx-')
         plt.xlabel('Hz')
         plt.ylabel('Normalized power spectrum')
         if xlims[0] == True:
