@@ -20,9 +20,15 @@ v2.2 - August 23 2019
 
 v3.0 - January 9 2020
 
-Significant revision to many scripts! Look at Evernote from first week of January 2020. The main revision is to use event files as inputs in most of the functions/modules, rather than ObsIDs, to generalize the algorithms a little. This is in anticipation for other missions (RXTE, for example), and for NICER quicklook stuff. It's mostly tested. Documentation hasn't been updated yet, but will do so on 1/10 or 1/11. 
+- Significant revision to many scripts! Look at Evernote from first week of January 2020. The main revision is to use event files as inputs in most of the functions/modules, rather than ObsIDs, to generalize the algorithms a little. This is in anticipation for other missions (RXTE, for example), and for NICER quicklook stuff. It's mostly tested. Documentation hasn't been updated yet, but will do so on 1/10 or 1/11. 
 
-Most of the scripts were tested; most of the Lv1 and Lv2 scripts have been tested function by function, and as a whole. Some Lv3 scripts have been tested at this stage as well. The more substantial ones like Lv3_average_ps_main.py, Lv3_main.py, and Lv3_presto_main.py, are well-tested. The only exception is the "prepfold" and "ps2pdf" functions in Lv3_presto_main.py, because my personal PRESTO installation is screwing up. Will check in with this once my issue with the PRESTO installation is resolved.
+- Most of the scripts were tested; most of the Lv1 and Lv2 scripts have been tested function by function, and as a whole. Some Lv3 scripts have been tested at this stage as well. The more substantial ones like Lv3_average_ps_main.py, Lv3_main.py, and Lv3_presto_main.py, are well-tested. The only exception is the "prepfold" and "ps2pdf" functions in Lv3_presto_main.py, because my personal PRESTO installation is screwing up. Will check in with this once my issue with the PRESTO installation is resolved.
+
+v3.1 - January 11 2020
+
+- Added Lv2_efsearch (for epoch folding) and Lv3_quicklook.py, a script that is intended to easily cycle through different basic search techniques (power spectrum, PRESTO, sideband searches, and epoch folding) as new data come out. 
+
+- There is also testslider.py which is a work in progress - was thinking of adding a slider for the power spectra, but this might not be so necessary.
 
 Will make a more comprehensive README in the future, but this is the current state... Can refer to the documentation! 
 
