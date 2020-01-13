@@ -118,7 +118,6 @@ if __name__ == "__main__":
     accelsearch_flags = ['-numharm','8','-zmax','100','-photon','-flo','1','-fhi','500']
 
     ##### Parameters for prepfold
-    prepfold = False
     zmax = 100
 
     ##### From Lv2_presto_subroutines

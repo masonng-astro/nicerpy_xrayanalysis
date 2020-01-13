@@ -25,6 +25,8 @@ Lv0_dirs.global_par()
 def model_par(model):
     """
     Given the model, return a list of associated Parameters
+
+    model - name of the model used
     """
     if model == 'powerlaw':
         return ['PhoIndex','norm']
@@ -50,6 +52,10 @@ def model_par(model):
 def xspec_par(model,E1,E2):
     """
     From the model.txt files, obtain the XSPEC parameter fit values
+
+    model - name of the model used
+    E1 - lower bound for energy (4-digit PI string)
+    E2 - upper bound for energy (4-digit PI string)
     """
     if 'simpl' in model:
         models = model.split('-')[2:]
@@ -259,6 +265,8 @@ def plot_rrcl(model,MJDs,E1,E2,plottype):
 def plot_HID(MJDs):
     """
     Plot the soft color-intensity diagram for a given set of MJDs
+
+    MJDs - list of MJDs used
     """
     mjd_data,soft,soft_err,intensity,intensity_err = np.genfromtxt(Lv0_dirs.NGC300+'soft_color_HID.txt',skip_header=1,usecols=(0,1,2,3,4),unpack=True)
 

@@ -85,6 +85,7 @@ def power_for_sigma(significance,N,M,W):
     inverse survival function for this!
 
     significance - the number of 'sigmas' desired for detection
+    N - number of trials
     M - number of segments
     W - number of consecutive bins summed
     """

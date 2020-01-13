@@ -347,6 +347,7 @@ def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
     starting_freq - frequency to start constructing the histogram of powers from
+    W - number of consecutive frequency bins to AVERAGE over
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")

@@ -1,276 +1,195 @@
 This is documentation for the suite of programs I am writing.
 
-FUTURE IMPROVEMENTS as of Jan 8 2019:
-
-1) Could add a FULL list of the columns + their descriptions to the bottom
-of each of the files for the Lv0-related FITS files.
-2) For the Lv0 functions, change the function description to add more
-representative variables. Currently, I am just using event_cl as an example.
+Jan 8 2019 - first big add ; added onto it from time to time...
+Jan 12 2020 - biggest revision to the documentation with the addition/removal of functions
 
 ################################## LEVEL 0 ####################################
 
-Base level - obtaining data and then binning them
+Base level - calling/processing of data
 
 >>>>>>>>>> Lv0_dirs <<<<<<<<<<
 
-Functions:
+  Functions:
 
-##### global_par
--- Defining global variables for the directories
--- has BASE_DIR and NICER_DATADIR
+  ##### global_par
+  -- Defining global variables for the directories
+  -- has BASE_DIR, NICER_DATADIR, NICERSOFT_DATADIR, and NGC300
 
->>>>>>>>>> Lv0_obsid_info <<<<<<<<<<
+>>>>>>>>>> Lv0_fits2dict <<<<<<<<<<
 
-Functions:
+  Functions:
 
-##### obstime(obsid)
+  ##### fits2dict(fits_file,ext,par_list)
 
--- Returns a list showing observation start and end times for a desired ObsID
+  -- 'Converts' a FITS file to a Python dictionary, with a list of the original
+  FITS table's columns, of the user's choosing. Can use this for ANY FITS file,
+  but is meant for mkf/orb files in $OBSID_pipe folders from NICER, or event files
+  (be it from NICER-data or NICERsoft_outputs or any other mission which has this format)
 
-obsid - Observation ID of the object of interest (10-digit str)
+  fits_file - path to the FITS file
+  ext - which extension number; 1 for EVENTS, 2 for GTI, 3 for PPS_TREND
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
 
-#####
-
->>>>>>>>>> Lv0_call_eventcl <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid,bary)
-
--- Opening the FITS file for the cleaned event file
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-
-##### get_eventcl(obsid,bary,par_list)
-
--- Getting data from the FITS files, e.g., PI_FAST, times, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_eventcl('0034070101',True,['PI_FAST','TIME'])) [WORKED]
-
->>>>>>>>>> Lv0_call_ufa <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid,mpu_no)
-
--- Opening the FITS file for the ufa event file
-
-obsid - Observation ID of the object of interest (10-digit str)
-mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs. str!!
-MPU number 7 corresponds to the COMBINED file!
-
-##### get_ufa(obsid,mpu_no,par_list)
-
--- Getting data from the FITS files, e.g., PI_FAST, times, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_ufa('0034070101','6',['TIME','PI_FAST'])) [WORKED]
-
->>>>>>>>>> Lv0_call_uf <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid,mpu_no)
-
--- Opening the FITS file for the unfiltered event file
-
-obsid - Observation ID of the object of interest (10-digit str)
-mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs. str!!
-
-##### get_uf(obsid,mpu_no,par_list)
-
--- Getting data from the FITS files, e.g., PI_FAST, times, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_uf('0034070101','6',['TIME','RAWX','RAWY'])) [WORKED]
-
->>>>>>>>>> Lv0_call_hk <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid,mpu_no)
-
--- Opening the FITS file for the housekeeping file
-
-obsid - Observation ID of the object of interest (10-digit str)
-mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs. str!!
-
-##### get_hk(obsid,mpu_no,par_list)
-
--- Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_hk('0034070101','4',['MPU_D_TEMP','MPU_ALL_COUNT','MPU_TEC_I'])) [WORKED]
-
->>>>>>>>>> Lv0_call_att <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid)
-
--- Opening the FITS file for the attitude file
-
-obsid - Observation ID of the object of interest (10-digit str)
-
-##### get_att(obsid,par_list)
-
-Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_att('0034070101',['TIME','QPARAM','STATE'])) [WORKED]
-
->>>>>>>>>> Lv0_call_cat <<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid)
-
--- Opening the FITS file for the .cat file
-
-obsid - Observation ID of the object of interest (10-digit str)
-
-##### get_cat(obsid,par_list)
-
-Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_cat('0034070101',['FILENAME','FORMAT','TYPE'])) [WORKED]
-
->>>>>>>>>> Lv0_call_mkf <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid)
-
--- Opening the FITS file for the mkf filter file
-
-obsid - Observation ID of the object of interest (10-digit str)
-
-##### get_mkf(obsid,par_list)
-
-Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_mkf('0034070101',['TIME','ELV','MOON_DEC'])) [WORKED]
-
->>>>>>>>>> Lv0_call_orb <<<<<<<<<<
-
-Functions:
-
-##### open_fits(obsid)
-
--- Opening the FITS file for the orbit file
-
-obsid - Observation ID of the object of interest (10-digit str)
-
-##### get_orb(obsid,par_list)
-
--- Getting data from the FITS files, e.g., PI_FAST, TIME, PI, PI_RATIO, FLAGS
-
-obsid - Observation ID of the object of interest (10-digit str)
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI)
-
-TEST: print(get_orb('0034070101',['TIME','Vy','QUALITY'])) [WORKED]
-
->>>>>>>>>> Lv0_scp <<<<<<<<<<
-
-Functions:
-
-##### scp(obsid)
-
--- To securely copy the files from ciri onto /Volumes/Samsung_T5/NICER-data/
-
-obsid - Observation ID of the object of interest (10-digit str)
-
-TEST: for i in range(11,25):
-    scp('10600601' + str(i)) WORKED.
+  TEST:
+  eventfile = "/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/cleanfilt.evt"
+  print(fits2dict(eventfile,1,['TIME','RAWX']))
+  print(fits2dict(eventfile,2,['START','STOP']))
 
 >>>>>>>>>> Lv0_gunzip <<<<<<<<<<
 
-Functions:
+  Functions:
 
-##### auxil(obsid) -- TESTED THIS WITH unzip_all below!
+  ##### unzip_all(obsdir)
 
--- Unzipping the auxil files
+  -- Does a recursive scan through the directory and unzips all files which have not yet been unzipped
 
-obsid - Observation ID of the object of interest (10-digit str)
+  obsdir - directory of all the observation files
 
-##### cl(obsid)
+  TEST:
+  unzip_all(Lv0_dirs.NICER_DATADIR+'1034070101')
 
--- Unzipping the cl and ufa files
+>>>>>>>>>> Lv0_nicer_housekeeping <<<<<<<<<<
 
-obsid - Observation ID of the object of interest (10-digit str)
+  Functions:
 
-##### uf(obsid)
+  ##### get_att(eventfile,par_list)
 
--- Unzipping the uf files
+  -- Getting data from the .att FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
 
-obsid - Observation ID of the object of interest (10-digit str)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
 
-##### hk(obsid)
+  ##### get_cat(eventfile,par_list)
 
--- Unzipping the hk files
+  -- Getting data from the .cat FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
 
-obsid - Observation ID of the object of interest (10-digit str)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
 
-##### unzip_all(obsid)
+  ##### get_mkf(eventfile,par_list)
 
--- Unzipping all the auxil/cl/uf/hk files
+  -- Getting data from the .mkf FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
 
-obsid - Observation ID of the object of interest (10-digit str)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
 
-TEST: unzip_all('1060060127') - WORKED
-unzip_all('1023021323') - This is a nonsense ObsID. Wanted to check that os.path.isdir works!
-Added an error which'd tell me if one hasn't yet imported the ObsID folder from ciri.
+  ##### get_orb(eventfile,par_list)
 
->>>>>>>>>> Lv0_psrpipe <<<<<<<<<<
+  -- Getting data from the .orb FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
 
--- Running psrpipe on the observation, to make more cuts! I decided not to
-put in pre-determined options for fully flexibility. Though standard flags
-would be ['--emin','0.3','--emax','12.0','--shrinkelvcut'], though there are
-others. Check out "psrpipe.py -h"! Also made sure that I moved $OBSID_pipe from
-the working directory to where NICERSOFT_DATADIR is, though I need to temporarily
-  store the output folder in the working directory.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
 
-obsid - Observation ID of the object of interest (10-digit str)
-flags - a LIST of input flags for psrpipe
+  ##### get_hk(eventfile,mpu_no,par_list)
 
-TEST: psrpipe('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'])
+  -- Getting data from the .hk FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
+
+  ##### get_uf(eventfile,mpu_no,ext,par_list)
+
+  -- Getting data from the .uf FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
+  ext - which extension number; 1 for EVENTS, 2 for GTI, 3 for PPS_TREND
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
+
+  ##### get_ufa(eventfile,mpu_no,ext,par_list)
+
+  -- Getting data from the .ufa FITS file! Just provide a path to the event file.
+  I can also input the NICERsoft-output event files because this script will
+  just search for the ObsID and trawl through the NICER-data folder.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  mpu_no - MPU number, from 0 to 6 inclusive. For the 7 MPUs.
+           MPU number 7 corresponds to the COMBINED file!
+  ext - which extension number; 1 for EVENTS, 2 for GTI
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI)
+
+  TEST:
+  eventfile = '/Volumes/Samsung_T5/NICER-data/1034070101/xti/event_cl/ni1034070101_0mpu7_cl.evt'
+
+  print(get_att(eventfile,['TIME','QPARAM']))
+  print(get_cat(eventfile,['FILENAME','FORMAT']))
+  print(get_mkf(eventfile,['TIME','NICER_SAA','ANG_DIST']))
+  print(get_orb(eventfile,['TIME','Vx','Vy']))
+  print(get_hk(eventfile,'3',['TIME','GIT_HASH']))
+  print(get_uf(eventfile,'2',1,['TIME','RAWX','DEADTIME']))
+  print(get_ufa(eventfile,'7',1,['TIME','MPU_UNDER_COUNT','PI_RATIO']))
 
 >>>>>>>>>> Lv0_nicerl2 <<<<<<<<<<
 
--- Running nicerl2 to do initial filtering of the ufa file!
+  Functions:
 
-obsid - Observation ID of the object of interest (10-digit str)
-flags - a LIST of input flags for nicerl2
+  ##### nicerl2(obsdir,nicerl2_flags)
+
+  -- Running nicerl2 to do initial filtering of the ufa file!
+
+  obsdir - NICER data directory containing all the data files (e.g., path_to_NICER_dir/1034070101)
+  nicerl2_flags - a LIST of input flags for nicerl2
+
+  TEST:
+  obsid = '1034070101'
+  obsdir = Lv0_dirs.NICER_DATADIR + obsid
+  nicerl2(obsdir,['clobber=YES'])
+
+>>>>>>>>>> Lv0_psrpipe <<<<<<<<<<
+
+  Functions:
+
+  ##### psrpipe(eventfile,flags)
+
+  -- Running psrpipe on the observation, to make more cuts! I decided not to
+  put in pre-determined options for fully flexibility. Though standard flags
+  would be ['--emin','0.3','--emax','12.0','--shrinkelvcut'], though there are
+  others. Check out "psrpipe.py -h"! Also made sure that I moved $OBSID_pipe from
+  the working directory to where NICERSOFT_DATADIR is, though I need to temporarily
+  store the output folder in the working directory.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  flags - a LIST of input flags for psrpipe
+
+  TEST:
+  obsid = '1034070101'
+  eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid+'_0mpu7_cl.evt'
+  psrpipe(eventfile,['--emin','0.3','--emax','12.0'])
+
+>>>>>>>>>> Lv0_scp <<<<<<<<<<
+
+  Functions:
+
+  ##### scp(obsid)
+
+  -- To securely copy the files from ciri onto /Volumes/Samsung_T5/NICER-data/
+
+  obsid - Observation ID of the object of interest (10-digit str)
+
+  TEST:
+  for i in range(11,25):
+      scp('10600601' + str(i)) WORKED.
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -278,255 +197,231 @@ flags - a LIST of input flags for nicerl2
 
 ################################## LEVEL 1 #####################################
 
->>>>>>>>>> Lv1_data_gtis <<<<<<<<<
+>>>>>>>>>> Lv1_barycorr <<<<<<<<<<
 
-Functions:
+  Functions:
 
-##### get_gtis(obsid,bary,gap)
+  ##### get_ra_dec(eventfile)
 
--- Obtaining the GTIs corresponding to the ObsID
-Jan 30 - added a second list to be returned - the unshifted GTI values
+  -- Obtain the RA_OBJ and DEC_OBJ corresponding to the observation!
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-gap - if time between start of next subregion and the end of the previous
-subregion is greater than the gap, consider that a new subregion!
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
 
-TEST: print(get_gtis('1034070104',True,50)) [WORKED]
+  ##### read_par(parfile)
 
->>>>>>>>>> Lv1_data_gtis_filter <<<<<<<<<<
+  -- Function that reads a par file. In particular, for the purposes of barycorr,
+  it will return POSEPOCH, RAJ, DECJ, PMRA, and PMDEC.
 
-Functions:
+  Step 1: Read par file line by line, where each line is stored as a string in the 'contents' array
+  Step 2a: For PSRJ, RAJ, DECJ, PMRA, and PMDEC, those lines are teased out
+  Step 2b: The corresponding strings are split up without whitespace
+  Step 3: Extract the values accordingly
 
-##### desired_gtis(obsid,bary,gap,desired_length)
+  parfile - path of the .par file
 
--- Obtain a list of tuples for GTIs, both shifted (i.e., starts at 0) and the actual
-   GTIs (MJD), that have intervals longer than a desired length (e.g. 1000s)
+  ##### barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-gap - gap between data that would still be considered data
--- for example, if you have data for t=1000-1040 and t=1045-1100, then if
-gap < 5, you get TWO GTIs. If gap >= 5, then you have 1 GTI from 1000-1100.
-This is different to desired_length - this is just meant to 'join up data'
-which are separated by mere seconds!
-desired_length - if GTIs > some desired length, use that data. This is used to
-weed out short GTIs.
+  -- General function to perform the barycenter corrections for an event file
 
-TEST: shifted,actual = desired_gtis('1034090111',True,50,1000)
-      for i in range(len(shifted)):
-         print(shifted[i],actual[i]) [WORKED]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  refframe - reference frame for barycenter corrections (usually ICRS)
+  parfile - name of the .par file
 
->>>>>>>>>> Lv1_data_filter <<<<<<<<<<
+  TEST:
+  obsid = '1911212213'
+  eventfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt.evt'
+  outfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt_bary.evt'
+  orbitfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209.orb'
+  parfile = ''
+  output_folder = Lv0_dirs.NICER_DATADIR + 'rxj0209/'
+  refframe = 'ICRS'
 
-Functions:
-
-##### filter_time(obsid,bary,par_list,t1,t2)
-
--- Obtain the time stamps that fall in a desired time interval.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - time value for the lower boundary (in s)
-t2 - time value for the upper boundary (in s)
-
-TEST:
-
-t_cut = filter_time('1034070104',True,['TIME'],11113,11945)
-counts = np.ones(len(t_cut))
-t_bins = np.linspace(11113,11945,11945-11113+1)
-from scipy import stats
-import matplotlib.pyplot as plt
-summed_data, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
-plt.plot(t_bins[:-1],summed_data)
-plt.show()
-
-[WORKED]
-
-##### filter_energy(obsid,bary,par_list,E1,E2)
-
--- Obtain the time stamps and the corresponding energy value (of the photon)
-in a desired energy range.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-E1 - energy value for the lower boundary (in keV)
-E2 - energy value for the upper boundary (in keV)
-
-TEST:
-
-t_cut,E_cut = filter_energy('1034070104',True,['TIME','PI'],0.3,12)
-counts = np.ones(len(t_cut))
-startt = int(t_cut[0])
-endt = int(t_cut[-1])
-#t_bins = np.linspace(startt,endt,endt-startt+1)
-t_bins = np.linspace(11113,11945,11945-11113+1)
-E_bins = np.linspace(0.3,12,118)
-from scipy import stats
-import matplotlib.pyplot as plt
-summed_data_t, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
-summed_data_E, bin_edges, binnumber = stats.binned_statistic(E_cut,counts,statistic='sum',bins=E_bins)
-plt.plot(t_bins[:-1],summed_data_t)
-plt.xlim([11113,11945])
-plt.show()
-
-[WORKED? Check to make sure once I got all code running.]
-
-##### filter_data(obsid,bary,par_list,t1,t2,E1,E2)
-
---  Truncate the data such that you get counts in a given time interval and
-    energy range.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - time value for the lower boundary (in s)
-t2 - time value for the upper boundary (in s)
-E1 - energy value for the lower boundary (in keV)
-E2 - energy value for the upper boundary (in keV)
-
-TEST:
-
-t1 = 0
-t2 = 72000
-E1 = 0.3
-E2 = 12
-t_cut,E_cut = filter_data('1034070104',True,['TIME','PI'],t1,t2,E1,E2)
-counts = np.ones(len(t_cut))
-#t_bins = np.linspace(startt,endt,endt-startt+1)
-t_bins = np.linspace(t1,t2,t2-t1+1)
-E_bins = np.linspace(E1,E2,118)
-from scipy import stats
-import matplotlib.pyplot as plt
-summed_data_t, bin_edges, binnumber = stats.binned_statistic(t_cut,counts,statistic='sum',bins=t_bins)
-summed_data_E, bin_edges, binnumber = stats.binned_statistic(E_cut,counts,statistic='sum',bins=E_bins)
-plt.figure()
-plt.plot(t_bins[:-1],summed_data_t)
-plt.xlim([t1,t2])
-
-plt.figure()
-plt.plot(E_bins[:-1],summed_data_E)
-plt.show() [WORKED]
+  barycorr(eventfile,outfile,refframe,orbitfile,parfile,output_folder)
 
 >>>>>>>>>> Lv1_data_bin <<<<<<<<<<
 
-Functions:
+  Functions:
 
-##### binning_t(obsid,bary,par_list,tbin_size,t1,t2)
+  ##### binning_t(eventfile,par_list,tbin_size,t1,t2)
 
--- Binning routine for when I truncate the data by JUST time interval.
-Got to make sure I have TIME and PI called!
+  -- Binning routine for when I truncate the data by JUST time interval.
+  Got to make sure I have TIME and PI called!
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - lower time boundary
-t2 - upper time boundary
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - lower time boundary
+  t2 - upper time boundary
 
-TEST:
+  ##### binning_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2)
 
-x,y = binning_t('1034070104',True,['PI','TIME'],1,11113,11945)
-print(x[-100:])
-print(y[-100:]) [WORKED]
+  -- Binning routine for when I truncate the data by JUST energy range.
+  Got to make sure I have TIME and PI called!
 
-##### binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.05 means bin by 0.05keV
+  E1 - lower energy boundary
+  E2 - upper energy boundary
 
--- Binning routine for when I truncate the data by JUST energy range.
-Got to make sure I have TIME and PI called!
+  ##### binning_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.05 means bin by 0.05keV
-E1 - lower energy boundary
-E2 - upper energy boundary
+  -- Binning routine for when I truncated the data by BOTH time interval AND energy range.
+  Got to make sure I have TIME and PI called!
 
-TEST:
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.05 means bin by 0.05keV
+  t1 - lower time boundary
+  t2 - upper time boundary
+  E1 - lower energy boundary
+  E2 - upper energy boundary
 
-w,x,y,z = binning_E('1034070104',True,['PI','TIME'],1,0.05,0.3,12) [WORKED]
-print(w[:50])
-print(x[:50])
-print(y[:50])
-print(z[:50])
-print(sum(x))
-print(sum(z)) #the two sums are basically the same
+  TEST:
+  obsid = '1034070101'
+  eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl_bary.evt'
+  par_list = ['TIME','PI','PI_RATIO']
+  t1 = 0
+  t2 = 300
+  E1 = 0.3
+  E2 = 6
 
-##### binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
+  tbin_size = 1
+  Ebin_size = 0.05
 
--- Binning routine for when I truncated the data by BOTH time interval AND energy range.
-Got to make sure I have TIME and PI called!
+  tbins,summed_data = binning_t(eventfile,par_list,tbin_size,t1,t2)
+  #print(len(tbins),len(summed_data))
+  tbins,summed_t_data,Ebins,summed_E_data = binning_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2)
+  #print(len(tbins),len(summed_t_data),len(Ebins),len(summed_E_data))
+  tbins,summed_t_data,Ebins,summed_E_data = binning_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
+  #print(len(tbins),len(summed_t_data),len(Ebins),len(summed_E_data))
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.05 means bin by 0.05keV
-t1 - lower time boundary
-t2 - upper time boundary
-E1 - lower energy boundary
-E2 - upper energy boundary
+>>>>>>>>>> Lv1_data_filter <<<<<<<<<<
 
-TEST:
+  Functions:
 
-w,x,y,z = binning_tE('1034070104',True,['PI','TIME'],1,0.05,11113,11945,0.3,12) [WORKED]
-print(w[:50])
-print(x[:50])
-print(y[:50])
-print(z[:50])
-print(sum(x))
-print(sum(z)) #the two sums are exactly the same
+  ##### filter_time(eventfile,par_list,t1,t2)
 
->>>>>>>>>> Lv1_barycorr <<<<<<<<<<
+  -- Obtain the time stamps that fall in a desired time interval.
 
-##### get_ra_dec(obsid)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - time value for the lower boundary (in s)
+  t2 - time value for the upper boundary (in s)
 
--- Obtain the RA_OBJ and DEC_OBJ corresponding to the observation!
+  ##### filter_energy(eventfile,par_list,E1,E2)
 
-obsid - Observation ID of the object of interest (10-digit str)
+  -- Obtain the time stamps and the corresponding energy value (of the photon)
+  in a desired energy range.
 
-TEST: get_ra_dec('1060060127') - WORKED
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  E1 - energy value for the lower boundary (in keV)
+  E2 - energy value for the upper boundary (in keV)
 
-##### nicerdata_barycorr(obsid,refframe)
+  ##### filter_data(eventfile,par_list,t1,t2,E1,E2)
 
--- Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+  -- Truncate the data such that you get counts in a given time interval and
+  energy range.
 
-obsid - Observation ID of the object of interest (10-digit str)
-refframe - reference frame for barycenter corrections (usually ICRS)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - time value for the lower boundary (in s)
+  t2 - time value for the upper boundary (in s)
+  E1 - energy value for the lower boundary (in keV)
+  E2 - energy value for the upper boundary (in keV)
 
-##### nicersoft_barycorr(obsid,refframe)
+  TEST:
+  obsid = '1034070101'
+  eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl_bary.evt'
+  par_list = ['TIME','PI','PI_RATIO']
+  t1 = 0
+  t2 = 300
+  E1 = 0.3
+  E2 = 6
 
--- Applying the barycenter corrections to the X-ray timing data (for NICER in this case)
+  tcut = filter_time(eventfile,par_list,t1,t2)
+  #print(len(tcut))
+  tcut,E_cut = filter_energy(eventfile,par_list,E1,E2)
+  #print(len(tcut),len(E_cut))
+  tcut,E_cut = filter_data(eventfile,par_list,t1,t2,E1,E2)
+  #print(len(tcut),len(E_cut))
 
-obsid - Observation ID of the object of interest (10-digit str)
-refframe - reference frame for barycenter corrections (usually ICRS)
+>>>>>>>>>> Lv1_ngc300_binning <<<<<<<<<<
 
-TEST: nicersoft_barycorr('1060060127','ICRS') - WORKED
+  Functions:
+
+  ##### get_binned_data(counts_dict,err_dict)
+
+  -- Given the dictionaries where the data (counts and uncertainty) are already
+  binned, put them into lists!
+
+  counts_dict - dictionary where the keys are MJD values, and the entries correspond
+  to the counts/rate for a given MJD
+  err_dict - dictionary where the keys are MJD values, and the entries correspond
+  to the UNCERTAINTY in the counts/rate for a given MJD
+
+  ##### binned_text()
+
+  -- Given the MJDs, binned counts, and associated uncertainties, put them into a text file
+
+  No arguments because I'll put all the bands in here
+
+>>>>>>>>>> Lv1_ngc300_mathgrp_pha <<<<<<<<<<
+
+  Functions:
+
+  ##### mathpha(bin_size,filetype)
+
+  -- Function that takes in a bin size, and does MATHPHA on the set of pha files.
+  The file names are already saved in the binned .ffphot files. The function
+  will output pha files of the format 'MJD_binsize_' + filetype + '_cl50.pha'!
+
+  bin_size - bin size in days
+  filetype - either 'bgsub' or 'bg' or 'cl'!
+
+  ##### grppha(bin_size,filetype)
+
+  -- Function that takes in a bin size, and does GRPPHA on a set of pha files.
+  The input file names will be "$MJD_$binsize_bgsub_cl50.pha". The function
+  will output pha files of the format 'grp_$MJD_$binsize_$filetype_cl50.pha'!
+
+  bin_size - bin size in days
+  filetype - either 'bgsub' or 'bg' or 'cl'!
+
+  TEST:
+  #mathpha(bin_size,'bgsub')
+  grppha(bin_size,'bgsub')
+  #bg_mathpha(bin_size)
+  #bg_grppha(bin_size)
+
+>>>>>>>>>> Lv1_spectra_txt <<<<<<<<<<
+
+>>>>>>>>>> Lv1_spectral_renorm <<<<<<<<<<
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -534,964 +429,902 @@ TEST: nicersoft_barycorr('1060060127','ICRS') - WORKED
 
 ################################## LEVEL 2 #####################################
 
->>>>>>>>>> Lv2_sources <<<<<<<<<<
+>>>>>>>>>> Lv2_average_ps_methods <<<<<<<<<<
 
-Functions:
+  Functions:
 
-##### obsid_to_obj(obsid)
+  ##### do_demodulate(eventfile,segment_length,mode,par_file)
 
--- 'Convert' the ObsID into the corresponding object nameself.
+  -- Do orbital demodulation on the original events.
 
-obsid - Observation ID of the object of interest (10-digit str)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the segments
+  par_file - orbital parameter file for input into binary_psr
+  mode - "all", "t" or "E" ; basically to tell the function where to access files to run do_demodulate
 
-TEST: obsid_to_obj['1034070104'] [WORKED]
+  ##### do_nicerfits2presto(eventfile,tbin,segment_length)
 
->>>>>>>>>> Lv2_mkdir <<<<<<<<<<
+  -- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
 
-Functions:
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments for combining power spectra
 
-##### makedir(dir)
+  ##### edit_inf(eventfile,tbin,segment_length)
 
--- Creating a folder if it does not exist in the directory.
+  -- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
+  Mainly need to edit the "Number of bins in the time series".
+  This is only for when we make segments by time though!
 
-https://gist.github.com/keithweaver/562d3caa8650eefe7f84fa074e9ca949
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
 
-dir - desired directory (provide FULL path!)
+  ##### edit_binary(eventfile,tbin,segment_length)
 
->>>>>>>>>> Lv2_lc <<<<<<<<<<
+  -- To pad the binary file so that it will be as long as the desired segment length.
+  The value to pad with for each time bin, is the average count rate in THAT segment!
+  Jul 10: Do zero-padding instead... so that number of counts is consistent!
+  Again, this is only for when we make segments by time!
 
-Functions:
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
 
-##### whole(obsid,bary,name_par_list,par_list,tbin_size,mode)
+  ##### realfft(eventfile,segment_length)
 
--- Plot the entire raw time series without any cuts to the data.
+  -- Performing PRESTO's realfft on the binned data (.dat)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-mode - whether we want to show or save the plot.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the individual segments
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  ##### presto_dat(eventfile,segment_length,demod)
 
-TEST: whole('1034070104',True,['PI','TIME','PI_FAST'],2,'save') [WORKED]
-whole('0034070101',True,[True,False,4,100,300,800],['TIME','PI','PI_FAST'],1,'show') - Jun 3 [WORKED]
+  -- Obtain the dat files that were generated from PRESTO
 
-##### partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the segments
+  demod - whether we're dealing with demodulated data or not!
 
--- Plot the time series for a desired time interval.
+  ##### presto_fft(eventfile,segment_length,demod)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - lower time boundary
-t2 - upper time boundary
-mode - whether we want to show or save the plot
+  -- Obtain the FFT files that were generated from PRESTO
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the segments
+  demod - whether we're dealing with demodulated data or not!
 
-TEST: partial_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'show') [WORKED]
-partial_t('0034070101',True,[True,False,1,100,300,800],['PI','TIME','PI_FAST'],1,0,100,'show') - Jun 3 [WORKED]
+  ##### segment_threshold(eventfile,segment_length,demod,tbin_size,threshold)
 
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode)
+  -- Using the .dat files, rebin them into 1s bins, to weed out the segments below
+  some desired threshold. Will return a *list* of *indices*! This is so that I
+  can filter out the *sorted* array of .dat and .fft files that are below threshold!
 
--- Plot the time series for a desired energy range.
-   [Though I don't think this will be used much. Count/s vs energy is pointless,
-   since we're not folding in response matrix information here to get the flux.
-   So we're just doing a count/s vs time with an energy cut to the data.]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the segments
+  demod - whether we're dealing with demodulated data or not!
+  tbin_size - size of the time bin
+  threshold - if data is under threshold (in percentage), then don't use the segment!
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-E1 - lower energy boundary
-E2 - upper energy boundary
+  ##### average_ps(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W)
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  -- Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
+  data is beyond some threshold, return the averaged power spectrum!
 
-TEST: partial_E('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show') [WORKED]
-partial_E('0034070101',True,[True,False,1,100,300,800],['PI','TIME','PI_FAST'],1,0.05,0.3,12,'show') - Jun 3 [WORKED]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the segments
+  demod - whether we're dealing with demodulated data or not!
+  tbin_size - size of the time bin
+  threshold - if data is under threshold (in percentage), then don't use the segment!
+  W - number of consecutive frequency bins to AVERAGE over
 
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
+  ##### noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W)
 
--- Plot the time series for a desired time interval and desired energy range.
+  -- Given the average spectrum for an ObsID, return the histogram of powers, such
+  that you have N(>P). This is for powers corresponding to frequencies larger
+  than some starting frequency (perhaps to avoid red noise).
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-t1 - lower time boundary
-t2 - upper time boundary
-E1 - lower energy boundary
-E2 - upper energy boundary
-mode - whether we want to show or save the plot
-
-TEST: [WORKED]
-
-partial_tE('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,11113,11945,0.3,2.7,'save')
-partial_tE('1034070104',True,['PI','TIME','PI_FAST'],1,0.05,11113,11945,2.7,12,'save')
-
->>>>>>>>>> Lv2_ps_method <<<<<<<<<<
-
-Functions:
-
-##### padding(counts)
-
--- For use in the function manual. Recall: The optimal number of bins is 2^n,
-n being some natural number. We pad 0s onto the original data set, where
-the number of 0s to pad is determined by the difference between the optimal
-number of bins and the length of the data set (where the former should be
-greater than the latter!)
-
-counts - array of counts from the binned data
-
-##### oversample(factor,counts)
-
--- Perform oversampling on the data. Return the padded array of counts.
-
-factor - N-times oversampling; factor = 5 means 5x oversampling
-counts - array of counts from the binned data
-
-##### pdgm(times,counts,xlims,vlines,toplot,oversampling)
-
--- Generating the power spectrum through the signal.periodogram method.
-
-times - array of binned times
-counts - array of counts from the binned data
-xlims - a list or array: first entry = True/False as to whether to impose an
-xlim; second and third entry correspond to the desired x-limits of the plot
-vlines - a list or array: first entry = True/False as to whether to draw
-a vertical line in the plot; second entry is the equation for the vertical line
-toplot - whether to show the plot or not
-oversampling - whether to perform oversampling. Array will consist of
-[True/False, oversampling factor]
-
-##### manual(times,counts,xlims,vlines,toplot,oversampling)
-
--- Generating the power spectrum through the manual FFT method.
-
-times - array of binned times
-counts - array of counts from the binned data
-xlims - a list or array: first entry = True/False as to whether to impose an
-xlim; second and third entry correspond to the desired x-limits of the plot
-vlines - a list or array: first entry = True/False as to whether to draw
-a vertical line in the plot; second entry is the equation for the vertical line
-toplot - whether to show the plot or not
-oversampling - whether to perform oversampling. Array will consist of
-[True/False, oversampling factor]
-
->>>>>>>>>> Lv2_ps <<<<<<<<<<
-
-Functions:
-
-##### whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines)
-
--- Plot the entire power spectrum without any cuts to the data.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-mode - whether we want to show or save the plot.
-ps_type - obtain power spectrum through the periodogram method ('period') or
-the manual FFT way ('manual') or both ('both')
-oversampling - whether to perform oversampling. Array will consist of
-[True/False, oversampling factor]
-xlims - a list or array: first entry = True/False as to whether to impose an
-xlim; second and third entry correspond to the desired x-limits of the plot
-vlines - a list or array: first entry = True/False as to whether to draw
-a vertical line in the plot; second entry is the equation for the vertical line
-
-TEST: whole('0034070101',True,['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2078])
-[WORKED]
-whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
-
-##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
-
--- Plot the power spectrum for a desired time interval.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - lower time boundary
-t2 - upper time boundary
-mode - whether we want to show or save the plot.
-ps_type - obtain power spectrum through the periodogram method ('period') or
-the manual FFT way ('manual') or both ('both')
-oversampling - whether to perform oversampling. Array will consist of
-[True/False, oversampling factor]
-xlims - a list or array: first entry = True/False as to whether to impose an
-xlim; second and third entry correspond to the desired x-limits of the plot
-vlines - a list or array: first entry = True/False as to whether to draw
-a vertical line in the plot; second entry is the equation for the vertical line
-
-TEST: partial_t('1034070104',True,['TIME','PI','PI_FAST'],0.1,11113,11945,'show','both',[True,5],[True,0,1],[True,0.2078])
-[WORKED]
-partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0,100,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
-
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
-
--- Plot the time series for a desired energy range.
-[Though I don't think this will be used much. Count/s vs energy is pointless,
-since we're not folding in response matrix information here to get the flux.
-So we're just doing a count/s vs time with an energy cut to the data.]
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-E1 - lower energy boundary
-E2 - upper energy boundary
-mode - whether we want to show or save the plot.
-ps_type - obtain power spectrum through the periodogram method ('period') or
-the manual FFT way ('manual') or both ('both')
-oversampling - whether to perform oversampling. Array will consist of
-[True/False, oversampling factor]
-xlims - a list or array: first entry = True/False as to whether to impose an
-xlim; second and third entry correspond to the desired x-limits of the plot
-vlines - a list or array: first entry = True/False as to whether to draw
-a vertical line in the plot; second entry is the equation for the vertical line
-
-TEST: partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,3,8,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
-
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
-
--- Plot the time series for a desired time interval and desired energy range.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-t1 - lower time boundary
-t2 - upper time boundary
-E1 - lower energy boundary
-E2 - upper energy boundary
-mode - whether we want to show or save the plot.
-ps_type - obtain power spectrum through the periodogram method ('period') or
-the manual FFT way ('manual') or both ('both')
-oversampling - whether to perform oversampling. Array will consist of
-[True/False, oversampling factor]
-xlims - a list or array: first entry = True/False as to whether to impose an
-xlim; second and third entry correspond to the desired x-limits of the plot
-vlines - a list or array: first entry = True/False as to whether to draw
-a vertical line in the plot; second entry is the equation for the vertical line
-
-TEST:
-partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,0.3,2.7,'save','both',[True,5],[True,0,1],[True,0.2078])
-partial_tE('1034070104',True,['TIME','PI','PI_FAST'],0.1,0.05,11113,11945,2.7,12,'save','both',[True,5],[True,0,1],[True,0.2078])
-[WORKED]
-partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],0.1,0.05,0,100,3,8,'show','both',[True,5],[True,0,1],[True,0.2081]) - Jun 3 [WORKED]
-
->>>>>>>>>> Lv2_phase <<<<<<<<<<
-
-##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
-
---  Calculating the pulse profile for the observation. Goes from 0 to 2!
-
-f_pulse - the frequency of the pulse
-times - the array of time values
-counts - the array of counts values
-shift - how much to shift the pulse by in the phase axis.
-It only affects how the pulse profile is 'displaced'.
-no_phase_bins - number of phase bins desired
-
-##### pulse_folding(t,T,T0,f,fdot,fdotdot,no_bins):
-
---  Calculating the pulse profile by also incorporating \dot{f} corrections!
-Goes from 0 to 2.
-
-t - array of time values
-T - sum of all the GTIs
-T0 - reference epoch
-f - pulse/folding Frequency
-fdot - frequency derivative
-fdotdot - second derivative of frequency
-no_bins - number of phase bins desired (recommended 20!)
-
-Returns the pulse profile in counts/s/phase bin vs phase. The number of counts
-is divided by the exposure time (calculated through total sum of the GTIs)
-
-##### whole(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode)
-
--- Plot the entire raw pulse profile without any cuts to the data.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-f_pulse - the frequency of the pulse
-pulse_pars - parameters corresponding to the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-mode - whether we want to show or save the plot.
-
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
-pulse_pars will have [f,fdot,fdotdot]
-
-TEST: whole('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,'show') [WORKED]
-whole('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.2081,0.4,51,'show') - Jun 3 [WORKED]
-
-##### partial_t(obsid,bary,name_par_list,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode)
-
---  Plot the pulse profile for a desired time interval.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-pulse_pars - parameters corresponding to the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-t1 - lower time boundary
-t2 - upper time boundary
-mode - whether we want to show or save the plot
-
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
-pulse_pars will have [f,fdot,fdotdot]
-
-TEST: partial_t('0034070101',True,['TIME','PI','PI_FAST'],1,0.2085,0.4,1001,0,809,'show') [WORKED]
-partial_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.2081,0.4,51,0,100,'show') - Jun 3 [WORKED]
-
-##### partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode)
-
--- Plot the pulse profile for a desired energy range.
-[Though I don't think this will be used much. Count/s vs energy is pointless,
-since we're not folding in response matrix information here to get the flux.
-So we're just doing a count/s vs time with an energy cut to the data.]
-INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-pulse_pars - parameters corresponding to the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-E1 - lower energy boundary
-E2 - upper energy boundary
-
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
-pulse_pars will have [f,fdot,fdotdot]
-
-TEST: partial_E('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.2085,0.4,1001,0,20,'show') [WORKED]
-partial_E('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.05,0.2081,0.4,51,3,8,'show') [WORKED]
-
-##### partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
-
--- Plot the pulse profile for a desired time interval and desired energy range.
-
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-pulse_pars - parameters corresponding to the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-t1 - lower time boundary
-t2 - upper time boundary
-E1 - lower energy boundary
-E2 - upper energy boundary
-mode - whether we want to show or save the plot
-
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
-pulse_pars will have [f,fdot,fdotdot]
-
-TEST: partial_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.2085,0.4,101,0,809,0,20,'save') [WORKED]
-partial_tE('0034070101',True,[True,True,1,100,300,800],['TIME','PI','PI_FAST'],1,0.05,0.2081,0.4,51,0,100,3,8,'show') [WORKED]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the segments
+  demod - whether we're dealing with demodulated data or not!
+  tbin_size - size of the time bin
+  threshold - if data is under threshold (in percentage), then don't use the segment!
+  starting_freq - frequency to start constructing the histogram of powers from
+  W - number of consecutive frequency bins to AVERAGE over
+
+  TEST:
+  eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+  mode = 't'
+  segment_length = 100
+  par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par'
+  do_demodulate(eventfile,segment_length,mode,par_file)
 
 >>>>>>>>>> Lv2_color <<<<<<<<<<
 
-##### soft_counts(E_bound,pi_data)
-
--- Will get an array of PI values from the data, where each entry = 1 count.
-So construct an array of ones of equal length, then where E >= E_bound, set to 0.
-This will give an array where 0 = harder X-rays, 1 = softer X-rays, so when
-doing the binning, will get just soft counts.
-
-E_bound - boundary energy considered (in keV)
-pi_data - array of PI values
-
-##### hard_counts(E_bound,pi_data)
-
--- Will get an array of PI values from the data, where each entry = 1 count.
-So construct an array of ones of equal length, then where E < E_bound, set to 0.
-This will give an array where 0 = harder X-rays, 1 = softer X-rays, so when
-doing the binning, will get just soft counts.
+  Functions:
 
-E_bound - boundary energy considered (in keV)
-pi_data - array of PI values
+  ##### soft_counts(E_bound,pi_data)
 
-##### get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
+  -- Will get an array of PI values from the data, where each entry = 1 count.
+  So construct an array of ones of equal length, then where E >= E_bound, set to 0.
+  This will give an array where 0 = harder X-rays, 1 = softer X-rays, so when
+  doing the binning, will get just soft counts.
 
--- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
+  E_bound - boundary energy considered (in keV)
+  pi_data - array of PI values
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-E_bound - boundary energy considered (in keV)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
+  ##### hard_counts(E_bound,pi_data)
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  -- Will get an array of PI values from the data, where each entry = 1 count.
+  So construct an array of ones of equal length, then where E < E_bound, set to 0.
+  This will give an array where 0 = harder X-rays, 1 = softer X-rays, so when
+  doing the binning, will get just soft counts.
 
-TEST: a,b,c = get_color('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1) [WORKED]
-plt.figure(1)
-plt.plot(a[:-1],b)
-plt.figure(2)
-plt.plot(a[:-1],c)
-plt.show()
+  E_bound - boundary energy considered (in keV)
+  pi_data - array of PI values
+
+  ##### get_color(eventfile,par_list,E_bound,tbin_size)
+
+  -- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  E_bound - boundary energy considered (in keV)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
 
-##### get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2)
+  ##### get_color_t(eventfile,par_list,E_bound,tbin_size,t1,t2)
 
--- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
+  -- Calculating the color - hard/soft and (hard-soft)/(hard+soft)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-E_bound - boundary energy considered (in keV)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - lower time boundary
-t2 - upper time boundary
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  E_bound - boundary energy considered (in keV)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - lower time boundary
+  t2 - upper time boundary
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  ##### plotting(eventfile,par_list,E_bound,tbin_size,mode)
 
-TEST: a,b,c = get_color_t('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1) [WORKED]
-plt.figure(1)
-plt.plot(a[:-1],b)
-plt.figure(2)
-plt.plot(a[:-1],c)
-plt.show()
+  -- Plotting the hardness ratio/color diagrams.
 
-##### plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode)
+  t_bins,color,color_diff = get_color(eventfile,par_list,E_bound,tbin_size)
 
--- Plotting the hardness ratio/color diagrams.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  E_bound - boundary energy considered (in keV)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  mode - whether we want to show or save the plot.
 
-t_bins,color,color_diff = get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
+  ##### plotting_t(eventfile,par_list,E_bound,tbin_size,t1,t2,mode)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-E_bound - boundary energy considered (in keV)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-mode - whether we want to show or save the plot.
+  -- Plotting the hardness ratio/color diagrams.
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  t_bins,color,color_diff = get_color_t(eventfile,par_list,E_bound,tbin_size)
 
-TEST: plotting('0034070101',True,[True,True,1,100,300,800],['TIME','PI'],3,1,'save') [WORKED]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  E_bound - boundary energy considered (in keV)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - lower time boundary
+  t2 - upper time boundary
+  mode - whether we want to show or save the plot.
 
-##### plotting_t(obsid,bary,par_list,E_bound,tbin_size,t1,t2,mode)
+  TEST:
+  eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/cleanfilt.evt'
+
+  plotting(eventfile,['TIME','PI','PI_FAST'],3,1,'save')
+  plotting_t(eventfile,['TIME','PI','PI_FAST'],3,1,200,400,'save')
+
+>>>>>>>>>> Lv2_efsearch <<<<<<<<<<
+
+  Functions:
+
+  ##### efsearch(eventfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_efsearch)
+
+  Performing FTOOLS' efsearch!
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  n_segments - no. of segments to break the epoch folding search into
+  dper - value for period used in the folding; input represents center of range of trial periods
+  nphase - no. of phases in the folded light curve(s) ; "INDEF" uses the default value
+  nbint - the number of newbins per interval used in the analysis
+  nper - no. of periods over which the search is carried out
+  dres - period resolution is the spacing between two contiguous periods in the search
+         "INDEF" uses default value of half the Fourier resolution in the interval
+  outfile_root - prefix for the end file name
+  plot_efsearch - 'yes' or 'no' to plot the results from efsearch; do "exit" for the next plot!
+
+  TEST:
+
+  out_baryfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt_bary.evt'
+
+  n_segments = 10 #number of segments to break the epoch folding search into
+  dper = 9.3 #Value for the period  used  in the folding. In 'efsearch' the
+  #input period represents the centre of the range of the trial periods.
+  nphase = 32 #Number of phases in the folded light curve(s). Typing 'INDEF'
+  #forces the task to use the default value (see parameter "nbdf").
+  nbint = int((T/(dper/nphase))/n_segments) # The number of newbins per interval used in the analysis. The
+  #"nbint" together with the NEWBIN duration determines the length in time of an interval
+  #and therefore the total number of intervals within the start and stop time over which the
+  #analysis will be carried out. Typing 'INDEF' forces the task to use the default value
+  #(see parameter "nbdf"). NOTE: By pressing return "nbint" is set to the value found in the
+  #parameter file used in a previous run."
+  nper = 128 #The number of periods over which the search is carried out
+  dres = 1E-4 # The period resolution is the spacing between two contiguous periods in the search.
+  #'INDEF' uses the default value of: half the Fourier resolution in the interval (e.g., P^2/T(i)/2 ; T(i) is interval duration)
+  outfile_root = "testefsearch"
+  plot_efsearch = 'no' #to plot the results from efsearch ; do "exit" to see the next plot!
+
+  Lv2_efsearch.efsearch(out_baryfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_efsearch)
+
+>>>>>>>>>> Lv2_lc <<<<<<<<<<
+
+  Functions:
+
+  ##### whole(eventfile,par_list,tbin_size,mode)
+
+  -- Plot the entire raw time series without any cuts to the data.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  mode - whether we want to show or save the plot.
+
+  ##### partial_t(eventfile,par_list,tbin_size,t1,t2,mode)
+
+  -- Plot the time series for a desired time interval.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - lower time boundary
+  t2 - upper time boundary
+  mode - whether we want to show or save the plot
+
+  ##### partial_E(eventfile,par_list,tbin_size,E1,E2,mode)
+
+  -- Plot the time series for a desired energy range.
+  [Though I don't think this will be used much. Count/s vs energy is pointless,
+  since we're not folding in response matrix information here to get the flux.
+  So we're just doing a count/s vs time with an energy cut to the data.]
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  E1 - lower energy boundary
+  E2 - upper energy boundary
+
+  ##### partial_tE(eventfile,par_list,tbin_size,t1,t2,E1,E2,mode)
+
+  -- Plot the time series for a desired time interval and desired energy range.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  t1 - lower time boundary
+  t2 - upper time boundary
+  E1 - lower energy boundary
+  E2 - upper energy boundary
 
--- Plotting the hardness ratio/color diagrams.
+  TEST:
+  eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/cleanfilt.evt'
 
-t_bins,color,color_diff = get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
+  whole(eventfile,['TIME','PI','PI_FAST'],1,'save')
+  partial_t(eventfile,['TIME','PI','PI_FAST'],1,0,400,'save')
+  partial_E(eventfile,['TIME','PI','PI_FAST'],1,0.3,6,'save')
+  partial_tE(eventfile,['TIME','PI','PI_FAST'],1,0,200,0.3,6,'save')
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-name_par_list - list of parameters specifying parameters like GTI number and/or energy range
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-E_bound - boundary energy considered (in keV)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - lower time boundary
-t2 - upper time boundary
-mode - whether we want to show or save the plot.
+>>>>>>>>>> Lv2_merged_pulse_methods <<<<<<<<<<
 
-name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
+  Functions:
 
-TEST: plotting_t('1034070104',True,['PI','TIME','PI_FAST'],2.7,1,11113,11945,'show') [WORKED]
-plotting_t('0034070101',True,[True,True,1,100,300,800],['PI','TIME','PI_FAST'],2.7,1,0,99,'show') - Jun 3 [WORKED]
->>>>>>>>>> Lv2_presto_all <<<<<<<<<<
+  ##### niextract_gti_energy(merging,data_id,PI1,PI2)
 
-##### realfft(obsid)
+  -- Using niextract-events to get segmented data based on the energy range
 
--- Performing PRESTO's realfft on the binned data (.dat)
+  merging - True/False - whether to use merged data
+  data_id - 10-digit ObsID or 6-digit ID for the merged event file
+  PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+  PI2 - upper bound of PI (not energy in keV!) desired for the energy range
 
-obsid - Observation ID of the object of interest (10-digit str)
+  ##### do_demodulate(merging,data_id,par_file,E_trunc,PI1,PI2)
 
-##### accelsearch(obsid,flags)
+  -- Using do_demodulate in binary_psr.py in Scott Ransom's PRESTO Python library to
+  demodulate the time series for the merged event file!
 
--- Performing PRESTO's accelsearch on the FFT data (.fft)
+  merging - True/False - whether to use merged data
+  data_id - 10-digit ObsID or 6-digit ID for the merged event file
+  par_file - orbital parameter file for input into binary_psr
+  E_trunc - True/False - whether to do energy truncation
+  PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+  PI2 - upper bound of PI (not energy in keV!) desired for the energy range
 
-obsid - Observation ID of the object of interest (10-digit str)
-flags - a LIST of input flags for psrpipe
+  ##### pulse_profile(merging,data_id,E_trunc,PI1,PI2,pulse_pars,no_phase_bins)
 
-##### prepfold(obsid,zmax,segment_length)
+  -- Extracts the time series from the demodulated merged event file, and creates
+  the pulse profile from Lv2_phase.py!
 
--- Performing PRESTO's prepfold on the pulsation candidates.
+  merging - True/False - whether to use merged data
+  data_id - 10-digit ObsID or 6-digit ID for the merged event file
+  E_trunc - True/False - whether to do energy truncation
+  PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+  PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+  pulse_pars - parameters corresponding to the pulse
+  no_phase_bins - number of phase bins desired
 
-obsid - Observation ID of the object of interest (10-digit str)
-zmax - maximum acceleration
-segment_length - length of the individual segments
+  ##### plot_pf(merging,data_id,E_trunc,PI1,PI2,pulse_pars,no_phase_bins)
 
-##### ps2pdf(obsid)
+  -- Extracts the time series from the demodulated merged event file, and creates
+  the pulse profile from Lv2_phase.py!
 
--- Converting from .ps to .pdf
+  merging - True/False - whether to use merged data
+  data_id - 10-digit ObsID or 6-digit ID for the merged event file
+  E_trunc - True/False - whether to do energy truncation
+  PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+  PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+  pulse_pars - parameters corresponding to the pulse
+  no_phase_bins - number of phase bins desired
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the individual segments
+  TEST:
+  merging = False
+  data_id = '1013010105'
+  E_trunc = False
+  PI1 = 30
+  PI2 = 1200
+  pulse_pars = [29.639575,-3.77535E-10,1.1147E-20]
+  no_phase_bins = 50
+  plot_pf(merging,data_id,E_trunc,PI1,PI2,pulse_pars,no_phase_bins)
 
->>>>>>>>>> Lv2_presto_segments <<<<<<<<<<
+>>>>>>>>>> Lv2_merging_events <<<<<<<<<<
 
-##### get_gti_file(obsid,segment_length)
+  Functions:
 
--- Creating the individual .gti files for my data segments!
+  ##### merging(obsids)
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the individual segments for combining power spectra
+  -- Given a list of ObsIDs, create a file which merges all the rows in the EVENTS
+  extension of the FITS files!
 
-TEST: get_gti_file('1060060127',100)
+  obsids - list (or array) of ObsIDs
 
-##### niextract_gti_time(obsid,segment_length)
+  ##### merging_GTIs(obsids,merged_id)
 
--- Using niextract-events to get segmented data based on the [segment_length]-length
-GTIs that were created above!
+  -- Given a list of ObsIDs and the merged_id, create the final event file, which
+  already has all the rows in the EVENTS extension of the FITS files, BUT also
+  including the GTI extension of the FITS files!
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the individual segments for combining power spectra
+  obsids - list (or array) of ObsIDs
+  merged_id - 6-digit ID for the merged event file
 
-TEST: niextract_gti_time('1060060127',100)
+  TEST:
+  obsids = ['2060060363','2060060364','2060060365']
+  merged_id = '000013'
+  merging(obsids)
+  merging_GTIs(obsids,merged_id)
 
-##### niextract_gti_energy(obsid,PI1,PI2)
+>>>>>>>>>> Lv2_mkdir <<<<<<<<<<
 
--- Using niextract-events to get segmented data based on the energy range
+  Functions:
 
-obsid - Observation ID of the object of interest (10-digit str)
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+  ##### makedir(dir)
 
-TEST: niextract_gti_energy('1060060127',200,300)
+  Creating a folder if it does not exist in the directory.
 
-##### niextract_gti_time_energy(obsid,segment_length,PI1,PI2)
+  dir - desired directory (provide FULL path!)
 
--- Using niextract-events to get segmented data based on [segment_length]-length
-GTIs that were created above, AND energy range!
+  TEST:
+  makedir('/Volumes/Samsung_T5/hahaha')
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the individual segments for combining power spectra
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+>>>>>>>>>> Lv2_ngc300_color <<<<<<<<<<
 
-TEST: niextract_gti_time_energy('0034070101',100,300,800) WORKED.
+  Functions:
 
-##### do_nicerfits2presto(obsid,tbin,segment_length)
+  ##### get_color(bin_size,band1,band2)
 
--- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
-I can always move files to different folders to prevent repeats (especially for large files)
+  -- Obtain colors and the corresponding uncertainties. Will NOT use values where
+  either the counts/rate from band1 OR band2 are negative! Allowed band values are
+  "soft1, soft2, A, B, C, D, and inband."
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments for combining power spectra
+  bin_size - binning size desired (1 day or 10 days, for example)
+  band1 - energy band 1
+  band2 - energy band 2
 
-TEST: do_nicerfits2presto('1060060127',0.0005)
+>>>>>>>>>> Lv2_phase <<<<<<<<<<
 
-##### edit_inf(obsid,tbin,segment_length)
+  Functions:
 
--- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
-Mainly need to edit "Number of bins in the time series".
-This is only for when we make segments by time though!
+  ##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments
+  -- Calculating the pulse profile for the observation. Goes from 0 to 2!
 
-TEST: edit_inf('1060060127',0.0005,1000)
+  f_pulse - the frequency of the pulse
+  times - the array of time values
+  counts - the array of counts values
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+
+  ##### pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins)
+
+  -- Calculating the pulse profile by also incorporating \dot{f} corrections!
+  Goes from 0 to 2.
+
+  t - array of time values
+  T - sum of all the GTIs
+  T0 - reference epoch in MJD
+  f - pulse/folding Frequency
+  fdot - frequency derivative
+  fdotdot - second derivative of frequency
+  no_phase_bins - number of phase bins desired (recommended 20!)
+
+  Returns the pulse profile in counts/s/phase bin vs phase. The number of counts
+  is divided by the exposure time (calculated through total sum of the GTIs)
+
+  Also added a "TIMEZERO" manually in the script since it'd be inconvenient to call the eventfile here.
+
+  ##### whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode)
+
+  -- Plot the entire raw pulse profile without any cuts to the data.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  pulse_pars - parameters corresponding to the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how the pulse profile is 'displaced'.
+  no_phase_bins - number of phase bins desired
+  mode - whether we want to show or save the plot.
+
+  pulse_pars will have [f,fdot,fdotdot]
+
+  ##### partial_t(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode)
+
+  -- Plot the pulse profile for a desired time interval.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  pulse_pars - parameters corresponding to the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  t1 - lower time boundary
+  t2 - upper time boundary
+  mode - whether we want to show or save the plot
+
+  pulse_pars will have [f,fdot,fdotdot]
+
+  ##### partial_E(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode)
+
+  -- Plot the pulse profile for a desired energy range.
+  [Though I don't think this will be used much. Count/s vs energy is pointless,
+  since we're not folding in response matrix information here to get the flux.
+  So we're just doing a count/s vs time with an energy cut to the data.]
+  INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  pulse_pars - parameters corresponding to the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  E1 - lower energy boundary
+  E2 - upper energy boundary
+
+  pulse_pars will have [f,fdot,fdotdot]
+
+  ##### partial_tE(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode)
+
+  -- Plot the pulse profile for a desired time interval and desired energy range.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  pulse_pars - parameters corresponding to the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  t1 - lower time boundary
+  t2 - upper time boundary
+  E1 - lower energy boundary
+  E2 - upper energy boundary
+  mode - whether we want to show or save the plot
+
+  pulse_pars will have [f,fdot,fdotdot]
+
+  ##### partial_subplots_E(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,subplot_Es,E1,E2,mode)
+
+  -- Plot the pulse profile for a desired energy range.
+  [Though I don't think this will be used much. Count/s vs energy is pointless,
+  since we're not folding in response matrix information here to get the flux.
+  So we're just doing a count/s vs time with an energy cut to the data.]
+  INTERJECTION: This caveat is for the spectrum, NOT the pulse profile!
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  f_pulse - the frequency of the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  subplot_Es - list of tuples defining energy boundaries for pulse profiles
+  E1 - lower energy boundary
+  E2 - upper energy boundary
 
-##### edit_binary(obsid,tbin,segment_length)
+  TEST:
+  eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/ni1034070101_nicersoft_bary.evt'
 
--- To pad the binary file so that it will be as long as the desired segment length.
-The value to pad with for each time bin, is the average count rate in THAT segment!
-Again, this is only for when we make segments by time!
+  whole(eventfile,['TIME','PI','PI_FAST'],0.01,[0.20801275,0,0],0.4,21,'show')
+  partial_t(eventfile,['TIME','PI','PI_FAST'],1,[0.2081,0,0],0.4,21,0,400,'show')
+  partial_E(eventfile,['TIME','PI','PI_FAST'],1,0.05,[0.2081,0,0],0.4,21,0.3,12,'show')
+  partial_tE(eventfile,['TIME','PI','PI_FAST'],1,0.05,[0.2081,0,0],0.4,21,0,400,0.3,12,'show')
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments
+>>>>>>>>>> Lv2_preprocess <<<<<<<<<<
 
-TEST: edit_binary('1060060127',0.0005,1000)
+  Functions:
 
-##### realfft(obsid,segment_length)
+  ##### preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nicer_datafile,nicer_output,nicersoft_datafile,nicersoft_output,nicersoft_folder)
 
--- Performing PRESTO's realfft on the binned data (.dat)
+  -- Preprocessing the NICER data for use in PRESTO, so running gunzip, psrpipe, and barycorr.
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the individual segments
+  obsdir - NICER data directory containing all the data files (e.g., path_to_NICER_dir/1034070101)
+  nicerl2_flags - a LIST of input flags for nicerl2
+  psrpipe_flags - a LIST of input flags for psrpipe
+  refframe - reference frame for barycenter corrections (usually ICRS)
+  orbitfile - orbit file (from the NICER data directory) for the barycenter corrections
+  parfile - .par file if any
+  nicer_datafile - event file from the original NICER data directory
+  nicer_output - output/barycenter-corrected event file from the original NICER data directory
+  nicersoft_datafile - event file (usually cleanfilt.evt) from the NICERsoft data directory
+  nicersoft_output - output/barycenter-corrected event file from the NICERsoft data directory
+  nicersoft_folder - output folder for the NICERsoft data
 
-TEST: realfft('1060060127')
+  Functions:
 
-##### accelsearch(obsid,flags,segment_length)
+  TEST:
+  obsdir = Lv0_dirs.NICER_DATADIR + '1034070101/'
+  nicerl2_flags = ['clobber=YES']
+  psrpipe_flags = ['--emin','0.3','--emax','12.0'] #for psrpipe in Lv0_psrpipe
+  refframe = 'ICRS' #for barycorr in Lv1_barycorr
+  orbitfile = obsdir + '/auxil/ni1034070101.orb'
+  parfile = ''
 
--- Performing PRESTO's accelsearch on the FFT data (.fft)
+  nicer_datafile = obsdir + 'xti/event_cl/ni1034070101_0mpu7_cl.evt'
+  nicer_output = obsdir + 'xti/event_cl/ni1034070101_0mpu7_cl_bary.evt'
+  nicersoft_datafile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/cleanfilt.evt'
+  nicersoft_output = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+  nicersoft_folder = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/'
 
-obsid - Observation ID of the object of interest (10-digit str)
-flags - a LIST of input flags for accelsearch
-segment_length - length of the individual segments
+  preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nicer_datafile,nicer_output,nicersoft_datafile,nicersoft_output,nicersoft_folder)
 
-TEST: accelsearch_flags = ['-numharm','8','-zmax','200','-photon','-flo','1','-fhi','1000']
-      accelsearch('1060060127',accelsearch_flags) [WORKED]
+>>>>>>>>>> Lv2_presto_subroutines <<<<<<<<<<
 
-##### prepfold(obsid,zmax)
+  Functions:
 
--- Performing PRESTO's prepfold on the pulsation candidates.
+  ##### get_gti_file(eventfile,segment_length)
 
-obsid - Observation ID of the object of interest (10-digit str)
-zmax - maximum acceleration
+  -- Creating the individual .gti files for my data segments!
 
-TEST: prepfold('0034070101',10,0) [WORKED] -OLD VERSION
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the individual segments for combining power spectra
 
-##### ps2pdf(obsid)
+  ##### niextract_gti_time(eventfile,segment_length)
 
--- Converting from .ps to .pdf
+  -- Using niextract-events to get segmented data based on the [segment_length]-length
+  GTIs that were created above!
 
-obsid - Observation ID of the object of interest (10-digit str)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the individual segments for combining power spectra
 
->>>>>>>>>> Lv2_presto_preprocess <<<<<<<<<<
+  ##### niextract_gti_energy(eventfile,PI1,PI2)
 
-##### preprocess(obsid,psrpipe_flags,refframe,tbin)
+  -- Using niextract-events to get segmented data based on the energy range
 
--- Preprocessing the NICER data for use in PRESTO, so running scp, gunzip, psrpipe,
-    barycorr, and nicerfits2presto.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+  PI2 - upper bound of PI (not energy in keV!) desired for the energy range
 
-obsid - Observation ID of the object of interest (10-digit str)
-psrpipe_flags - a LIST of input flags for psrpipe
-refframe - reference frame for barycenter corrections (usually ICRS)
-tbin - time bin for PRESTO data in seconds
+  ##### niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
 
-TEST: preprocess('1060060127',['--emin','0.3','--emax','12.0','--shrinkelvcut'],'ICRS','0.00025')
+  -- Using niextract-events to get segmented data based on [segment_length]-length
+  GTIs that were created above, AND energy range!
 
->>>>>>>>>> Lv2_average_ps_methods <<<<<<<<<<
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the individual segments for combining power spectra
+  PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+  PI2 - upper bound of PI (not energy in keV!) desired for the energy range
 
-##### do_demodulate(obsid,segment_length,par_file)
+  ##### do_nicerfits2presto(eventfile,tbin,segment_length)
 
--- Do orbital demodulation on the original events.
+  -- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
+  I can always move files to different folders to prevent repeats (especially for large files)
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the segments
-par_file - orbital parameter file for input into binary_psr
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments for combining power spectra
 
-##### do_nicerfits2presto(obsid,tbin,segment_length)
+  ##### edit_inf(eventfile,tbin,segment_length)
 
--- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
+  -- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
+  Mainly need to edit the "Number of bins in the time series".
+  This is only for when we make segments by time though!
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments for combining power spectra
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
 
-##### edit_inf(obsid,tbin,segment_length)
+  ##### edit_binary(eventfile,tbin,segment_length)
 
--- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
-Mainly need to edit the "Number of bins in the time series".
-This is only for when we make segments by time though!
+  -- To pad the binary file so that it will be as long as the desired segment length.
+  The value to pad with for each time bin, is the average count rate in THAT segment!
+  Jul 10: Do zero-padding instead... so that number of counts is consistent!
+  Again, this is only for when we make segments by time!
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
 
-##### edit_binary(obsid,tbin,segment_length)
+  ##### realfft(eventfile,segment_length,mode)
 
--- To pad the binary file so that it will be as long as the desired segment length.
-The value to pad with for each time bin, is the average count rate in THAT segment!
-Jul 10: Do zero-padding instead... so that number of counts is consistent!
-Again, this is only for when we make segments by time!
+  -- Performing PRESTO's realfft on the binned data (.dat)
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the individual segments
+  mode - "all", "t" or "E" ; basically to tell the function where to access files to run realfft for
 
-##### realfft_segment(obsid,segment_length)
+  ##### accelsearch(eventfile,segment_length,mode,flags)
 
--- Performing PRESTO's realfft on the binned data (.dat)
+  -- Performing PRESTO's accelsearch on the FFT data (.fft)
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the individual segments
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  segment_length - length of the individual segments
+  mode - "all", "t" or "E" ; basically to tell the function where to access files to run accelsearch for
+  flags - a LIST of input flags for accelsearch
 
-##### presto_dat(obsid,segment_length,demod)
+  ##### prepfold(eventfile,mode,zmax)
 
--- Obtain the dat files that were generated from PRESTO
+  -- Performing PRESTO's prepfold on the pulsation candidates.
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  mode - "all", "t" or "E" ; basically to tell the function where to access files to run prepfold for
+  zmax - maximum acceleration
 
-##### presto_fft(obsid,segment_length,demod)
+  ##### ps2pdf(eventfile,mode)
 
--- Obtain the FFT files that were generated from PRESTO
+  == Converting from .ps to .pdf
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  mode - "all", "t" or "E" ; basically to tell the function where to access files to run ps2pdf for
 
-##### segment_threshold(obsid,segment_length,demod,tbin_size,threshold)
+  TEST:
+  eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+  mode = 't'
+  segment_length = 100
+  PI1 = 100
+  PI2 = 1000
+  zmax=100
 
--- Using the .dat files, rebin them into 1s bins, to weed out the segments below
-some desired threshold. Will return a *list* of *indices*! This is so that I
-can filter out the *sorted* array of .dat and .fft files that are below threshold!
+  tbin = 0.025
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-tbin_size - size of the time bin
-threshold - if data is under threshold (in percentage), then don't use the segment!
+  accelsearch_flags = ['-numharm','4','-zmax','100','-photon','-flo','1','-fhi','1000']
 
-##### average_ps(obsid,segment_length,demod,tbin_size,threshold,W)
+  get_gti_file(eventfile,segment_length)
+  niextract_gti_time(eventfile,segment_length)
+  niextract_gti_energy(eventfile,PI1,PI2)
+  niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
+  do_nicerfits2presto(eventfile,tbin,segment_length)
+  edit_inf(eventfile,tbin,segment_length)
+  edit_binary(eventfile,tbin,segment_length)
+  realfft(eventfile,segment_length,mode)
+  accelsearch(eventfile,segment_length,mode,accelsearch_flags)
+  prepfold(eventfile,mode,zmax)
+  ps2pdf(eventfile,mode)
 
--- Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
-data is beyond some threshold, return the averaged power spectrum!
+>>>>>>>>>> Lv2_ps_method <<<<<<<<<<
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-tbin_size - size of the time bin
-threshold - if data is under threshold (in percentage), then don't use the segment!
-W - number of consecutive frequency bins to AVERAGE over
+  Functions:
 
-##### noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W)
+  ##### padding(counts)
 
--- Given the average spectrum for an ObsID, return the histogram of powers, such
-that you have N(>P). This is for powers corresponding to frequencies larger
-than some starting frequency (perhaps to avoid red noise).
+  -- For use in the function manual. Recall: The optimal number of bins is 2^n,
+  n being some natural number. We pad 0s onto the original data set, where
+  the number of 0s to pad is determined by the difference between the optimal
+  number of bins and the length of the data set (where the former should be
+  greater than the latter!)
+
+  counts - array of counts from the binned data
+
+  ##### oversample(factor,counts)
+
+  -- Perform oversampling on the data. Return the padded array of counts.
+
+  factor - N-times oversampling; factor = 5 means 5x oversampling
+  counts - array of counts from the binned data
+
+  ##### pdgm(times,counts,xlims,vlines,toplot,oversampling)
+
+  -- Generating the power spectrum through the signal.periodogram method.
+
+  times - array of binned times
+  counts - array of counts from the binned data
+  xlims - a list or array: first entry = True/False as to whether to impose an
+  xlim; second and third entry correspond to the desired x-limits of the plot
+  vlines - a list or array: first entry = True/False as to whether to draw
+  a vertical line in the plot; second entry is the equation for the vertical line
+  toplot - whether to show the plot or not
+  oversampling - whether to perform oversampling. Array will consist of
+  [True/False, oversampling factor]
+
+  ##### manual(times,counts,xlims,vlines,toplot,oversampling)
+
+  -- Generating the power spectrum through the manual FFT method.
+
+  times - array of binned times
+  counts - array of counts from the binned data
+  xlims - a list or array: first entry = True/False as to whether to impose an
+  xlim; second and third entry correspond to the desired x-limits of the plot
+  vlines - a list or array: first entry = True/False as to whether to draw
+  a vertical line in the plot; second entry is the equation for the vertical line
+  toplot - whether to show the plot or not
+  oversampling - whether to perform oversampling. Array will consist of
+  [True/False, oversampling factor]
+
+>>>>>>>>>> Lv2_ps <<<<<<<<<<
+
+  Functions:
+
+  ##### whole(eventfile,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines)
+
+  -- Plot the entire power spectrum without any cuts to the data.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  mode - whether we want to show or save the plot.
+  ps_type - obtain power spectrum through the periodogram method ('period') or
+  the manual FFT way ('manual') or both ('both')
+  oversampling - whether to perform oversampling. Array will consist of
+  [True/False, oversampling factor]
+  xlims - a list or array: first entry = True/False as to whether to impose an
+  xlim; second and third entry correspond to the desired x-limits of the plot
+  vlines - a list or array: first entry = True/False as to whether to draw
+  a vertical line in the plot; second entry is the equation for the vertical line
+
+  ##### partial_t(eventfile,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
+
+  -- Plot the power spectrum for a desired time interval.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - lower time boundary
+  t2 - upper time boundary
+  mode - whether we want to show or save the plot.
+  ps_type - obtain power spectrum through the periodogram method ('period') or
+  the manual FFT way ('manual') or both ('both')
+  oversampling - whether to perform oversampling. Array will consist of
+  [True/False, oversampling factor]
+  xlims - a list or array: first entry = True/False as to whether to impose an
+  xlim; second and third entry correspond to the desired x-limits of the plot
+  vlines - a list or array: first entry = True/False as to whether to draw
+  a vertical line in the plot; second entry is the equation for the vertical line
+
+  ##### partial_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+
+  -- Plot the time series for a desired energy range.
+  [Though I don't think this will be used much. Count/s vs energy is pointless,
+  since we're not folding in response matrix information here to get the flux.
+  So we're just doing a count/s vs time with an energy cut to the data.]
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  E1 - lower energy boundary
+  E2 - upper energy boundary
+  mode - whether we want to show or save the plot.
+  ps_type - obtain power spectrum through the periodogram method ('period') or
+  the manual FFT way ('manual') or both ('both')
+  oversampling - whether to perform oversampling. Array will consist of
+  [True/False, oversampling factor]
+  xlims - a list or array: first entry = True/False as to whether to impose an
+  xlim; second and third entry correspond to the desired x-limits of the plot
+  vlines - a list or array: first entry = True/False as to whether to draw
+  a vertical line in the plot; second entry is the equation for the vertical line
+
+  ##### partial_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+
+  -- Plot the time series for a desired time interval and desired energy range.
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  t1 - lower time boundary
+  t2 - upper time boundary
+  E1 - lower energy boundary
+  E2 - upper energy boundary
+  mode - whether we want to show or save the plot.
+  ps_type - obtain power spectrum through the periodogram method ('period') or
+  the manual FFT way ('manual') or both ('both')
+  oversampling - whether to perform oversampling. Array will consist of
+  [True/False, oversampling factor]
+  xlims - a list or array: first entry = True/False as to whether to impose an
+  xlim; second and third entry correspond to the desired x-limits of the plot
+  vlines - a list or array: first entry = True/False as to whether to draw
+  a vertical line in the plot; second entry is the equation for the vertical line
+
+  TEST:
+  eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+  whole(eventfile,['TIME','PI','PI_FAST'],0.1,'show','both',[True,5],[False,0,1],[True,0.2081])
+  partial_t(eventfile,['TIME','PI','PI_FAST'],0.1,0,100,'show','both',[False,5],[False,0,1],[True,0.2081])
+  partial_E(eventfile,['TIME','PI','PI_FAST'],0.1,0.05,3,8,'show','both',[False,5],[False,0,1],[True,0.2081])
+  partial_tE(eventfile,['TIME','PI','PI_FAST'],0.1,0.05,0,100,3,8,'show','both',[False,5],[False,0,1],[True,0.2081])
 
-obsid - Observation ID of the object of interest (10-digit str)
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-tbin_size - size of the time bin
-threshold - if data is under threshold (in percentage), then don't use the segment!
-starting_freq - frequency to start constructing the histogram of powers from
-
->>>>>>>>>> Lv2_average_merge_ps_methods <<<<<<<<<<
-
-##### merging(obsids)
-
--- Given a list of ObsIDs, create a file which merges all the rows in the EVENTS
-extension of the FITS files!
-
-obsids - list (or array) of ObsIDs
-
-##### merging_GTIs(obsids,merged_id)
-
--- Given a list of ObsIDs and the merged_id, create the final event file, which
-already has all the rows in the EVENTS extension of the FITS files, BUT also
-including the GTI extension of the FITS files!
-
-obsids - list (or array) of ObsIDs
-merged_id - 6-digit ID for the merged event file
-
-##### get_gti_file(merged_id,segment_length)
-
--- Creating the individual .gti files for my data segments!
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the individual segments for combining power spectra
-
-##### niextract_gti_time(merged_id,segment_length)
-
--- Using niextract-events to get segmented data based on the [segment_length]-length
-GTIs that were created above!
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the individual segments for combining power spectra
-
-##### niextract_gti_energy(merged_id,PI1,PI2)
-
--- Using niextract-events to get segmented data based on the energy range
-
-merged_id - 6-digit ID for the merged event file
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-
-##### niextract_gti_time_energy(merged_id,segment_length,PI1,PI2)
-
--- Using niextract-events to get segmented data based on [segment_length]-length
-GTIs that were created above, AND energy range!
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the individual segments for combining power spectra
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-
-##### do_nicerfits2presto(merged_id,tbin,segment_length)
-
--- Using nicerfits2presto.py to bin the data, and to convert into PRESTO-readable format.
-I can always move files to different folders to prevent repeats (especially for large files)
-
-merged_id - 6-digit ID for the merged event file
-tbin - size of the bins in time
-segment_length - length of the individual segments for combining power spectra
-
-##### edit_inf(merged_id,tbin,segment_length)
-
--- Editing the .inf file, as it seems like accelsearch uses some information from the .inf file!
-Mainly need to edit the "Number of bins in the time series".
-This is only for when we make segments by time though!
-
-merged_id - 6-digit ID for the merged event file
-tbin - size of the bins in time
-segment_length - length of the individual segments
-
-##### edit_binary(merged_id,tbin,segment_length)
-
---  To pad the binary file so that it will be as long as the desired segment length.
-The value to pad with for each time bin, is the average count rate in THAT segment!
-Jul 10: Do zero-padding instead... so that number of counts is consistent!
-Again, this is only for when we make segments by time!
-
-merged_id - 6-digit ID for the merged event file
-tbin - size of the bins in time
-segment_length - length of the individual segments
-
-##### realfft(merged_id,segment_length)
-
--- Performing PRESTO's realfft on the binned data (.dat)
-
-merged_id - 6-digit ID for the merged event file
-
-##### do_demodulate(merged_id,segment_length,par_file)
-
--- Do orbital demodulation on the original events.
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the segments
-par_file - orbital parameter file for input into binary_psr
-
-Jul 18 - actually, since this is an "average_ps" thing, don't need to
-demodulate the energy truncation event files!
-
-##### presto_dat(merged_id,segment_length,demod,PI1,PI2)
-
--- Obtain the dat files that were generated from PRESTO
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-
-##### presto_fft(merged_id,segment_length,demod,PI1,PI2)
-
--- Obtain the FFT files that were generated from PRESTO
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-
-##### segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold)
-
--- Using the .dat files, rebin them into 1s bins, to weed out the segments below
-some desired threshold. Will return a *list* of *indices*! This is so that I
-can filter out the *sorted* array of .dat and .fft files that are below threshold!
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-tbin_size - size of the time bin
-threshold - if data is under threshold (in percentage), then don't use the segment!
-
-##### average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
-
--- Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
-data is beyond some threshold, return the averaged power spectrum!
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-tbin_size - size of the time bin
-threshold - if data is under threshold (in percentage), then don't use the segment!
-W - number of consecutive frequency bins to AVERAGE over
-
-##### noise_hist(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
-
--- Given the average spectrum for an ObsID, return the histogram of powers, such
-that you have N(>P). This is for powers corresponding to frequencies larger
-than some starting frequency (perhaps to avoid red noise).
-
-merged_id - 6-digit ID for the merged event file
-segment_length - length of the segments
-demod - whether we're dealing with demodulated data or not!
-PI1 - lower bound of PI (not energy in keV!) desired for the energy range
-PI2 - upper bound of PI (not energy in keV!) desired for the energy range
-tbin_size - size of the time bin
-threshold - if data is under threshold (in percentage), then don't use the segment!
-starting_freq - frequency to start constructing the histogram of powers from
 
 ################################################################################
 ################################################################################
@@ -1499,266 +1332,517 @@ starting_freq - frequency to start constructing the histogram of powers from
 
 ################################## LEVEL 3 #####################################
 
+>>>>>>>>>> Lv3_analyze_xspec_pars <<<<<<<<<<
+
+ Functions:
+
+  ##### model_par(model)
+
+  -- Given the model, return a list of associated Parameters
+
+  model - name of the model used
+
+  ##### xspec_par(model,E1,E2)
+
+  -- From the model.txt files, obtain the XSPEC parameter fit values
+
+  model - name of the model used
+  E1 - lower bound for energy (4-digit PI string)
+  E2 - upper bound for energy (4-digit PI string)
+
+  ##### plot_ufspectra(model,MJDs,E1,E2)
+
+  -- Plotting the outputs from ufspectra!
+
+  model - name of the model used
+  MJDs - list of MJDs used
+  E1 - lower bound for energy (4-digit PI string)
+  E2 - upper bound for energy (4-digit PI string)
+
+  ##### plot_rrcl(model,MJDs,E1,E2,plottype)
+
+  -- To plot either of ratio, residual, chi, or lumin
+
+  model - name of the model used
+  MJDs - list of MJDs used
+  E1 - lower bound for energy (4-digit PI string)
+  E2 - upper bound for energy (4-digit PI string)
+  plottype - either of 'ratio','resid','chi', or 'lumin'
+
+  ##### plot_HID(MJDs)
+
+  -- Plot the soft color-intensity diagram for a given set of MJDs
+
+  MJDs - list of MJDs used
+
+  ##### lumin_plus_par(model,MJDs,E1,E2)
+
+  -- Plot luminosity against a spectral parameter
+  11/17: Need to be able to generalize such that I can use this function for >1 model!
+
+  model - name of the model used
+  MJDs - list of MJDs used
+  E1 - lower bound for energy (4-digit PI string)
+  E2 - upper bound for energy (4-digit PI string)
+
+  TEST:
+  E1 = '0040'
+  E2 = '0500'
+  absorption = 'tbnew'
+  models = ['-powerlaw','-bbodyrad','-ezdiskbb','-diskbb']
+  MJDs_25 = ['58239','58244','58249','58254','58259','58264','58269','58274',
+              '58289','58309','58314','58324','58329','58334','58339','58389',
+              '58399','58449','58454','58459','58464','58484','58489','58504',
+              '58509']
+  MJDs_23 = ['58239','58244','58249','58254','58259','58264','58269','58274',
+              '58289','58309','58314','58324','58329','58334','58339','58389',
+              '58449','58454','58464','58484','58489','58504','58509']
+  MJDs_21 = ['58239','58244','58249','58254','58259','58264','58269','58274',
+              '58309','58314','58324','58329','58334','58339','58389','58449',
+              '58454','58484','58489','58504','58509']
+
+  #for i in range(len(models)):
+  #    plot_rrcl(absorption+models[i],MJDs_25,E1,E2,'ratio')
+  #plot_rrcl(absorption+'-powerlaw-bbodyrad',MJDs_21,E1,E2,'ratio')
+  #plot_rrcl(absorption+'-powerlaw-bbodyrad',MJDs_21,E1,E2,'resid')
+  #plot_rrcl(absorption+'-powerlaw-bbodyrad',MJDs_21,E1,E2,'chi')
+  #plot_rrcl(absorption+'-powerlaw-bbodyrad',MJDs_21,E1,E2,'lumin')
+  plot_ufspectra(absorption+'-powerlaw',MJDs_21,E1,E2)
+  #xspec_par('tbnew-powerlaw',E1,E2)
+
+>>>>>>>>>> Lv3_average_ps_main <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_B1957+20_merged <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_calc_deadtime <<<<<<<<<<
+
+  Functions:
+
+  ##### deadtime(obsid,mpu_no,par_list)
+
+  -- Calculate the accumulated deadtime for a given observation ID
+
+  obsid - Observation ID of the object of interest (10-digit str)
+  mpu_no - Will be '7' for the combined file
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+
+  ##### exposure(obsid,bary,par_list)
+
+  -- Get the on-source, exposure time
+
+  obsid - Observation ID of the object of interest (10-digit str)
+  bary - Whether the data is barycentered. True/False
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+
+  TEST:
+  print(deadtime('1050390148','7',['TIME','DEADTIME']))
+  print(exposure('1050390148',True,['TIME','DEADTIME','PI','PI_FAST']))
+
+>>>>>>>>>> Lv3_detection_level <<<<<<<<<<
+
+  Functions:
+
+  ##### max_acc(zmax,T,f0)
+
+  -- To obtain the maximum acceleration 'detectable' by PRESTO.
+
+  zmax - (expected) maximum number of Fourier bins that the pulsar frequency
+  f0 drifts
+  T - observation duration (s)
+  f0 - pulsar's frequency (Hz)
+
+  ##### N_trials(tbin,T)
+
+  -- To obtain the number of trials used in the FFT. Divided by two to get number
+  of trials f >= 0!
+
+  tbin- size of the bins in time
+  T - observation duration (s) or segment length (s)
+
+  ##### single_trial_prob(significance,N)
+
+  -- To obtain the single trial probability required for a statistically significant
+  "significance" detection, with N trials.
+
+  significance - the number of 'sigmas' desired for detection
+  N - number of trials
+
+  ##### signal_significance(M,W,Pthreshold)
+
+  -- Calculating the significance of a particular signal in the power spectrum,
+  given M (number of segments), W (number of consecutive bins summed), and
+  Pthreshold (the power [Leahy-normalized] of the signal).
+
+  M - number of segments
+  W - number of consecutive bins summed
+  Pthreshold - the power of the signal (Leahy-normalized)
+
+  ##### power_for_sigma(significance,N,M,W)
+
+  -- Given some probability (that is, desired significance), what is the corresponding
+  power needed in the power spectrum to claim statistical significance? Use the
+  inverse survival function for this!
+
+  significance - the number of 'sigmas' desired for detection
+  N - number of trials
+  M - number of segments
+  W - number of consecutive bins summed
+
+  TEST:
+  print(max_acc(200,200,230))
+  sig_sig = signal_significance(43,5000,2.02697)
+  sig_sig = signal_significance(43,5000,2.01199)
+  print(power_for_sigma(5,4000,1,1))
+  single_trial_prob(2,4e6)
+  single_trial_prob(1,4e6)
+
 >>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 
-##### display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
+  Functions:
 
--- To display the plots for desired time interval. Whether to save or show the
-plots is determined in Lv3_diagnostics.
+  ##### display_all(eventfile,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
 
-obsid - Observation ID of the object of interest (10-digit str)
-diag_var - the diagnostic variable we are looking at
-lc_t - array corresponding to time values for the light curve
-lc_counts - array corresponding to counts for the light curve
-diag_t - array corresponding to times for the diagnostic variable
-diag_counts - array corresponding to counts for the diagnostic variable
-filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
+  -- To display the plots for desired time interval. Whether to save or show the
+  plots is determined in Lv3_diagnostics.
 
-##### display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype)
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  diag_var - the diagnostic variable we are looking at
+  lc_t - array corresponding to time values for the light curve
+  lc_counts - array corresponding to counts for the light curve
+  diag_t - array corresponding to times for the diagnostic variable
+  diag_counts - array corresponding to counts for the diagnostic variable
+  filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
 
--- To display the plots for desired time interval. Whether to save or show the
-plots is determined in Lv3_diagnostics.
+  ##### display_t(eventfile,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype)
 
-obsid - Observation ID of the object of interest (10-digit str)
-diag_var - the diagnostic variable we are looking at
-t1 - lower time boundary
-t2 - upper time boundary
-lc_t - array corresponding to time values for the light curve
-lc_counts - array corresponding to counts for the light curve
-diag_t - array corresponding to times for the diagnostic variable
-diag_counts - array corresponding to counts for the diagnostic variable
-filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
+  -- To display the plots for desired time interval. Whether to save or show the
+  plots is determined in Lv3_diagnostics.
+
+  obsid - Observation ID of the object of interest (10-digit str)
+  diag_var - the diagnostic variable we are looking at
+  t1 - lower time boundary
+  t2 - upper time boundary
+  lc_t - array corresponding to time values for the light curve
+  lc_counts - array corresponding to counts for the light curve
+  diag_t - array corresponding to times for the diagnostic variable
+  diag_counts - array corresponding to counts for the diagnostic variable
+  filetype = '.att', '.mkf', '.cl' or ['.hk',mpuno]
 
 >>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
 
-##### diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars)
+  Functions:
 
--- Get the diagnostic plots for a desired time interval.
-[Likely too large a range in time (and energy) to be sufficiently useful for
-diagnosis.]
+  ##### diag_all(eventfile,par_list,tbin_size,mode,diag_vars)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-mode - whether we want to show or save the plot.
-diag_vars - a dictionary where each key = 'att','mkf','hk', or 'cl', and
-diag_vars[key] provides the list of variables to loop over.
+  Get the diagnostic plots for a desired time interval.
+  [Likely too large a range in time (and energy) to be sufficiently useful for
+  diagnosis.]
 
-TEST: diag_all('1034070104',True,['PI','TIME','PI_FAST'],1,'save') [WORKED]
-HAVE NOT TESTED WITH DIAG_VARS, BUT SHOULD BE STRAIGHTFORWARD. 1/14 4PM.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  mode - whether we want to show or save the plot.
+  diag_vars - a dictionary where each key = 'att','mkf','hk', or 'cl', and
+  diag_vars[key] provides the list of variables to loop over.
 
-##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode)
+  ##### diag_t(eventfile,par_list,tbin_size,t1,t2,mode,diag_vars)
 
--- Get the diagnostic plots for a desired time interval.
+  Get the diagnostic plots for a desired time interval.
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-t1 - lower time boundary
-t2 - upper time boundary
-mode - whether we want to show or save the plot.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  t1 - lower time boundary
+  t2 - upper time boundary
+  mode - whether we want to show or save the plot.
+  diag_vars - a dictionary where each key = 'att','mkf','hk', or 'cl', and
+  diag_vars[key] provides the list of variables to loop over.
 
-TEST: diag_t('1034070104',True,['PI','TIME','PI_FAST'],1,11113,11945,'save') [WORKED]
-HAVE NOT TESTED WITH DIAG_VARS, BUT SHOULD BE STRAIGHTFORWARD. 1/14 4PM.
+>>>>>>>>>> Lv3_duty_cycle <<<<<<<<<<
+
+  Functions:
+
+  ##### duty_cycle(eventfile,tbin,segment_length,duty_cycle_bin,threshold)
+
+  -- To determine the percentage of "data used"/total amount of data. Have two
+  types of values:
+  1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
+  2) % of bins with data over the GTIs
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
+  duty_cycle_bin - binning used to calculate the duty cycle
+  threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
+
+  ##### duty_cycle_dist(eventfile,tbin,segment_length,duty_cycle_bin,threshold)
+
+  -- To get the distribution of duty cycles over all segments, given an ObsID and
+  a desired segment length!
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
+  duty_cycle_bin - binning used to calculate the duty cycle
+  threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
+
+  ##### duty_cycle_tE(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold)
+
+  -- To determine the percentage of "data used"/total amount of data. Have two
+  types of values:
+  1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
+  2) % of bins with data over the GTIs
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_length - length of the individual segments
+  PI1 - lower energy boundary (in units of PI)
+  PI2 - upper energy boundary (in units of PI)
+  duty_cycle_bin - binning used to calculate the duty cycle
+  threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
+
+  ##### duty_cycle_tE_dist(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold)
+
+  -- To get the distribution of duty cycles over all segments, given an ObsID and
+  a desired segment length!
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  PI1 - lower energy boundary (in units of PI)
+  PI2 - upper energy boundary (in units of PI)
+  segment_length - length of the individual segments
+  duty_cycle_bin - binning used to calculate the duty cycle
+  threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
+
+  ##### compare_segment_lengths(eventfile,tbin,segment_lengths,duty_cycle_bin)
+
+  -- To get the distribution of duty cycles over all segments, given an ObsID and
+  a desired segment length! Compare through different thresholds!
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  tbin - size of the bins in time
+  segment_lengths - array of length of the individual segments
+  duty_cycle_bin - binning used to calculate the duty cycle
+
+  TEST:
+  eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+  #duty_cycle(eventfile,0.00025,100,1,10)
+  ### REMEMBER, tbin is NOT from Lv3_average_segments, but it's from nicerfits2presto!
+
+  duty_cycle_tE(eventfile,0.00025,100,30,200,1,10)
 
 >>>>>>>>>> Lv3_E_boundary <<<<<<<<<<
 
-##### E_bound(obsid,bary,par_list,E1,E2,cut_type,bound):
+  Functions:
 
--- Gives the energy bound corresponding to either a custom cut or a median cut.
-   Could add more cuts in the future!
+  ##### E_bound(eventfile,par_list,E1,E2,cut_type,bound)
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-E1 - energy value for the lower boundary (in keV)
-E2 - energy value for the upper boundary (in keV)
-cut_type - 'manual' or 'median'
-bound - boundary energy for when cut_type = 'manual'
+  -- Gives the energy bound corresponding to either a custom cut or a median cut.
+  Could add more cuts in the future!
 
-TEST: print(E_bound('0034070104',True,['PI','TIME','PI_FAST'],0.0,20,'median',2.7)) [WORKED]
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  E1 - energy value for the lower boundary (in keV)
+  E2 - energy value for the upper boundary (in keV)
+  cut_type - 'manual' or 'median'
+  bound - boundary energy for when cut_type = 'manual'
 
->>>>>>>>>> Lv3_pulsedfrac.py <<<<<<<<<<
+  TEST:
+  obsid = '1034070101'
+  eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid + '_0mpu7_cl_bary.evt'
+  print(E_bound(eventfile,['PI','TIME','PI_FAST'],0.0,20,'median',2.7))
 
-##### pf_all(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode):
+>>>>>>>>>> Lv3_holistic_CenX3 <<<<<<<<<<
 
--- Obtaining the pulsed fraction from the entire raw pulse profile without
-    any cuts to the data.
+  Functions:
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-f_pulse - the frequency of the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how the pulse profile is 'displaced'.
-no_phase_bins - number of phase bins desired
-mode - whether we want to show or save the plot.
+>>>>>>>>>> Lv3_J1231-1411_changeW <<<<<<<<<<
 
-TEST: print(pf_all('0034070104',True,['TIME','PI','PI_FAST'],1,0.20846118761251825,0.4,50,'show')) [WORKED]
+  Functions:
 
-##### pf_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode):
+>>>>>>>>>> Lv3_main <<<<<<<<<<
 
--- Obtain the pulsed fraction from the pulse profile for a desired time interval.
+  Functions:
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means bin by 0.05s!
-f_pulse - the frequency of the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-t1 - lower time boundary
-t2 - upper time boundary
-mode - whether we want to show or save the plot
+>>>>>>>>>> Lv3_merged_pulsed_profile <<<<<<<<<<
 
-TEST: print(pf_t('0034070101',True,['TIME','PI','PI_FAST'],1,0.20846118761251825,0.4,50,0,500,'show')) [WORKED]
+  Functions:
 
-##### pf_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode):
+>>>>>>>>>> Lv3_ngc300_plots <<<<<<<<<<
 
--- Obtain the pulsed fraction from the pulse profile for a desired energy range.
+  Functions:
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-f_pulse - the frequency of the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-E1 - lower energy boundary
-E2 - upper energy boundary
+>>>>>>>>>> Lv3_orbsol <<<<<<<<<<
 
-TEST: print(pf_E('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0.3,12,'show')) [WORKED]
+  Functions:
 
-##### pf_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode):
+>>>>>>>>>> Lv3_plot_at2018cow_v2 <<<<<<<<<<
 
--- Obtain the pulsed fraction from a desired time interval and desired energy range.
+  Functions:
 
-obsid - Observation ID of the object of interest (10-digit str)
-bary - Whether the data is barycentered. True/False
-par_list - A list of parameters we'd like to extract from the FITS file
-(e.g., from eventcl, PI_FAST, TIME, PI,)
-tbin_size - the size of the time bins (in seconds!)
->> e.g., tbin_size = 2 means bin by 2s
->> e.g., tbin_size = 0.05 means by in 0.05s
-Ebin_size - the size of the energy bins (in keV!)
->> e.g., Ebin_size = 0.1 means bin by 0.1keV
->> e.g., Ebin_size = 0.01 means bin by 0.01keV!
-f_pulse - the frequency of the pulse
-shift - how much to shift the pulse by in the phase axis.
-It only affects how it is presented.
-no_phase_bins - number of phase bins desired
-t1 - lower time boundary
-t2 - upper time boundary
-E1 - lower energy boundary
-E2 - upper energy boundary
-mode - whether we want to show or save the plot
+>>>>>>>>>> Lv3_plot_at2018cow <<<<<<<<<<
 
-TEST: print(pf_tE('0034070101',True,['TIME','PI','PI_FAST'],1,0.05,0.20846118761251825,0.4,50,0,500,0.3,12,'show')) [WORKED]
+  Functions:
 
->>>>>>>>>> Lv3_duty_cycle.py <<<<<<<<<<
+>>>>>>>>>> Lv3_presto_candidates <<<<<<<<<<
 
-##### duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold):
+  Functions:
 
--- To determine the percentage of "data used"/total amount of data. Have two
-types of values:
-1) % of bins (of size duty_cycle_bin) with data over the ENTIRE observation
-2) % of bins with data over the GTIs
+  ##### get_candidates(obsid,name_par_list,zmax,f1,f2)
 
-obsid - Observation ID of the object of interest (10-digit str)
-tbin - size of the bins in time
-segment_length - length of the individual segments
-duty_cycle_bin - binning used to calculate the duty cycle
-threshold - if amount of data in the segment is more than threshold IN PERCENTAGE, use the data
+  -- Getting pulsation candidates within some frequency range. If I want the full
+  frequency range, just do f1 = 0, f2 = some large number.
 
-TEST: duty_cycle('0034070101',0.00025,100,1,10)
+  obsid - Observation ID of the object of interest (10-digit str)
+  name_par_list - list of parameters specifying parameters like GTI number and/or energy range
+  zmax - maximum acceleration
+  f1 - lower limit of frequency range
+  f2 - upper limit of frequency range
 
+  name_par_list should be [GTI_true,E_true,GTIno,segment_length,PI1,PI2]
 
+  TEST:
+  get_candidates('1200250101',[True,False,0,64,0,0],100,0,100)
 
+>>>>>>>>>> Lv3_presto_main <<<<<<<<<<
 
+  Functions:
 
+>>>>>>>>>> Lv3_pulsations <<<<<<<<<<
 
+  Functions:
 
+>>>>>>>>>> Lv3_pulsedfrac <<<<<<<<<<
 
+  Functions:
 
+  ##### pf_all(eventfile,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
 
+  -- Obtaining the pulsed fraction from the entire raw pulse profile without
+  any cuts to the data.
 
-########################### THINK ABOUT THIS LATER #############################
-WILL USE PYXSPEC IN THE FUTURE ANYWAYS. DISREGARD.
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  f_pulse - the frequency of the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how the pulse profile is 'displaced'.
+  no_phase_bins - number of phase bins desired
+  mode - whether we want to show or save the plot.
 
+  ##### pf_t(eventfile,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
 
->>>>>>>>>> Lv1_data_spectra <<<<<<<<<<
+  -- Obtain the pulsed fraction from the pulse profile for a desired time interval.
 
-Functions:
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means bin by 0.05s!
+  f_pulse - the frequency of the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  t1 - lower time boundary
+  t2 - upper time boundary
+  mode - whether we want to show or save the plot
 
-##### read_redist()
+  ##### pf_E(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
 
---  Opening the FITS file corresponding to the redistribution matrix
+  -- Obtain the pulsed fraction from the pulse profile for a desired energy range.
 
-    Describes the detector response
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  f_pulse - the frequency of the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  E1 - lower energy boundary
+  E2 - upper energy boundary
 
-    Has CHANNEL, E_MIN, E_MAX for first card
-    Has ENERG_LO, ENERG_HI, N_GRP, F_CHAN, N_CHAN, MATRIX
+  ##### pf_tE(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
 
-##### read_anc()
+  -- Obtain the pulsed fraction from a desired time interval and desired energy range.
 
---  Opening the FITS file corresponding to the ancillary response
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  par_list - A list of parameters we'd like to extract from the FITS file
+  (e.g., from eventcl, PI_FAST, TIME, PI,)
+  tbin_size - the size of the time bins (in seconds!)
+  >> e.g., tbin_size = 2 means bin by 2s
+  >> e.g., tbin_size = 0.05 means by in 0.05s
+  Ebin_size - the size of the energy bins (in keV!)
+  >> e.g., Ebin_size = 0.1 means bin by 0.1keV
+  >> e.g., Ebin_size = 0.01 means bin by 0.01keV!
+  f_pulse - the frequency of the pulse
+  shift - how much to shift the pulse by in the phase axis.
+  It only affects how it is presented.
+  no_phase_bins - number of phase bins desired
+  t1 - lower time boundary
+  t2 - upper time boundary
+  E1 - lower energy boundary
+  E2 - upper energy boundary
+  mode - whether we want to show or save the plot
 
-    Describes the efficiency vs energy; gives telescope area x filter efficiency
-    x detector quantum efficiency vs energy
+  TEST:
+  eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
+  print(pf_tE(eventfile,['TIME','PI','PI_FAST'],0.01,0.05,[0.20801725,0,0],0.4,50,0,500,1,6,'show'))
 
-    Has ENERG_LO, ENERG_HI, SPECRESP, ENERGY, XRCAREA, QE, WINDOW, THERMALSD
+>>>>>>>>>> Lv3_quicklook <<<<<<<<<<
 
-TEST:
-redist = read_redist()
-print(redist[1].data['CHANNEL'][0:20])
-print(redist[1].data['E_MIN'][0:20])
-print(redist[1].data['E_MAX'][0:20])
+  ##### nicerql(eventfile,extra_nicerql_args)
 
-print(redist[2].data['ENERG_LO'][0:20])
-print(redist[2].data['ENERG_HI'][0:20])
-print(redist[2].data['N_GRP'][0:20])
-print(redist[2].data['F_CHAN'][0:20])
-print(redist[2].data['N_CHAN'][0:20])
-print(redist[2].data['MATRIX'][0:20])
+  -- Probably the second step in the process, but this is to generate the psrpipe
+  diagnostic plots, to see if there are any obvious red flags in the data.
 
-read_anc():
+  Will just really need eventfile ; orb file and mkf file is assumed to be in the SAME folder
 
-print(anc[1].data['ENERG_LO'][0:20])
-print(anc[1].data['ENERG_HI'][0:20])
-print(anc[1].data['SPECRESP'][0:20])
-print(anc[1].data['ENERGY'][0:20])
-print(anc[1].data['XRCAREA'][0:20])
-print(anc[1].data['QE'][0:20])
-print(anc[1].data['WINDOW'][0:20])
-print(anc[1].data['THERMALSD'][0:20])
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  extra_nicerql_args - extra arguments to the nicerql script
 
-print(np.min(anc[1].data['XRCAREA'][0:20]),np.max(anc[1].data['XRCAREA'][0:20]))
-print(np.min(anc[1].data['QE'][0:20]),np.max(anc[1].data['QE'][0:20]))
-print(np.min(anc[1].data['WINDOW'][0:20]),np.max(anc[1].data['WINDOW'][0:20]))
-print(np.min(anc[1].data['THERMALSD']),np.max(anc[1].data['THERMALSD']))
+  ##### filtering(eventfile,outfile,maskdet,eventflags)
+
+  -- Function that will filter out bad detectors and impose eventflag restrictions.
+  Will expect to add to this function over time...
+
+  eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+  outfile - output file from the filtering
+  maskdet - list of DET_IDs to mask
+  eventflags - NICER event flags to filter out (e.g., in the format '(EVENT_FLAGS==bx1x000)')
+
+>>>>>>>>>> Lv3_swift <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_TBOs <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_Z2_stat <<<<<<<<<<
+
+  -- Update later! Still need to upgrade this to use 'eventfile'

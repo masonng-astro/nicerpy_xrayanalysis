@@ -115,18 +115,3 @@ for i in tqdm(range(len(T))): #for every window size:
     mplcursors.cursor(hover=True)
 
 plt.show()
-
-### calculate the significance - print a couple of things:
-### source name
-### obsid
-
-### produce a text file which has something like:
-### text file name: $ObsID.txt
-### window size - xx seconds, dt - xx seconds,
-### 3 sigma - [Leahy power] ; 4 sigma - [Leahy power] ; 5 sigma - [Leahy power]
-### starting MJD, end MJD
-### ##### [start time 1 - in zeroized units]
-### frequency - Leahy power - significance
-### frequency - Leahy power - significance
-### ...
-### [start time 2 - in zeroized units]

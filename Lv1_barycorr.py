@@ -18,7 +18,7 @@ def get_ra_dec(eventfile):
     """
     Obtain the RA_OBJ and DEC_OBJ corresponding to the observation!
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     """
     event = fits.open(eventfile)
     event_header = event[1].header
@@ -34,6 +34,8 @@ def read_par(parfile):
     Step 2a: For PSRJ, RAJ, DECJ, PMRA, and PMDEC, those lines are teased out
     Step 2b: The corresponding strings are split up without whitespace
     Step 3: Extract the values accordingly
+
+    parfile - path of the .par file
     """
     if parfile[-4:] != '.par':
         raise ValueError("parfile is neither an empty string nor a .par file. Is this right?")
@@ -54,7 +56,7 @@ def barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder):
     """
     General function to perform the barycenter corrections for an event file
 
-    obsid - Observation ID of the object of interest (10-digit str)
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     refframe - reference frame for barycenter corrections (usually ICRS)
     parfile - name of the .par file
     """

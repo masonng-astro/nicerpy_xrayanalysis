@@ -43,5 +43,5 @@ def fits2dict(fits_file,ext,par_list):
 
 if __name__ == "__main__":
     eventfile = "/Volumes/Samsung_T5/NICERsoft_outputs/1034070101_pipe/cleanfilt.evt"
-    #print(fits2dict(eventfile,['TIME','RAWX']))
+    #print(fits2dict(eventfile,1,['TIME','RAWX']))
     print(fits2dict(eventfile,2,['START','STOP']))

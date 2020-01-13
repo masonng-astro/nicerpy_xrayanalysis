@@ -6,96 +6,77 @@ Quick, short list of the modules and functions in this suite of programs.
 
 ################################## LEVEL 0 #####################################
 
-Base level - obtaining data and then binning them
+Base level - calling/processing of data
 
 >>>>>>>>>> Lv0_dirs <<<<<<<<<<
 
-Functions:
+  ##### global_par
 
-##### global_par
+>>>>>>>>>> Lv0_fits2dict <<<<<<<<<<
 
->>>>>>>>>> Lv0_call_eventcl <<<<<<<<<<
-
-##### open_fits(obsid,bary)
-##### get_eventcl(obsid,bary,par_list)
-
->>>>>>>>>> Lv0_call_ufa <<<<<<<<<<
-
-##### open_fits(obsid,mpu_no)
-##### get_ufa(obsid,mpu_no,par_list)
-
->>>>>>>>>> Lv0_call_uf <<<<<<<<<<
-
-##### open_fits(obsid,mpu_no)
-##### get_uf(obsid,mpu_no,par_list)
-
->>>>>>>>>> Lv0_call_hk <<<<<<<<<<
-
-##### open_fits(obsid,mpu_no)
-##### get_hk(obsid,mpu_no,par_list)
-
->>>>>>>>>> Lv0_call_att <<<<<<<<<<
-
-##### open_fits(obsid)
-##### get_att(obsid,par_list)
-
->>>>>>>>>> Lv0_call_cat <<<<<<<<<
-
-##### open_fits(obsid)
-##### get_cat(obsid,par_list)
-
->>>>>>>>>> Lv0_call_mkf <<<<<<<<<<
-
-##### open_fits(obsid)
-##### get_mkf(obsid,par_list)
-
->>>>>>>>>> Lv0_call_orb <<<<<<<<<<
-
-##### open_fits(obsid)
-##### get_orb(obsid,par_list)
-
->>>>>>>>>> Lv0_scp <<<<<<<<<<
-
-##### scp(obsid)
+  ##### fits2dict(fits_file,ext,par_list)
 
 >>>>>>>>>> Lv0_gunzip <<<<<<<<<<
 
-##### auxil(obsid)
-##### cl(obsid)
-##### uf(obsid)
-##### hk(obsid)
-##### unzip_all(obsid)
+  ##### unzip_all(obsdir)
+
+>>>>>>>>>> Lv0_nicer_housekeeping <<<<<<<<<<
+
+  ##### get_att(eventfile,par_list)
+  ##### get_cat(eventfile,par_list)
+  ##### get_mkf(eventfile,par_list)
+  ##### get_hk(eventfile,mpu_no,par_list)
+  ##### get_uf(eventfile,mpu_no,ext,par_list)
+  ##### get_ufa(eventfile,mpu_no,ext,par_list)
+
+>>>>>>>>>> Lv0_nicerl2 <<<<<<<<<<
+
+  ##### nicerl2(obsdir,nicerl2_flags)
 
 >>>>>>>>>> Lv0_psrpipe <<<<<<<<<<
 
-##### psrpipe(obsid,flags)
+  ##### psrpipe(eventfile,flags)
+
+>>>>>>>>>> Lv0_scp <<<<<<<<<<
+
+  ##### scp(obsid)
 
 --------------------------------------------------------------------------------
 ################################################################################
 --------------------------------------------------------------------------------
 
 ################################## LEVEL 1 #####################################
->>>>>>>>>> Lv1_data_gtis <<<<<<<<<
-
-##### get_gtis(obsid,bary,gap)
-
->>>>>>>>>> Lv1_data_filter <<<<<<<<<<
-
-##### filter_time(obsid,bary,par_list,t1,t2)
-##### filter_energy(obsid,bary,par_list,E1,E2)
-##### filter_data(obsid,bary,par_list,t1,t2,E1,E2)
-
->>>>>>>>>> Lv1_data_bin <<<<<<<<<<
-
-##### binning_t(obsid,bary,par_list,tbin_size,t1,t2)
-##### binning_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2)
-##### binning_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
 
 >>>>>>>>>> Lv1_barycorr <<<<<<<<<<
 
-##### get_ra_dec(obsid)
-##### nicerdata_barycorr(obsid,refframe)
-##### nicersoft_barycorr(obsid,refframe)
+  ##### get_ra_dec(eventfile)
+  ##### barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder)
+
+>>>>>>>>>> Lv1_data_bin <<<<<<<<<<
+
+  ##### binning_t(eventfile,par_list,tbin_size,t1,t2)
+  ##### binning_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2)
+  ##### binning_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2)
+
+>>>>>>>>>> Lv1_data_filter <<<<<<<<<<
+
+  ##### filter_time(eventfile,par_list,t1,t2)
+  ##### filter_energy(eventfile,par_list,E1,E2)
+  ##### filter_data(eventfile,par_list,t1,t2,E1,E2)
+
+>>>>>>>>>> Lv1_ngc300_binning <<<<<<<<<<
+
+  ##### get_binned_data(counts_dict,err_dict)
+  ##### binned_text()
+
+>>>>>>>>>> Lv1_ngc300_mathgrp_pha <<<<<<<<<<
+
+  ##### mathpha(bin_size,filetype)
+  ##### grppha(bin_size,filetype)
+
+>>>>>>>>>> Lv1_spectra_txt <<<<<<<<<<
+
+>>>>>>>>>> Lv1_spectral_renorm <<<<<<<<<<
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -103,109 +84,102 @@ Functions:
 
 ################################## LEVEL 2 #####################################
 
->>>>>>>>>> Lv2_sources <<<<<<<<<<
+>>>>>>>>>> Lv2_average_ps_methods <<<<<<<<<<
 
-##### obsid_to_obj(obsid)
-
->>>>>>>>>> Lv2_mkdir <<<<<<<<<<
-
-##### makedir(dir)
-
->>>>>>>>>> Lv2_lc <<<<<<<<<<
-
-##### whole(obsid,bary,name_par_list,par_list,tbin_size,mode)
-##### partial_t(obsid,bary,name_par_list,par_list,tbin_size,t1,t2,mode)
-##### partial_E(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,E1,E2,mode)
-##### partial_tE(obsid,bary,name_par_list,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode)
-
->>>>>>>>>> Lv2_ps_method <<<<<<<<<<
-
-##### padding(counts)
-##### oversample(factor,counts)
-##### pdgm(times,counts,xlims,vlines,toplot)
-##### manual(times,counts,xlims,vlines,toplot)
-
->>>>>>>>>> Lv2_ps <<<<<<<<<<
-
-##### whole(obsid,bary,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines)
-##### partial_t(obsid,bary,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
-
->>>>>>>>>> Lv2_phase <<<<<<<<<<
-
-##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
-##### pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins)
-##### whole(obsid,bary,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode)
-##### partial_t(obsid,bary,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode)
-##### partial_E(obsid,bary,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode)
-##### partial_tE(obsid,bary,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode)
+  ##### do_demodulate(eventfile,segment_length,mode,par_file)
+  ##### do_nicerfits2presto(eventfile,tbin,segment_length)
+  ##### edit_inf(eventfile,tbin,segment_length)
+  ##### edit_binary(eventfile,tbin,segment_length)
+  ##### realfft(eventfile,segment_length)
+  ##### presto_dat(eventfile,segment_length,demod)
+  ##### presto_fft(eventfile,segment_length,demod)
+  ##### segment_threshold(eventfile,segment_length,demod,tbin_size,threshold)
+  ##### average_ps(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W)
+  ##### noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W)
 
 >>>>>>>>>> Lv2_color <<<<<<<<<<
 
-##### soft_counts(E_bound,pi_data)
-##### hard_counts(E_bound,pi_data)
-##### get_color(obsid,bary,name_par_list,par_list,E_bound,tbin_size)
-##### get_color_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2)
-##### plotting(obsid,bary,name_par_list,par_list,E_bound,tbin_size,mode)
-##### plotting_t(obsid,bary,name_par_list,par_list,E_bound,tbin_size,t1,t2,mode)
+  ##### soft_counts(E_bound,pi_data)
+  ##### hard_counts(E_bound,pi_data)
+  ##### get_color(eventfile,par_list,E_bound,tbin_size)
+  ##### get_color_t(eventfile,par_list,E_bound,tbin_size,t1,t2)
+  ##### plotting(eventfile,par_list,E_bound,tbin_size,mode)
+  ##### plotting_t(eventfile,par_list,E_bound,tbin_size,t1,t2,mode)
 
->>>>>>>>>> Lv2_presto_all <<<<<<<<<<
+>>>>>>>>>> Lv2_efsearch <<<<<<<<<<
 
-##### realfft(obsid)
-##### accelsearch(obsid,flags)
-##### prepfold(obsid,zmax)
-##### ps2pdf(obsid)
+  ##### efsearch(eventfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_efsearch)
 
->>>>>>>>>> Lv2_presto_segments <<<<<<<<<<
+>>>>>>>>>> Lv2_lc <<<<<<<<<<
 
-##### get_gti_file(obsid,segment_length)
-##### niextract_gti_time(obsid,segment_length)
-##### niextract_gti_energy(obsid,PI1,PI2)
-##### niextract_gti_time_energy(obsid,segment_length,PI1,PI2)
-##### do_nicerfits2presto(obsid,tbin,segment_length)
-##### edit_inf(obsid,tbin,segment_length)
-##### edit_binary(obsid,tbin,segment_length)
-##### realfft(obsid)
-##### accelsearch(obsid,flags)
-##### prepfold(obsid,zmax,segment_length)
-##### ps2pdf(obsid,segment_length)
+  ##### whole(eventfile,par_list,tbin_size,mode)
+  ##### partial_t(eventfile,par_list,tbin_size,t1,t2,mode)
+  ##### partial_E(eventfile,par_list,tbin_size,E1,E2,mode)
+  ##### partial_tE(eventfile,par_list,tbin_size,t1,t2,E1,E2,mode)
 
->>>>>>>>>> Lv2_presto_preprocess <<<<<<<<<<
+>>>>>>>>>> Lv2_merged_pulse_methods <<<<<<<<<<
 
-##### preprocess(obsid,psrpipe_flags,refframe,tbin)
+  ##### niextract_gti_energy(merging,data_id,PI1,PI2)
+  ##### do_demodulate(merging,data_id,par_file,E_trunc,PI1,PI2)
+  ##### pulse_profile(merging,data_id,E_trunc,PI1,PI2,pulse_pars,no_phase_bins)
+  ##### plot_pf(merging,data_id,E_trunc,PI1,PI2,pulse_pars,no_phase_bins)
 
->>>>>>>>>> Lv2_average_ps_methods <<<<<<<<<<
+>>>>>>>>>> Lv2_merging_events <<<<<<<<<<
 
-##### do_demodulate(obsid,segment_length,par_file)
-##### do_nicerfits2presto(obsid,tbin,segment_length)
-##### edit_inf(obsid,tbin,segment_length)
-##### edit_binary(obsid,tbin,segment_length)
-##### realfft_segment(obsid,segment_length)
-##### presto_dat(obsid,segment_length,demod)
-##### presto_fft(obsid,segment_length,demod)
-##### segment_threshold(obsid,segment_length,demod,tbin_size,threshold)
-##### average_ps(obsid,segment_length,demod,tbin_size,threshold,W)
-##### noise_hist(obsid,segment_length,demod,tbin_size,threshold,starting_freq,W)
+  ##### merging(obsids)
+  ##### merging_GTIs(obsids,merged_id)
 
->>>>>>>>>> Lv2_average_merge_ps_methods <<<<<<<<<<
+>>>>>>>>>> Lv2_mkdir <<<<<<<<<<
 
-##### merging(obsids)
-##### merging_GTIs(obsids,merged_id)
-##### get_gti_file(merged_id,segment_length)
-##### niextract_gti_time(merged_id,segment_length)
-##### niextract_gti_energy(merged_id,PI1,PI2)
-##### niextract_gti_time_energy(merged_id,segment_length,PI1,PI2)
-##### do_nicerfits2presto(merged_id,tbin,segment_length)
-##### edit_inf(merged_id,tbin,segment_length)
-##### edit_binary(merged_id,tbin,segment_length)
-##### realfft(merged_id,segment_length)
-##### do_demodulate(merged_id,segment_length,par_file)
-##### presto_dat(merged_id,segment_length,demod,PI1,PI2)
-##### presto_fft(merged_id,segment_length,demod,PI1,PI2)
-##### segment_threshold(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold)
-##### average_ps(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
-##### noise_hist(merged_id,segment_length,demod,PI1,PI2,tbin_size,threshold,starting_freq,W)
+  ##### makedir(dir)
+
+>>>>>>>>>> Lv2_ngc300_color <<<<<<<<<<
+
+  ##### get_color(bin_size,band1,band2)
+
+>>>>>>>>>> Lv2_phase <<<<<<<<<<
+
+  Functions:
+
+  ##### pulse_profile(f_pulse,times,counts,shift,no_phase_bins)
+  ##### pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins)
+  ##### whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode)
+  ##### partial_t(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,mode)
+  ##### partial_E(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,E1,E2,mode)
+  ##### partial_tE(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_bins,t1,t2,E1,E2,mode)
+  ##### partial_subplots_E(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,subplot_Es,E1,E2,mode)
+
+>>>>>>>>>> Lv2_preprocess <<<<<<<<<<
+
+  ##### preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nicer_datafile,nicer_output,nicersoft_datafile,nicersoft_output,nicersoft_folder)
+
+>>>>>>>>>> Lv2_presto_subroutines <<<<<<<<<<
+
+  ##### get_gti_file(eventfile,segment_length)
+  ##### niextract_gti_time(eventfile,segment_length)
+  ##### niextract_gti_energy(eventfile,PI1,PI2)
+  ##### niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
+  ##### do_nicerfits2presto(eventfile,tbin,segment_length)
+  ##### edit_inf(eventfile,tbin,segment_length)
+  ##### edit_binary(eventfile,tbin,segment_length)
+  ##### realfft(eventfile,segment_length,mode)
+  ##### accelsearch(eventfile,segment_length,mode,flags)
+  ##### prepfold(eventfile,mode,zmax)
+  ##### ps2pdf(eventfile,mode)
+
+>>>>>>>>>> Lv2_ps_method <<<<<<<<<<
+
+  ##### padding(counts)
+  ##### oversample(factor,counts)
+  ##### pdgm(times,counts,xlims,vlines,toplot,oversampling)
+  ##### manual(times,counts,xlims,vlines,toplot,oversampling)
+
+>>>>>>>>>> Lv2_ps <<<<<<<<<<
+
+  ##### whole(eventfile,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines)
+  ##### partial_t(eventfile,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims,vlines)
+  ##### partial_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversampling,xlims,vlines)
+  ##### partial_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,oversampling,xlims,vlines)
 
 --------------------------------------------------------------------------------
 ################################################################################
@@ -213,27 +187,122 @@ Functions:
 
 ################################## LEVEL 3 #####################################
 
->>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
+>>>>>>>>>> Lv3_analyze_xspec_pars <<<<<<<<<<
 
-##### diag_all(obsid,bary,par_list,tbin_size,mode,diag_vars)
-##### diag_t(obsid,bary,par_list,tbin_size,t1,t2,mode,diag_vars)
+  ##### model_par(model)
+  ##### xspec_par(model,E1,E2)
+  ##### plot_ufspectra(model,MJDs,E1,E2)
+  ##### plot_rrcl(model,MJDs,E1,E2,plottype)
+  ##### plot_HID(MJDs)
+  ##### lumin_plus_par(model,MJDs,E1,E2)
+
+>>>>>>>>>> Lv3_average_ps_main <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_B1957+20_merged <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_calc_deadtime <<<<<<<<<<
+
+  ##### deadtime(obsid,mpu_no,par_list)
+  ##### exposure(obsid,bary,par_list)
+
+>>>>>>>>>> Lv3_detection_level <<<<<<<<<<
+
+  ##### max_acc(zmax,T,f0)
+  ##### N_trials(tbin,T)
+  ##### single_trial_prob(significance,N)
+  ##### signal_significance(M,W,Pthreshold)
+  ##### power_for_sigma(significance,N,M,W)
 
 >>>>>>>>>> Lv3_diagnostics_display <<<<<<<<<<
 
-##### display_all(obsid,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
-##### display_t(obsid,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype)
+  ##### display_all(eventfile,diag_var,lc_t,lc_counts,diag_t,diag_counts,filetype)
+  ##### display_t(eventfile,diag_var,t1,t2,lc_t,lc_counts,diag_t,diag_counts,filetype)
 
->>>>>>>>>> Lv3_E_boundary <<<<<<<<<<
+>>>>>>>>>> Lv3_diagnostics <<<<<<<<<<
 
-##### E_bound(obsid,bary,par_list,E1,E2,cut_type,bound)
-
->>>>>>>>>> Lv3_pulsedfrac <<<<<<<<<<
-
-##### pf_all(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
-##### pf_t(obsid,bary,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
-##### pf_E(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
-##### pf_tE(obsid,bary,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+  ##### diag_all(eventfile,par_list,tbin_size,mode,diag_vars)
+  ##### diag_t(eventfile,par_list,tbin_size,t1,t2,mode,diag_vars)
 
 >>>>>>>>>> Lv3_duty_cycle <<<<<<<<<<
 
-##### duty_cycle(obsid,tbin,segment_length,duty_cycle_bin,threshold)
+  ##### duty_cycle(eventfile,tbin,segment_length,duty_cycle_bin,threshold)
+  ##### duty_cycle_dist(eventfile,tbin,segment_length,duty_cycle_bin,threshold)
+  ##### duty_cycle_tE(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold)
+  ##### duty_cycle_tE_dist(eventfile,tbin,segment_length,PI1,PI2,duty_cycle_bin,threshold)
+  ##### compare_segment_lengths(eventfile,tbin,segment_lengths,duty_cycle_bin)
+
+>>>>>>>>>> Lv3_E_boundary <<<<<<<<<<
+
+  ##### E_bound(eventfile,par_list,E1,E2,cut_type,bound)
+
+>>>>>>>>>> Lv3_holistic_CenX3 <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_J1231-1411_changeW <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_main <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_merged_pulsed_profile <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_ngc300_plots <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_orbsol <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_plot_at2018cow_v2 <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_plot_at2018cow <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_presto_candidates <<<<<<<<<<
+
+  ##### get_candidates(obsid,name_par_list,zmax,f1,f2)
+
+>>>>>>>>>> Lv3_presto_main <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_pulsations <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_pulsedfrac <<<<<<<<<<
+
+  ##### pf_all(eventfile,par_list,tbin_size,f_pulse,shift,no_phase_bins,mode)
+  ##### pf_t(eventfile,par_list,tbin_size,f_pulse,shift,no_phase_bins,t1,t2,mode)
+  ##### pf_E(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,E1,E2,mode)
+  ##### pf_tE(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_phase_bins,t1,t2,E1,E2,mode)
+
+>>>>>>>>>> Lv3_quicklook <<<<<<<<<<
+
+  ##### nicerql(eventfile,extra_nicerql_args)
+  ##### filtering(eventfile,outfile,maskdet,eventflags)
+
+>>>>>>>>>> Lv3_swift <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_TBOs <<<<<<<<<<
+
+  Functions:
+
+>>>>>>>>>> Lv3_Z2_stat <<<<<<<<<<
+
+  -- Update later! Still need to upgrade this to use 'eventfile'

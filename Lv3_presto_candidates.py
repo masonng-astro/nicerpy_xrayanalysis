@@ -84,6 +84,5 @@ def get_candidates(obsid,name_par_list,zmax,f1,f2):
                 if (np.float(candidates[2][j][:-3]) > f1) and (np.float(candidates[2][j][:-3]) < f2):
                     cands_txt.write(obsid + '   ' + date_obs + '   ' + date_end + '   ' + tstart + '   ' + tstop + '   ' + segment_no + '   ' + MET_centroid + '   ' + candidates[0][j].zfill(4) + '   ' + candidates[1][j] + '   ' + candidates[2][j] + '   ' + candidates[3][j] + '   ' + candidates[4][j] + '   ' + candidates[5][j] + '\n')
 
-
 if __name__ == "__main__":
     get_candidates('1200250101',[True,False,0,64,0,0],100,0,100)
