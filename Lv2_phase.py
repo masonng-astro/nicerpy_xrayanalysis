@@ -24,6 +24,8 @@ Lv0_dirs.global_par() #obtaining the global parameters
 def pulse_profile(f_pulse,times,counts,shift,no_phase_bins):
     """
     Calculating the pulse profile for the observation. Goes from 0 to 2!
+    Thoughts on 1/14/2020: I wonder if the count rate is calculated from times[-1]-times[0]?
+    If so, this is WRONG! I should be using the total from the GTIs!
 
     f_pulse - the frequency of the pulse
     times - the array of time values

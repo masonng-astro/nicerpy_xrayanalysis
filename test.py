@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
-#import binary_psr
+from presto import binary_psr
 import matplotlib.gridspec as gridspec
 import subprocess
 import glob

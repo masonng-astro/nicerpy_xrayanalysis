@@ -12,7 +12,7 @@ import numpy as np
 import pathlib
 import Lv0_dirs,Lv0_fits2dict
 import Lv1_barycorr,Lv1_data_bin
-import Lv2_lc,Lv2_ps,Lv2_color,Lv2_phase,Lv2_efsearch
+import Lv2_lc,Lv2_ps,Lv2_color,Lv2_phase,Lv2_efsearch,Lv2_TBOs_method
 import Lv3_E_boundary
 from matplotlib.backends.backend_pdf import PdfPages
 import time
@@ -92,6 +92,10 @@ if __name__ == "__main__":
     orbitfile = Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209.orb'
     parfile = ''
     output_folder = Lv0_dirs.NICER_DATADIR + 'rxj0209/'
+################################################################################
+
+########################### BURST_CANDS PARAMETERS #############################
+    do_burst_cands = True
 ################################################################################
 
 ######################### LC_PS_PHASE_COLOR PARAMETERS #########################
@@ -181,6 +185,9 @@ if __name__ == "__main__":
 
     if do_bary == True:
         Lv1_barycorr.barycorr(eventfiles[0],out_baryfile,refframe,orbitfile,parfile,output_folder)
+
+    if do_burst_cands == True:
+        Lv2_TBOs_method.burst_cands(out_baryfile)
 
     if do_lc_ps_phase_color == True:
         par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
