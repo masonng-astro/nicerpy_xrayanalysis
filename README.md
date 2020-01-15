@@ -32,3 +32,6 @@ v3.1 - January 11 2020
 
 Will make a more comprehensive README in the future, but this is the current state... Can refer to the documentation! 
 
+v3.2 - January 15 2020
+
+- Adding Lv2_TBOs_method, which takes care of searching for burst candidates and adding contour/colormap plots. Edited Lv3_TBOs.py to make it more an executive script than a methods script.
