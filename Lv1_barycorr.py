@@ -52,13 +52,17 @@ def read_par(parfile):
 
     return posepoch[1], ra_deg, dec_deg, pmra, pmdec #returns object name, RA, DEC, PMRA, PMDEC
 
-def barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder):
+def barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder,custom_coords):
     """
     General function to perform the barycenter corrections for an event file
 
     eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+    outfile - path to the output event file with barycenter corrections applied
     refframe - reference frame for barycenter corrections (usually ICRS)
+    orbit_file - path to the orbit file of the observation
     parfile - name of the .par file
+    output_folder - path to the folder where the outfile will be
+    custom_coords - either an empty list/array or a list/array with two elements (RA/DEC)
     """
     if refframe != 'ICRS' and refframe != 'FK5':
         raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
@@ -83,6 +87,9 @@ def barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder):
         new_dec = old_dec + (PMDEC*1E-3/3600) * time_elapsed/365.2425
 
         with open(logfile,'w') as logtextfile:
+            if len(custom_coords) == 2:
+                new_ra = custom_coords[0]
+                new_dec = custom_coords[1]
             output = subprocess.run(['barycorr',eventfile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(new_ra),'dec='+str(new_dec),'refframe='+str(refframe),'clobber=YES'],capture_output=True,text=True)
             logtextfile.write(output.stdout)
             logtextfile.write('*------------------------------* \n')
@@ -91,6 +98,9 @@ def barycorr(eventfile,outfile,refframe,orbit_file,parfile,output_folder):
 
     elif parfile == '':
         ra,dec = get_ra_dec(eventfile)
+        if len(custom_coords) == 2:
+            ra = custom_coords[0]
+            dec = custom_coords[1]
         with open(logfile,'w') as logtextfile:
             output = subprocess.run(['barycorr',eventfile,'outfile='+outfile,'orbitfiles='+orbit_file,'ra='+str(ra),'dec='+str(dec),'refframe='+str(refframe),'clobber=YES'],capture_output=True,text=True)
             logtextfile.write(output.stdout)

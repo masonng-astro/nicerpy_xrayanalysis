@@ -147,7 +147,7 @@ def dynamic_ps(eventfile,search_window,T,dt,tbin_size,df,f_central,mode):
 
             output_file.write('Start time for this window: zeroized - ' + str(T_start[j]) + ' ; MJD - ' + str(MJDREFI+MJDREFF+(times[0]+T_start[j])/86400) + '\n')
             for k in range(len(f_window)):
-                output_file.write(str(f_window[k]) + ' ' + str(ps_window[k]) + ' ' + str(Lv3_detection_level.signal_significance(1,1,ps_window[k])) + '\n')
+                output_file.write(str(f_window[k]) + ' ' + str(ps_window[k]) + ' ' + str(Lv3_detection_level.signal_significance(N,1,1,ps_window[k])) + '\n')
 
         output_file.close()
 

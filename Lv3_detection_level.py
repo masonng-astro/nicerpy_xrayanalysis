@@ -58,7 +58,7 @@ def single_trial_prob(significance,N):
 
     return single_trial, single_trial_signif
 
-def signal_significance(M,W,Pthreshold):
+def signal_significance(N,M,W,Pthreshold):
     """
     Calculating the significance of a particular signal in the power spectrum,
     given M (number of segments), W (number of consecutive bins summed), and
@@ -73,7 +73,7 @@ def signal_significance(M,W,Pthreshold):
 
     Q_chi2_dof = 1-stats.chi2.cdf(chi2,dof) #stats.chi2 is from 0 to chi2, so do the complement if we want chi2 to infinity
     ## Q(M*W*Pthreshold|2*M*W) ; where Q(chi^2|nu) = 1/[2^(nu/2)*Gamma(nu/2)] * \int_{chi^2}^\infty t^{nu/2 - 1} e^{-t/2} dt
-    significance = special.erfinv(1-Q_chi2_dof)*np.sqrt(2)
+    significance = special.erfinv(1-Q_chi2_dof*N)*np.sqrt(2)
     #print('The signal has a significance of ' + str(significance) + ' sigma.')
     #confidence_level = special.erf(significance/np.sqrt(2))*100
     return significance

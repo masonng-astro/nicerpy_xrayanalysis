@@ -15,12 +15,13 @@ import numpy as np
 from astropy.io import fits
 import Lv0_dirs,Lv0_gunzip,Lv0_nicerl2,Lv0_psrpipe,Lv1_barycorr
 import os
+from tqdm import tqdm
 import subprocess
 import glob
 
 Lv0_dirs.global_par()
 
-def preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nicer_datafile,nicer_output,nicersoft_datafile,nicersoft_output,nicersoft_folder):
+def preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nicer_datafile,nicer_output,nicersoft_datafile,nicersoft_output,nicersoft_folder,custom_coords):
     """
     Preprocessing the NICER data for use in PRESTO, so running gunzip, psrpipe, and barycorr.
 
@@ -35,6 +36,7 @@ def preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nic
     nicersoft_datafile - event file (usually cleanfilt.evt) from the NICERsoft data directory
     nicersoft_output - output/barycenter-corrected event file from the NICERsoft data directory
     nicersoft_folder - output folder for the NICERsoft data
+    custom_coords - either an empty list/array or a list/array with two elements (RA/DEC)
     """
     if type(psrpipe_flags) != list:
         raise TypeError("flags should be a list! Not even an array.")
@@ -48,24 +50,27 @@ def preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nic
     Lv0_psrpipe.psrpipe(nicer_datafile,psrpipe_flags) #applying custom cuts (though no need --shrinkelv after HEASOFT 6.26)
 
     ##### For the NICER data
-    Lv1_barycorr.barycorr(nicer_datafile,nicer_output,refframe,orbitfile,parfile,obsdir)
+    Lv1_barycorr.barycorr(nicer_datafile,nicer_output,refframe,orbitfile,parfile,obsdir,custom_coords)
     ##### For the NICERsoft file (cleanfilt.evt, usually)
-    Lv1_barycorr.barycorr(nicersoft_datafile,nicersoft_output,refframe,orbitfile,parfile,nicersoft_folder)
+    Lv1_barycorr.barycorr(nicersoft_datafile,nicersoft_output,refframe,orbitfile,parfile,nicersoft_folder,custom_coords)
 
     return
 
 if __name__ == "__main__":
-    obsdir = Lv0_dirs.NICER_DATADIR + '1034070101/'
+    #obsdirs = [Lv0_dirs.NICER_DATADIR + str(i) + '/' for i in range(1034200124,1034200200)] + [Lv0_dirs.NICER_DATADIR + str(i) + '/' for i in range(1034200201,1034200241)] + [Lv0_dirs.NICER_DATADIR + str(i) + '/' for i in range(2034200201,2034200206)]
+    obsdirs = [Lv0_dirs.NICER_DATADIR + '/1050070103/']
     nicerl2_flags = ['clobber=YES']
     psrpipe_flags = ['--emin','0.3','--emax','12.0'] #for psrpipe in Lv0_psrpipe
     refframe = 'ICRS' #for barycorr in Lv1_barycorr
-    orbitfile = obsdir + '/auxil/ni1034070101.orb'
+    orbitfile = [obsdirs[i] + 'auxil/ni' + obsdirs[i][-11:-1] + '.orb' for i in range(len(obsdirs))]
     parfile = ''
+    custom_coords = np.array([])
 
-    nicer_datafile = obsdir + 'xti/event_cl/ni1034070101_0mpu7_cl.evt'
-    nicer_output = obsdir + 'xti/event_cl/ni1034070101_0mpu7_cl_bary.evt'
-    nicersoft_datafile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/cleanfilt.evt'
-    nicersoft_output = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
-    nicersoft_folder = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/'
+    nicer_datafile = [obsdirs[i] + 'xti/event_cl/ni' + obsdirs[i][-11:-1] + '_0mpu7_cl.evt' for i in range(len(obsdirs))]
+    nicer_output = [obsdirs[i] + 'xti/event_cl/ni' + obsdirs[i][-11:-1] + '_0mpu7_cl_bary.evt' for i in range(len(obsdirs))]
+    nicersoft_datafile = [Lv0_dirs.NICERSOFT_DATADIR + obsdirs[i][-11:-1] + '_pipe/cleanfilt.evt' for i in range(len(obsdirs))]
+    nicersoft_output = [Lv0_dirs.NICERSOFT_DATADIR + obsdirs[i][-11:-1] + '_pipe/ni' + obsdirs[i][-11:-1] + '_nicersoft_bary.evt' for i in range(len(obsdirs))]
+    nicersoft_folder = [Lv0_dirs.NICERSOFT_DATADIR + obsdirs[i][-11:-1] + '_pipe/' for i in range(len(obsdirs))]
 
-    preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nicer_datafile,nicer_output,nicersoft_datafile,nicersoft_output,nicersoft_folder)
+    for i in tqdm(range(len(obsdirs))):
+        preprocess(obsdirs[i],nicerl2_flags,psrpipe_flags,refframe,orbitfile[i],parfile,nicer_datafile[i],nicer_output[i],nicersoft_datafile[i],nicersoft_output[i],nicersoft_folder[i],custom_coords)

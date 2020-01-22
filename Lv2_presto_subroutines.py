@@ -80,6 +80,9 @@ def niextract_gti_time(eventfile,segment_length):
     Lv2_mkdir.makedir(niextract_folder)
     for i in tqdm(range(len(segment_times)-1)):
         outputfile = niextract_folder + 'ni' + obsid + '_nicersoft_bary_GTI'+str(i)+'_'+str(segment_length)+'s.evt'
+        if 'merged' in parent_folder:
+            merged_id = str(pathlib.Path(eventfile).name)[:12]
+            outputfile = niextract_folder + merged_id + '_nicersoft_bary_GTI' + str(i) + '_' + str(segment_length) + 's.evt'
         subprocess.run(['niextract-events',eventfile,outputfile,'timefile='+parent_folder+'/gtis/'+str(segment_length)+'s_GTI'+str(i)+'.gti'])
 
     return
@@ -131,14 +134,17 @@ def niextract_gti_time_energy(eventfile,segment_length,PI1,PI2):
 #    Tobs_end = event[1].data['TIME'][-1]
 
     segment_times = np.arange(Tobs_start,Tobs_end+segment_length,segment_length) #array of time values, starting
-    #Jul 10: added Tobs_end + segment_length to ge tthat final piece of data
+    #Jul 10: added Tobs_end + segment_length to get that final piece of data
 
     niextract_folder = parent_folder + '/accelsearch_' + str(segment_length) + 's/'
     Lv2_mkdir.makedir(niextract_folder)
 
     for i in tqdm(range(len(segment_times)-1)):
-        output_file = niextract_folder + 'ni' + obsid + '_nicersoft_bary_GTI'+str(i)+'_'+str(segment_length)+'s_' + 'E'+str(PI1)+'-'+str(PI2)+'.evt'
-        subprocess.run(['niextract-events',eventfile+'[PI='+str(PI1)+':'+str(PI2)+']',output_file,'timefile='+parent_folder+'/gtis/'+str(segment_length)+'s_GTI'+str(i)+'.gti'])
+        outputfile = niextract_folder + 'ni' + obsid + '_nicersoft_bary_GTI'+str(i)+'_'+str(segment_length)+'s_' + 'E'+str(PI1)+'-'+str(PI2)+'.evt'
+        if 'merged' in parent_folder:
+            merged_id = str(pathlib.Path(eventfile).name)[:12]
+            outputfile = niextract_folder + merged_id + '_nicersoft_bary_GTI' + str(i) + '_' + str(segment_length) + 's_E' + str(PI1) + '-' + str(PI2) + '.evt'
+        subprocess.run(['niextract-events',eventfile+'[PI='+str(PI1)+':'+str(PI2)+']',outputfile,'timefile='+parent_folder+'/gtis/'+str(segment_length)+'s_GTI'+str(i)+'.gti'])
 
     return
 
@@ -181,6 +187,8 @@ def do_nicerfits2presto(eventfile,tbin,segment_length):
     ##### in the terminal!
 
     presto_files = glob.glob('*'+obsid+'*')
+    if 'merged' in eventfile:
+        presto_files = glob.glob('merged*')
     for i in range(len(presto_files)):
         if segment_length == 0:
             subprocess.run(['mv',presto_files[i],parent_folder+'/'])
@@ -336,11 +344,12 @@ def accelsearch(eventfile,segment_length,mode,flags):
 
     return
 
-def prepfold(eventfile,mode,zmax):
+def prepfold(eventfile,segment_length,mode,zmax):
     """
     Performing PRESTO's prepfold on the pulsation candidates.
 
     eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+    segment_length - length of the individual segments
     mode - "all", "t" or "E" ; basically to tell the function where to access files to run prepfold for
     zmax - maximum acceleration
     """
@@ -359,26 +368,38 @@ def prepfold(eventfile,mode,zmax):
         raise ValueError("mode should either of 'all', 't', or 'E'!")
 
     cand_files = [ACCEL_files[i] + '.cand' for i in range(len(ACCEL_files))]
-    events_files = [cand_files[i][:-15]+'.events' for i in range(len(cand_files))]
+    if zmax < 10:
+        events_files = [cand_files[i][:-11]+'.events' for i in range(len(cand_files))]
+    if (zmax >= 10) & (zmax < 100):
+        events_files = [cand_files[i][:-12]+'.events' for i in range(len(cand_files))]
+    if (zmax >= 100) & (zmax < 999):
+        events_files = [cand_files[i][:-13]+'.events' for i in range(len(cand_files))]
+    else:
+        events_files = [cand_files[i][:-14]+'.events' for i in range(len(cand_files))]
 
     header1 = "             Summed  Coherent  Num        Period          Frequency         FFT 'r'        Freq Deriv       FFT 'z'         Accel                           "
     header2 = "                        Power /          Raw           FFT 'r'          Pred 'r'       FFT 'z'     Pred 'z'      Phase       Centroid     Purity                        "
 
-    for i in range(len(ACCEL_files)): #for each successful ACCEL_zmax file:
-        accel_textfile = np.array(open(ACCEL_files[i],'r').read().split('\n')) #read the data from the ACCEL_$zmax files
-        index_header1 = np.where(accel_textfile==header1)[0][0] #index for "Summed, Coherent, Num, Period etc
-        index_header2 = np.where(accel_textfile==header2)[0][0] #index for "Power / Raw  FFT  'r'  etc
-        no_cands = index_header2 - index_header1 - 5 #to obtain number of candidates
-        cand_relpath = relpath(cand_files[i],parent_folder) #relative path of .cand file ; PRESTO doesn't like using absolute paths
-        events_relpath = relpath(events_files[i],parent_folder) #relative path of .events file ; PRESTO doesn't like using absolute paths
+    with open(logfile,'w') as logtextfile:
+        for i in range(len(ACCEL_files)): #for each successful ACCEL_zmax file:
+            accel_textfile = np.array(open(ACCEL_files[i],'r').read().split('\n')) #read the data from the ACCEL_$zmax files
+            index_header1 = np.where(accel_textfile==header1)[0][0] #index for "Summed, Coherent, Num, Period etc
+            index_header2 = np.where(accel_textfile==header2)[0][0] #index for "Power / Raw  FFT  'r'  etc
+            no_cands = index_header2 - index_header1 - 5 #to obtain number of candidates
+            cand_relpath = relpath(cand_files[i],parent_folder) #relative path of .cand file ; PRESTO doesn't like using absolute paths
+            events_relpath = relpath(events_files[i],parent_folder) #relative path of .events file ; PRESTO doesn't like using absolute paths
 
-        for j in range(no_cands):
-            command = 'cd ' + nicersoft_output_folder + ' ; prepfold -double -events -noxwin -n 50 -accelcand ' + str(j+1) + ' -accelfile ' + cand_relpath + ' ' + events_relpath
-            subprocess.Popen(command,shell=True)
+            for j in range(min(100,no_cands)): #to control the number of outputs! Sometimes there can be thousands of candidates - insane!
+                command = 'cd ' + parent_folder + ' ; prepfold -double -events -noxwin -n 50 -accelcand ' + str(j+1) + ' -accelfile ' + cand_relpath + ' ' + events_relpath
+                output = subprocess.run(command,shell=True,capture_output=True,text=True)
+                logtextfile.write(output.stdout)
+                logtextfile.write('*------------------------------* \n')
+                logtextfile.write(output.stderr)
+        logtextfile.close()
 
     return
 
-def ps2pdf(eventfile,mode):
+def ps2pdf(eventfile,segment_length,mode):
     """
     Converting from .ps to .pdf
 
@@ -396,7 +417,8 @@ def ps2pdf(eventfile,mode):
     else:
         raise ValueError("mode should either of 'all', 't', or 'E'!")
 
-    for i in range(len(ps_files)):
+    print('Running ps2pdf now!')
+    for i in tqdm(range(len(ps_files))):
         pdf_file = ps_files[i][:-2]+'pdf' #replacing .ps to .pdf
         ps2pdf_command = ['ps2pdf',ps_files[i],pdf_file]
         subprocess.run(ps2pdf_command) #using ps2pdf to convert from ps to pdf ; not just a simple change in extension
@@ -409,7 +431,7 @@ if __name__ == "__main__":
     segment_length = 100
     PI1 = 100
     PI2 = 1000
-    zmax=100
+    zmax = 100
 
     tbin = 0.025
 

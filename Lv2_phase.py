@@ -147,7 +147,7 @@ def whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
         plt.show()
     elif mode == 'save':
         filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
     return phase_bins[:-1],summed_profile
@@ -214,7 +214,7 @@ def partial_t(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,
         plt.show()
     elif mode == 'save':
         filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
     return phase_bins[:-1],summed_profile
@@ -289,7 +289,7 @@ def partial_E(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_b
         plt.show()
     elif mode == 'save':
         filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
     return phase_bins[:-1],summed_profile
@@ -363,7 +363,7 @@ def partial_tE(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_
 
     elif mode == 'save':
         filename = 'pp_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
     return phase_bins[:-1],summed_profile
@@ -436,7 +436,7 @@ def partial_subplots_E(eventfile,par_list,tbin_size,Ebin_size,f_pulse,shift,no_p
         plt.show()
     elif mode == 'save':
         filename = 'pp_subplots_' + obsid + '_bin' + str(tbin_size) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
     return phase_bins[:-1],summed_profile

@@ -14,6 +14,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from presto import binary_psr
+import Lv3_detection_level
 import pathlib
 import subprocess
 import os
@@ -93,9 +94,11 @@ def do_nicerfits2presto(eventfile,tbin,segment_length):
         except (ValueError,subprocess.CalledProcessError):
             pass
 
-    obsid_files = glob.glob('*'+obsid+'*')
-    for i in range(len(obsid_files)):
-        subprocess.run(['mv',obsid_files[i],parent_folder+'/accelsearch_'+str(segment_length)+'s/'])
+    presto_files = glob.glob('*'+obsid+'*')
+    if 'merged' in eventfile:
+        presto_files = glob.glob('merged*')
+    for i in range(len(presto_files)):
+        subprocess.run(['mv',presto_files[i],parent_folder+'/accelsearch_'+str(segment_length)+'s/'])
 
 def edit_inf(eventfile,tbin,segment_length):
     """
@@ -116,7 +119,8 @@ def edit_inf(eventfile,tbin,segment_length):
 
     no_desired_bins = float(segment_length)/float(tbin)
 
-    for i in range(len(inf_files)):
+    print('Editing the .inf files!')
+    for i in tqdm(range(len(inf_files))):
         inf_file = open(inf_files[i],'r')
         contents = inf_file.read()
         contents = contents.split('\n')
@@ -153,6 +157,7 @@ def edit_binary(eventfile,tbin,segment_length):
 
     dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.dat')) #not that order matters here I think, but just in case
     no_desired_bins = float(segment_length)/float(tbin) #TOTAL number of desired bins for the segment
+    print('Editing the binary .dat files!')
     for i in tqdm(range(len(dat_files))):
         bins = np.fromfile(dat_files[i],dtype='<f',count=-1) #reads the binary file ; converts to little endian, count=-1 means grab everything
 
@@ -181,8 +186,9 @@ def realfft(eventfile,segment_length):
     # recall that un-truncated data is "*bary.dat", so "*bary_*.dat" is truncated data!
     logfile = parent_folder + '/accelsearch_' + str(segment_length) + 's/realfft.log'
 
+    print('Doing realfft now!')
     with open(logfile,'w') as logtextfile:
-        for i in range(len(dat_files)):
+        for i in tqdm(range(len(dat_files))):
             output = subprocess.run(['realfft',dat_files[i]],capture_output=True,text=True)
             logtextfile.write(output.stdout)
             logtextfile.write('*------------------------------* \n')
@@ -191,47 +197,77 @@ def realfft(eventfile,segment_length):
 
     return
 
-def presto_dat(eventfile,segment_length,demod):
+def presto_dat(eventfile,segment_length,demod,PI1,PI2):
     """
     Obtain the dat files that were generated from PRESTO
 
     eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
     parent_folder = str(pathlib.Path(eventfile).parent)
 
-    dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.dat'))
-    demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*demod.dat'))
+    if PI1 != '': #if we're doing energy cuts instead
+        dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*.dat'))
+        demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*demod.dat'))
+    else:
+        dat_files = []
+        demod_files = []
+        all_dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.dat'))
+        all_demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*demod.dat'))
+        for i in range(len(all_dat_files)):
+            if 'E' not in str(pathlib.Path(all_dat_files[i]).name):
+                dat_files.append(all_dat_files[i])
+        for i in range(len(all_demod_files)):
+            if 'E' not in str(pathlib.Path(all_demod_files[i]).name):
+                demod_files.append(all_demod_files[i])
+
     if demod == True:
         return np.array(demod_files)
     else:
         return np.array([datfile for datfile in dat_files if datfile not in set(demod_files)])
 
-def presto_fft(eventfile,segment_length,demod):
+def presto_fft(eventfile,segment_length,demod,PI1,PI2):
     """
     Obtain the FFT files that were generated from PRESTO
 
     eventfile - path to the event file. Will extract ObsID from this for the NICER files.
     segment_length - length of the segments
     demod - whether we're dealing with demodulated data or not!
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
     parent_folder = str(pathlib.Path(eventfile).parent)
 
-    fft_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.fft'))
-    demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*demod.fft'))
+    if PI1 != '': #if we're doing energy cuts instead
+        fft_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*.fft'))
+        demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*demod.fft'))
+    else:
+        fft_files = []
+        demod_files = []
+        all_fft_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.fft'))
+        all_demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*demod.fft'))
+        for i in range(len(all_fft_files)):
+            if 'E' not in str(pathlib.Path(all_fft_files[i]).name):
+                fft_files.append(all_fft_files[i])
+        for i in range(len(all_demod_files)):
+            if 'E' not in str(pathlib.Path(all_demod_files[i]).name):
+                demod_files.append(all_demod_files[i])
+
     if demod == True:
         return np.array(demod_files)
     else:
         return np.array([fftfile for fftfile in fft_files if fftfile not in set(demod_files)])
 
-def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold):
+def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2):
     """
     Using the .dat files, rebin them into 1s bins, to weed out the segments below
     some desired threshold. Will return a *list* of *indices*! This is so that I
@@ -242,11 +278,13 @@ def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold):
     demod - whether we're dealing with demodulated data or not!
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    dat_files = presto_dat(eventfile,segment_length,demod)
+    dat_files = presto_dat(eventfile,segment_length,demod,PI1,PI2)
     rebin_t = np.arange(segment_length+1)*1 #1-second bins
 
     passed_threshold = []
@@ -255,7 +293,8 @@ def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold):
         dat_file_data = np.fromfile(dat_files[i],dtype='<f',count=-1)
         data_t = np.arange(len(dat_file_data))*tbin_size
         rebin_sum,rebin_edges,rebin_trunc = stats.binned_statistic(data_t,dat_file_data,statistic='sum',bins=rebin_t)
-        #print(len(rebin_sum[rebin_sum>0])/len(rebin_sum)*100)
+        #print(str(pathlib.Path(dat_files[i]).name),len(rebin_sum[rebin_sum>0])/len(rebin_sum)*100)
+        #print(len(rebin_sum[rebin_sum>0]),len(rebin_sum))
         if len(rebin_sum[rebin_sum>0])/len(rebin_sum)*100 >= threshold:
             passed_threshold.append(i)
 
@@ -263,7 +302,7 @@ def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold):
 
     return passed_threshold, len(passed_threshold)
 
-def average_ps(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W):
+def average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starting_freq,W):
     """
     Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
     data is beyond some threshold, return the averaged power spectrum!
@@ -273,14 +312,17 @@ def average_ps(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,
     demod - whether we're dealing with demodulated data or not!
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    starting_freq - frequency to start constructing the histogram of powers from
     W - number of consecutive frequency bins to AVERAGE over
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    dat_files = presto_dat(eventfile,segment_length,demod) #sorted array of .dat files
-    fft_files = presto_fft(eventfile,segment_length,demod) #sorted array of .fft files
-    passed_threshold,M = segment_threshold(eventfile,segment_length,demod,tbin_size,threshold)
+    dat_files = presto_dat(eventfile,segment_length,demod,PI1,PI2) #sorted array of .dat files
+    fft_files = presto_fft(eventfile,segment_length,demod,PI1,PI2) #sorted array of .fft files
+    passed_threshold,M = segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2)
     #list of indices where the rebinned .dat files are beyond the threshold
 
     dat_threshold = dat_files[passed_threshold] #.dat files that passed the threshold
@@ -335,7 +377,7 @@ def average_ps(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,
 
         return f,ps,ps_bins,N_greaterthanP,M
 
-def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,W):
+def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starting_freq,W):
     """
     Given the average spectrum for an ObsID, return the histogram of powers, such
     that you have N(>P). This is for powers corresponding to frequencies larger
@@ -346,13 +388,15 @@ def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,
     demod - whether we're dealing with demodulated data or not!
     tbin_size - size of the time bin
     threshold - if data is under threshold (in percentage), then don't use the segment!
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
     starting_freq - frequency to start constructing the histogram of powers from
     W - number of consecutive frequency bins to AVERAGE over
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    f,ps = average_ps(eventfile,segment_length,demod,tbin_size,threshold,W)
+    f,ps = average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starting_freq,W)
 
     ps_to_use = ps[f>starting_freq]
     ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
@@ -363,6 +407,79 @@ def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,starting_freq,
         N_greaterthanP.append(len(array_greaterthan))
 
     return ps_bins, N_greaterthanP
+
+def plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq,W,N,xlims,plot_mode):
+    """
+    Plotting the averaged power spectrum and the noise histogram
+
+    eventfile - path to the event file. Will extract ObsID from this for the NICER files.
+    segment_length - length of the segments
+    demod - whether we're dealing with demodulated data or not!
+    tbin_size - size of the time bin
+    threshold - if data is under threshold (in percentage), then don't use the segment!
+    PI1 - lower bound of PI (not energy in keV!) desired for the energy range
+    PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    starting_freq - frequency to start constructing the histogram of powers from
+    W - number of consecutive frequency bins to AVERAGE over
+    N - number of trials
+    xlims - limits to apply on the x axis if desired
+    plot_mode - whether to "show" the plots or to "save" them
+    """
+    if demod != True and demod != False:
+        raise ValueError("demod should either be True or False!")
+    if plot_mode != "show" and plot_mode != "save":
+        raise ValueError("plot_mode should either be 'show' or 'save'!")
+
+    parent_folder = str(pathlib.Path(eventfile).parent)
+
+    f,ps,ps_bins,N_greaterthanP,M = average_ps(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq,W)
+
+    power_required_3 = Lv3_detection_level.power_for_sigma(3,N,M,W) #power required for significance
+    power_required_4 = Lv3_detection_level.power_for_sigma(4,N,M,W) #power required for significance
+
+    plt.figure(1)
+    plt.plot(f,ps,'rx-')
+    plt.axhline(y=power_required_3,lw=0.8,alpha=0.5,color='b')
+    plt.axhline(y=power_required_4,lw=0.8,alpha=0.5,color='k')
+    plt.xlabel('Frequency (Hz)',fontsize=12)
+    plt.ylabel('Leahy-normalized power',fontsize=12)
+    if len(xlims) != 0:
+        plt.xlim([xlims[0],xlims[1]])
+    #plt.axvline(x=271.453,lw=0.5,alpha=0.5)
+    plt.title('W = ' + str(W) + ', Threshold = ' + str(threshold) + '%' + '\n' + 'Segment Length: ' + str(segment_length) + 's, No. Segments = ' + str(M) + '\n' + 'Demodulated: ' + str(demod) + ' ; St.D = ' + str(np.std(ps)), fontsize=12)
+    plt.legend(('Power Spectrum','3 sigma','4 sigma'),loc='best')
+    if plot_mode == "save":
+        if PI1 != '':
+            energy_suffix = '_E' + str(PI1) + '-' + str(PI2)
+        else:
+            energy_suffix = ''
+        if demod == True:
+            demod_suffix = '_demod'
+        else:
+            demod_suffix = ''
+        plt.savefig(parent_folder + '/' + str(segment_length) + 's_average_ps_W' + str(W) + demod_suffix + energy_suffix + '.pdf',dpi=900)
+        plt.close()
+
+    plt.figure(2)
+    plt.semilogy(ps_bins,N_greaterthanP,'rx')
+    plt.xlabel('Leahy-normalized power',fontsize=12)
+    plt.ylabel('log[N(>P)]',fontsize=12)
+    plt.title('Energy range: ' + str(PI1) + ' - ' + str(PI2) + ', W = ' + str(W),fontsize=12)
+    if plot_mode == "save":
+        if PI1 != '':
+            energy_suffix = '_E' + str(PI1) + '-' + str(PI2)
+        else:
+            energy_suffix = ''
+        if demod == True:
+            demod_suffix = '_demod'
+        else:
+            demod_suffix = ''
+            plt.savefig(parent_folder + '/' + str(segment_length) + 's_noise_hist_W' + str(W) + demod_suffix + energy_suffix + '.pdf',dpi=900)
+        plt.close()
+
+    if plot_mode == "show":
+        plt.show()
+
 
 if __name__ == "__main__":
     eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'

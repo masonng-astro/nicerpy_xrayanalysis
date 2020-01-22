@@ -46,6 +46,7 @@ nicer_baryoutputs = [Lv0_dirs.NICER_DATADIR + obsids[i] + '/xti/event_cl/ni' + o
 nicersoft_datafiles = [Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/cleanfilt.evt' for i in range(len(obsids))]
 nicersoft_baryoutputs = [Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/ni' + obsids[i] + '_nicersoft_bary.evt' for i in range(len(obsids))]
 nicersoft_folder = [Lv0_dirs.NICERSOFT_DATADIR + obsids[i] + '_pipe/' for i in range(len(obsids))]
+custom_coords = np.array([])
 
 nicerl2_flags = ['clobber=YES']
 psrpipe_flags = ['--emin','0.3','--emax','12.0','--mask','14','34','54'] #for psrpipe in Lv0_psrpipe
@@ -92,7 +93,7 @@ if preprocess == True:
         Lv0_scp.scp(obsids[i]) #secure copying the decrypted folder from ciri
 
     for i in range(len(obsids)):
-        Lv2_preprocess.preprocess(obsdirs[i],nicerl2_flags,psrpipe_flags,refframe,orbitfiles[i],parfile,nicer_datafiles[i],nicer_baryoutputs[i],nicersoft_datafiles[i],nicersoft_baryoutputs[i],nicersoft_folder[i])
+        Lv2_preprocess.preprocess(obsdirs[i],nicerl2_flags,psrpipe_flags,refframe,orbitfiles[i],parfile,nicer_datafiles[i],nicer_baryoutputs[i],nicersoft_datafiles[i],nicersoft_baryoutputs[i],nicersoft_folder[i],custom_coords)
 
 ################################################################################
 ################################## PRESTO_ALL ##################################

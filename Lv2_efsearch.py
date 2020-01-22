@@ -24,6 +24,8 @@ import Lv2_lc,Lv2_ps,Lv2_color,Lv2_phase
 import Lv3_E_boundary
 from matplotlib.backends.backend_pdf import PdfPages
 import time
+from tqdm import tqdm
+import peakutils
 import matplotlib.pyplot as plt
 import os
 import subprocess
@@ -44,6 +46,7 @@ def efsearch(eventfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_
     outfile_root - prefix for the end file name
     plot_efsearch - 'yes' or 'no' to plot the results from efsearch; do "exit" for the next plot!
     """
+
     efsearch_cmd = ['efsearch',eventfile,'window="-"','sepoch=INDEF','dper='+str(dper),'nphase='+str(nphase),'nbint='+str(nbint),'nper='+str(nper),'dres='+str(dres),'outfile='+outfile_root,'outfiletype=2','plot='+plot_efsearch]
 
     parent_folder = str(pathlib.Path(eventfile).parent)
@@ -57,18 +60,25 @@ def efsearch(eventfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_
     logtextfile.close()
 
     subprocess.run(['mv',outfile_root+'.fes',parent_folder + '/' + outfile_root + '.fes'])
+
     efsearch_results = fits.open(parent_folder + '/' + outfile_root + '.fes')
     efsearch_plot = parent_folder + '/' + outfile_root + '.pdf'
 
     with PdfPages(efsearch_plot) as pdf:
-        for i in range(1,len(efsearch_results)):
+        for i in tqdm(range(1,len(efsearch_results))):
             T_start = efsearch_results[i].header['TSTARTI'] + efsearch_results[i].header['TSTARTF']
             T_stop = efsearch_results[i].header['TSTOPI'] + efsearch_results[i].header['TSTOPF']
             T_zeroref = efsearch_results[i].header['TIMEZERI'] + efsearch_results[i].header['TIMEZERF']
 
+            ### extracting period, chi-squared (+ error) values from the efsearch results
             period = efsearch_results[i].data['PERIOD']
             chisqrd1 = efsearch_results[i].data['CHISQRD1']
             error1 = efsearch_results[i].data['ERROR1']
+
+            ### First find the peaks in the plot
+            peak_indices = peakutils.indexes(chisqrd1,thres=0.2,min_dist=0.0001)
+
+            ### plotting the chi-squared vs period plots and the corresponding Gaussian fits
             plt.errorbar(x=period,y=chisqrd1,yerr=error1,fmt='x')
             plt.title('TSTART: ' + str((T_start-T_zeroref)*86400) + ' ; TSTOP: ' + str((T_stop-T_zeroref)*86400))
             plt.xlabel('Period (s)',fontsize=12)

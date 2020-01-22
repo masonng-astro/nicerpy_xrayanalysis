@@ -76,7 +76,7 @@ def whole(eventfile,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines):
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_pdgm.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps
@@ -89,7 +89,7 @@ def whole(eventfile,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines):
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_manual.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return manual_f, manual_ps
@@ -122,7 +122,7 @@ def whole(eventfile,par_list,tbin_size,mode,ps_type,oversampling,xlims,vlines):
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_both.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
@@ -184,7 +184,7 @@ def partial_t(eventfile,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_pdgm_'+str(t1)+'s-'+str(t2)+'s.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps
@@ -197,7 +197,7 @@ def partial_t(eventfile,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_manual_'+str(t1)+'s-'+str(t2)+'s.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return manual_f, manual_ps
@@ -230,7 +230,7 @@ def partial_t(eventfile,par_list,tbin_size,t1,t2,mode,ps_type,oversampling,xlims
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_both_'+str(t1)+'s-'+str(t2)+'s.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
@@ -298,7 +298,7 @@ def partial_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversamp
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_pdgm_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps
@@ -311,7 +311,7 @@ def partial_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversamp
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_manual_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return manual_f, manual_ps
@@ -344,7 +344,7 @@ def partial_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2,mode,ps_type,oversamp
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_both_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps
@@ -413,7 +413,7 @@ def partial_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,o
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_pdgm'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps
@@ -426,7 +426,7 @@ def partial_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,o
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_manual'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return manual_f, manual_ps
@@ -459,7 +459,7 @@ def partial_tE(eventfile,par_list,tbin_size,Ebin_size,t1,t2,E1,E2,mode,ps_type,o
             plt.show()
         elif mode == 'save':
             filename = 'ps_' + obsid + '_bin' + str(tbin_size) + 's_both'+str(t1)+'s-'+str(t2)+'s_'+str(E1)+'keV-'+str(E2)+'keV.pdf'
-            plt.savefig(parent_folder+filename,dpi=900)
+            plt.savefig(parent_folder+'/'+filename,dpi=900)
             plt.close()
 
         return pdgm_f, pdgm_ps, manual_f, manual_ps

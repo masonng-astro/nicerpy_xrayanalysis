@@ -21,18 +21,18 @@ Lv0_dirs.global_par() #obtaining the global parameters
 
 ### parameters used EVERYWHERE
 basedir = Lv0_dirs.NICERSOFT_DATADIR
-#eventfiles = [basedir + str(i) + '_pipe/ni' + str(i) + '_nicersoft_bary.evt' for i in range(1034070101,1034070102)]
-eventfiles = [Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt_bary.evt']
+eventfiles = [basedir + str(i) + '_pipe/ni' + str(i) + '_nicersoft_bary.evt' for i in ['0050070102']]
+#eventfiles = [Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt_bary.evt']
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 
-tbin_size = 1 #how you want to bin the light curve data
+tbin_size = 0.0005 #how you want to bin the light curve data
 Ebin_size = 0.05 #in keV
 mode = 'show'
-truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
+truncations = 'tE' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
 
-lc = True
-ps = False
-phase = False
+lc = False
+ps = True
+phase = True
 color = False
 ###############################################################################
 
@@ -41,31 +41,26 @@ color = False
 # Lv2_phase - partial_t, partial_E, partial_tE
 # Lv2_color - plotting_t
 
-t1 = 5580
-t2 = 5590
+t1 = 39651
+t2 = 39680
 E1 = 0.3
-E2 = 2.5
+E2 = 12
 #0 1800 ; 5400-7360 ; 10960-12925 ; 16380-18500 ; 22050 - 22350 ; 28360 - 28600
 ###############################################################################
 
-### more 'obscure' parameters
-#for Lv1_data_gtis
-gap = 50
-
 #for Lv2_ps
 ps_type = 'both' # 'period' (for periodogram) or 'manual' (for FFT) or 'both'
-oversampling = [True,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
-xlims = [True,0,500] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
-vlines = [True,271.453] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
+oversampling = [False,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
+xlims = [True,0,1000] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
+vlines = [True,581.127] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
 
 #for Lv2_phase
 ### For an unknown observation, one should run JUST Lv2_lc and Lv2_ps first to get
 ### the pulsation frequencies. Pulse profiles come LATER.
 ### If I have pulse_pars[1] and pulse_pars[2] != 0, then time binning DOES NOT MATTER, i.e., it'll be counts/s!
-#pulse_pars = [29.639575,-3.77535E-10,1.1147E-20]
-pulse_pars = [271.453019624388,-1.66705E-15,0] #J1231
+pulse_pars = [581.127,0,0]
 shift = 0.4 # how much to shift the pulse by in the phase axis. It only affects how the pulse profile is 'displaced'.
-no_phase_bins = 100 # number of phase bins desired
+no_phase_bins = 20 # number of phase bins desired
 
 #for Lv2_color
 E1_data = 0.3 #data is reliable between 0.3 and 12 keV

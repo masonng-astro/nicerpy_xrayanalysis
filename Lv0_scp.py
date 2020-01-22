@@ -27,13 +27,16 @@ def scp(obsid):
     nicer_dir = Lv0_dirs.NICER_DATADIR
 
     if os.path.isdir(nicer_dir+obsid): #to prevent duplicate files ; not likely to be the case, but just in case...
-        subprocess.check_call(['rm','-r',nicer_dir+obsid])
+        subprocess.run(['rm','-r',nicer_dir+obsid])
 
-    subprocess.check_call(['scp','-r',obsid_dir,nicer_dir])
+    subprocess.run(['scp','-r',obsid_dir,nicer_dir])
+    subprocess.run(['rm','-r',nicer_dir + obsid + '/auxil/ni' + str(obsid) + '.cat'])
+
     return
 
 if __name__ == "__main__":
-    obsids = ['203420020' + str(i) for i in range(1,6)] + ['103419010' + str(i) for i in range(1,5)] + ['1034200' + str(i) for i in range(201,241)]
+    #obsids = ['203420020' + str(i) for i in range(1,6)] + ['103419010' + str(i) for i in range(1,5)] + ['1034200' + str(i) for i in range(201,241)]
+    obsids = ['00' + str(i) for i in range(34070101,34070105)]
     for i in range(len(obsids)):
         scp(obsids[i])
 

@@ -26,22 +26,22 @@ import mplcursors
 
 Lv0_dirs.global_par()
 
-eventfiles = ['/Volumes/Samsung_T5/NICERsoft_outputs/2584010501_pipe/ni2584010501_nicersoft_bary.evt']
+eventfiles = ['/Volumes/Samsung_T5/NICERsoft_outputs/1050070103_pipe/ni1050070103_nicersoft_bary.evt']
 
-do_search = True # Searching for burst candidates!
+do_search = False # Searching for burst candidates!
 do_plots = True # Creating dynamic power spectra and contours
 
-search_window = [5560,5660] #start/end times of burst oscillation search
-T = np.array([10]) #window sizes
+search_window = [16360,16508] #start/end times of burst oscillation search
+T = np.array([4]) #window sizes
 dt = T/10  #i.e., do overlapping windows of T seconds in steps of dt seconds
-tbin_size = 0.001 #size of time bins in seconds
-df = 10 #tolerance of 10 Hz, say
-f_central = 401 #central frequency
+tbin_size = 0.0005 #size of time bins in seconds
+df = 5 #tolerance of 10 Hz, say
+f_central = 619 #central frequency
 mode = "show"
 
 for i in range(len(eventfiles)):
     if do_search == True:
-        Lv2_TBOs_method.burst_cands(eventfile)
+        Lv2_TBOs_method.burst_cands(eventfiles[i])
 
     if do_plots == True:
-        Lv2_TBOs_method.dynamic_ps(eventfile,search_window,T,dt,tbin_size,df,f_central,mode)
+        Lv2_TBOs_method.dynamic_ps(eventfiles[i],search_window,T,dt,tbin_size,df,f_central,mode)

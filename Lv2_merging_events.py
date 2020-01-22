@@ -16,7 +16,7 @@ from scipy import stats, signal
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from astropy.io import fits
-import binary_psr
+from presto import binary_psr
 import subprocess
 import glob
 import os

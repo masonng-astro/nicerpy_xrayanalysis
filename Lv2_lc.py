@@ -62,7 +62,7 @@ def whole(eventfile,par_list,tbin_size,mode):
         plt.show()
     elif mode == 'save':
         filename = 'lc_' + obsid + '_bin' + str(tbin_size) + 's.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
 def partial_t(eventfile,par_list,tbin_size,t1,t2,mode):
@@ -107,7 +107,7 @@ def partial_t(eventfile,par_list,tbin_size,t1,t2,mode):
         plt.show()
     elif mode == 'save':
         filename = 'lc_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
 def partial_E(eventfile,par_list,tbin_size,E1,E2,mode):
@@ -154,7 +154,7 @@ def partial_E(eventfile,par_list,tbin_size,E1,E2,mode):
         plt.show()
     elif mode == 'save':
         filename = 'lc_' + obsid + '_bin' + str(tbin_size) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
 def partial_tE(eventfile,par_list,tbin_size,t1,t2,E1,E2,mode):
@@ -202,7 +202,7 @@ def partial_tE(eventfile,par_list,tbin_size,t1,t2,E1,E2,mode):
         plt.show()
     elif mode == 'save':
         filename = 'lc_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's_' + str(E1) + 'keV-' + str(E2) + 'keV.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
 if __name__ == "__main__":

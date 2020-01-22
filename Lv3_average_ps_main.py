@@ -28,7 +28,7 @@ Lv0_dirs.global_par()
 
 demod = True
 merged = True
-preprocessing = True
+preprocessing = False
 time_segments = False
 time_energy_segments = False
 
@@ -46,6 +46,8 @@ if merged == False:
     W = 1 #number of consecutive Fourier bins to average over
     starting_freq = 1 #for noise_hist
     mode = 't'
+    xlims = np.array([])
+    plot_mode = 'show'
 
 ##### For merged = True:
 if merged == True:
@@ -53,22 +55,25 @@ if merged == True:
 
     merged_id = '000013' #need to be very careful that I know what the next one is!
     eventfile = Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged' + merged_id + '/merged' + merged_id + '_nicersoft_bary.evt'
-    segment_length = 500 #segment length
+    segment_length = 10000 #segment length
     mode = 't'
     par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par' #parameter file for demodulation
     PI1 = 30 #lower bound for PI
     PI2 = 200 #upper bound for PI
-    tbin = 0.00025 #bin size in s
+    tbin = 0.001 #bin size in s
     N = Lv3_detection_level.N_trials(tbin,segment_length)
-    threshold = 10 #threshold for counts in each segment
+    threshold = 2 #threshold for counts in each segment
     W = 1 #number of consecutive Fourier bins to average over
     starting_freq = 10 #for noise_hist
+    xlims = np.array([])
+    plot_mode = 'show'
 
 ################################################################################
 
 if merged == False:
     if preprocessing == True:
-        Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
+        if time_segments == True or time_energy_segments == True:
+            Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
         if time_segments == True:
             Lv2_presto_subroutines.niextract_gti_time(eventfile,segment_length)
         if time_energy_segments == True:
@@ -82,39 +87,18 @@ if merged == False:
         Lv2_average_ps_methods.edit_binary(eventfile,tbin,segment_length)
         Lv2_average_ps_methods.realfft(eventfile,segment_length)
 
-    f,ps,ps_bins,N_greaterthanP,M = Lv2_average_ps_methods.average_ps(eventfile,segment_length,demod,tbin,threshold,starting_freq,W)
-
-    power_required_3 = Lv3_detection_level.power_for_sigma(3,N,M,W) #power required for significance
-    power_required_4 = Lv3_detection_level.power_for_sigma(4,N,M,W) #power required for significance
-
-    plt.figure(1)
-    plt.plot(f,ps,'rx-')
-    plt.axhline(y=power_required_3,lw=0.8,alpha=0.5,color='b')
-    plt.axhline(y=power_required_4,lw=0.8,alpha=0.5,color='k')
-    plt.xlim([0.1,5])
-    plt.ylim([0,800])
-    plt.xlabel('Frequency (Hz)',fontsize=12)
-    plt.ylabel('Leahy-normalized power',fontsize=12)
-    plt.title('W = '+ str(W) + ', Threshold = '+str(threshold) + '%' + '\n' + 'Segment Length: ' + str(segment_length) + 's, No. Segments = ' + str(M) + '\n' + 'Demodulated: ' + str(demod),fontsize=12)
-    plt.legend(('Power Spectrum','3 sigma','4 sigma'),loc='best')
-
-    plt.figure(2)
-    plt.semilogy(ps_bins,N_greaterthanP,'rx')
-    plt.xlabel('Leahy-normalized power',fontsize=12)
-    plt.ylabel('log[N(>P)]',fontsize=12)
-    plt.title('W = ' + str(W),fontsize=12)
-
-    plt.show()
+    Lv2_average_ps_methods.plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq,W,N,xlims,plot_mode)
 
 if merged == True:
     if preprocessing == True:
-        #Lv2_merging_events.merging(obsids)
-        #Lv2_merging_events.merging_GTIs(obsids,merged_id)
-        #Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
-        #if time_segments == True:
-    #        Lv2_presto_subroutines.niextract_gti_time(eventfile,segment_length)
-    #    if time_energy_segments == True:
-    #        Lv2_presto_subroutines.niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
+        Lv2_merging_events.merging(obsids)
+        Lv2_merging_events.merging_GTIs(obsids,merged_id)
+        if time_segments == True or time_energy_segments == True:
+            Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
+        if time_segments == True:
+            Lv2_presto_subroutines.niextract_gti_time(eventfile,segment_length)
+        if time_energy_segments == True:
+            Lv2_presto_subroutines.niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
 
         if demod == True:
             Lv2_average_ps_methods.do_demodulate(eventfile,segment_length,mode,par_file)
@@ -124,31 +108,4 @@ if merged == True:
         Lv2_average_ps_methods.edit_binary(eventfile,tbin,segment_length)
         Lv2_average_ps_methods.realfft(eventfile,segment_length)
 
-    f,ps,ps_bins,N_greaterthanP,M = Lv2_average_ps_methods.average_ps(eventfile,segment_length,demod,tbin,threshold,starting_freq,W)
-
-    power_required_3 = Lv3_detection_level.power_for_sigma(3,N,M,W) #power required for significance
-    power_required_4 = Lv3_detection_level.power_for_sigma(4,N,M,W) #power required for significance
-
-    plt.figure(1)
-    plt.plot(f,ps,'rx-')
-    plt.axhline(y=power_required_3,lw=0.8,alpha=0.5,color='b')
-    plt.axhline(y=power_required_4,lw=0.8,alpha=0.5,color='k')
-    plt.xlabel('Frequency (Hz)',fontsize=12)
-    plt.ylabel('Leahy-normalized power',fontsize=12)
-    #plt.xlim([621.5,622.5])
-    #plt.xlim([269,273])
-    #plt.ylim([1.8,5])
-    plt.axvline(x=271.453,lw=0.5,alpha=0.5)
-    plt.title('W = ' + str(W) + ', Threshold = ' + str(threshold) + '%' + '\n' + 'Segment Length: ' + str(segment_length) + 's, No. Segments = ' + str(M) + '\n' + 'Demodulated: ' + str(demod) + ' ; St.D = ' + str(np.std(ps)), fontsize=12)
-    plt.legend(('Power Spectrum','3 sigma','4 sigma','271.453 Hz'),loc='best')
-    #pngname = '/Volumes/Samsung_T5/NICERsoft_outputs/merged_events/merged000005/W_dir/W_300.png'
-    #plt.savefig(pngname,dpi=900)
-    #plt.close()
-
-    plt.figure(2)
-    plt.semilogy(ps_bins,N_greaterthanP,'rx')
-    plt.xlabel('Leahy-normalized power',fontsize=12)
-    plt.ylabel('log[N(>P)]',fontsize=12)
-    plt.title('Energy range: ' + str(PI1) + ' - ' + str(PI2) + ', W = ' + str(W),fontsize=12)
-
-    plt.show()
+    Lv2_average_ps_methods.plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq,W,N,xlims,plot_mode)

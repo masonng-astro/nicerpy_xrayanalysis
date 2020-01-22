@@ -17,10 +17,12 @@ from presto import binary_psr
 import matplotlib.gridspec as gridspec
 import subprocess
 import glob
-import Lv0_dirs,Lv1_data_bin,Lv2_phase
+import peakutils
+import Lv0_dirs,Lv1_data_bin,Lv2_phase,Lv3_detection_level
 from matplotlib.backends.backend_pdf import PdfPages
 from scipy import stats
 from scipy import signal
+from scipy.optimize import curve_fit
 
 timestart = time.time()
 
@@ -468,7 +470,6 @@ event = base_folder + 'ni'+obsid+'_nicersoft_bary.evt'
 event = fits.open(event)
 times = event[1].data['TIME']
 
-import binary_psr
 timea = binary_psr.binary_psr("/Volumes/Samsung_T5/NICERsoft_outputs/J1231-1411.par").demodulate_TOAs(times)
 for i in range(100):
     print(times[i],timea[i])
@@ -1543,10 +1544,57 @@ plt.xlim([0.4,5])
 plt.show()
 """
 
-efsearch_results = '/Volumes/Samsung_T5/NICER-data/rxj0209/testefsearch.fes'
-data = fits.open(efsearch_results)
-print(data)
-print(len(data))
+"""
+def GaussSum(x,*p):
+    n=int(len(p)/3)
+    A=p[:n] #amplitude
+    w=p[n:2*n] #std
+    c=p[2*n:3*n] #centroid
+    const = p[-1]
+    return sum([ A[i]*np.exp(-(x-c[i])**2/(2*w[i]**2))/np.sqrt(2*np.pi*w[i]**2) for i in range(n)]) + const
+
+x = np.linspace(1,1000,10001)
+y = GaussSum(x,[5,10,3,5,100,200,50])
+print(len(x),len(y))
+plt.plot(x,y,'rx-')
+plt.show()
+
+
+efsearch_results = '/Volumes/Samsung_T5/NICER-data/rxj0209/rxj0209_100segs.fes'
+seg1_period = fits.open(efsearch_results)[6].data['PERIOD']
+seg1_chisq = fits.open(efsearch_results)[6].data['CHISQRD1']
+seg1_error = fits.open(efsearch_results)[6].data['ERROR1']
+mindist = 0.0001
+
+peak_indices = peakutils.indexes(seg1_chisq,thres=0,min_dist=mindist)
+N_gauss = len(peak_indices)
+
+amp_guess = [seg1_chisq[peak_indices[i]] - np.min(seg1_chisq) for i in range(N_gauss)]
+std_guess = [mindist*5] * N_gauss
+mean_guess = [seg1_period[peak_indices[i]] for i in range(N_gauss)]
+pguess = amp_guess + std_guess + mean_guess + [np.mean(seg1_chisq)]
+
+popt,pcov = curve_fit(f=GaussSum,xdata=seg1_period,ydata=seg1_chisq,sigma=seg1_error,p0=pguess)
+for i in range(len(popt)):
+    print(popt[i],np.sqrt(np.diag(pcov))[i])
+plt.plot(seg1_period,GaussSum(seg1_period,*popt),'b-')
+
+plt.errorbar(x=seg1_period,y=seg1_chisq,yerr=seg1_error)
+for i in range(len(peak_indices)):
+    plt.plot(seg1_period[peak_indices[i]],seg1_chisq[peak_indices[i]],'rx')
+    plt.text(seg1_period[peak_indices[i]],1.1*np.max(seg1_chisq),str(i) + '|',fontsize=8)
+plt.show()
+"""
+
+"""
+print(Lv3_detection_level.signal_significance(10/0.0005,1,1,31.633))
+print(Lv3_detection_level.power_for_sigma(3,10/0.0005,1,1))
+"""
+
+for i in range(1200250101,1200250127): #for all of the AT2018cow ObsIDs:
+    gtis = fits.open(Lv0_dirs.NICERSOFT_DATADIR + str(i) + '_pipe/ni' + str(i) + '_nicersoft_bary.evt')[2].data
+    print('ObsID: ' + str(i) + ' ; Start time in GTI: ' + str(gtis[0][0]) + ' ; End time in GTI: ' + str(gtis[-1][1]))
+
 
 timeend = time.time()
 

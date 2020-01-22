@@ -224,7 +224,7 @@ def plotting(eventfile,par_list,E_bound,tbin_size,mode):
 
     elif mode == 'save':
         filename = 'co_' + obsid + '_bin' + str(tbin_size) + 's.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
 def plotting_t(eventfile,par_list,E_bound,tbin_size,t1,t2,mode):
@@ -283,7 +283,7 @@ def plotting_t(eventfile,par_list,E_bound,tbin_size,t1,t2,mode):
 
     elif mode == 'save':
         filename = 'co_' + obsid + '_bin' + str(tbin_size) + 's_' + str(t1) + 's-' + str(t2) + 's.pdf'
-        plt.savefig(parent_folder+filename,dpi=900)
+        plt.savefig(parent_folder+'/'+filename,dpi=900)
         plt.close()
 
 if __name__ == "__main__":
