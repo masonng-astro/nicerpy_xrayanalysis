@@ -13,6 +13,12 @@ Search techniques to add which are not part of the quick look scheme:
 - Power spectral stacking
 - semi-coherent searches
 
+NOTE on 4/23/2020: Perhaps create a "text" mode for averaged spectra, when I first run
+with "save" where it saves both the plot AND a text file of Leahy-normalized power
+vs frequency; then when I want to retrieve it again, just plot data from the text
+file instead of going through the whole mess of re-calculating the averaged power spectrum...
+I should save things like number of segments used, threshold etc. in the text file though!
+
 """
 from __future__ import division, print_function
 from astropy.io import fits
@@ -36,19 +42,26 @@ Lv0_dirs.global_par() #obtaining the global parameters
 start_time = time.time()
 
 if __name__ == "__main__":
-    obsdirs = [Lv0_dirs.NICER_DATADIR + '00' + str(i) +'/' for i in range(34070101,34070105)]
+#    obsdirs = [Lv0_dirs.NICER_DATADIR + '1034100' + str(i) +'/' for i in range(101,121)] + [Lv0_dirs.NICER_DATADIR + '1034100' + str(i) +'/' for i in range(122,128)]
+    #obsdirs = [Lv0_dirs.NICER_DATADIR + '1030180' + str(i) + '/' for i in range(101,131)] + [Lv0_dirs.NICER_DATADIR + '1030180' + str(i) + '/' for i in range(149,188)] + [Lv0_dirs.NICER_DATADIR + '3614020' + str(i) + '/' for i in range(101,121)]
+    #obsdirs = [Lv0_dirs.NICER_DATADIR + '1030180' + str(i) + '/' for i in range(101,188)]
+    #obsdirs = [Lv0_dirs.NICER_DATADIR + '3614020' + str(i) + '/' for i in range(101,121)]
+    obsdirs = [Lv0_dirs.NICER_DATADIR + '3201710' + str(i) + '/' for i in range(138,158)]
     nicer_obsids = [obsdirs[i][-11:-1] for i in range(len(obsdirs))]
 
-    eventfiles = [Lv0_dirs.NICERSOFT_DATADIR + nicer_obsids[i] + '_pipe/ni' + nicer_obsids[i] + '_nicersoft_bary.evt' for i in range(len(obsdirs))]
+#    eventfiles = [Lv0_dirs.NICERSOFT_DATADIR + nicer_obsids[i] + '_pipe/ni' + nicer_obsids[i] + '_nicersoft_bary.evt' for i in range(len(obsdirs))]
+    #eventfiles = ['/Volumes/Samsung_T5/NGC300_ULX_Swift/xrt/event/ngc300x1/lightcurve/ngc300x1_merge_niceroverlap_all.evt']
+#    eventfiles = ['/Volumes/Samsung_T5/NICERsoft_outputs/0034070101_pipe/ni0034070101_nicersoft_bary.evt']
 
-############################# PREPROCESSING PARAMETERS ############################
+    #eventfiles = ['/Volumes/Samsung_T5/NGC300_XMMdata/0791010101/PROC/xmm_0791010101_lccorr.evt']
+######################## PREPROCESSING PARAMETERS ############################
     do_preprocess = False #scp, unzips, runs nicerl2, runs psrpipe, and then barycorr
-    if do_preprocess == True:
-        for i in range(len(nicer_obsids)):
-            Lv0_scp.scp(nicer_obsids[i])
+    #if do_preprocess == True:
+        #for i in range(len(nicer_obsids)):
+        #    Lv0_scp.scp(nicer_obsids[i])
 
-    nicerl2_flags = ['clobber=YES','ang_dist=0.035']
-    psrpipe_flags = ['--emin','0.3','--emax','12.0','--angdist','0.035'] #for psrpipe in Lv0_psrpipe
+    nicerl2_flags = ['clobber=YES','underonly_range=0-650']
+    psrpipe_flags = ['--emin','0.3','--emax','12.0','--nounderfilt','--mask','34','43'] #for psrpipe in Lv0_psrpipe
     refframe = 'ICRS'
     parfile = ''
 
@@ -57,15 +70,15 @@ if __name__ == "__main__":
 
 ############################## MERGING PARAMETERS ##############################
     do_merge = True
-    merged_yet = True
-    merged_id = '000014'
+    merged_yet = False
+    merged_id = '000027'
     if do_merge == True: #Lv2_merging_events is put higher up because it's quite important!
         if merged_yet == False: #if the ObsIDs haven't been merged yet
-            Lv2_merging_events.merging(nicer_obsids)
-            Lv2_merging_events.merging_GTIs(nicer_obsids,merged_id)
+            Lv2_merging_events.merging(nicer_obsids,merged_id)
             #### will add in an interface with cr_cut.py at some point...!
 
         eventfiles = [Lv0_dirs.NICERSOFT_DATADIR + 'merged_events/merged' + merged_id + '/merged' + merged_id + '_nicersoft_bary.evt']
+        #eventfiles = ['/Volumes/Samsung_T5/NGC300_ULX_Swift/ngc300x-1/xrt/event/merge_pocl_all.evt']
 ################################################################################
 
 ######################### LC_PS_PHASE_COLOR PARAMETERS #########################
@@ -83,42 +96,48 @@ if __name__ == "__main__":
         process_segments = True #whether to make truncations to the data
 
         time_segments = True #truncate by time segments
-        energy_segments = True #truncate by energy range
+        gti_segments = True #truncate by GTI segments
+        energy_segments = False #truncate by energy range
         time_energy_segments = True #truncate both by time segments and energy range
         accelsearch = True
         prepfold = True
 
-        tbin = '1' #time bin for PRESTO in seconds
+        ### for gti_segments
+        gap = 5 #seconds
+        gtifile = 'bunched.gti'
+
+        tbin = '0.00025' #time bin for PRESTO in seconds
 
         ##### From Lv2_presto_all
         ##### For when we analyze the entire data set (no truncations in energy or time)
-        accelsearch_flags = ['-numharm','4','-zmax','10','-photon','-flo','0.1','-fhi','1']
+        accelsearch_flags = ['-numharm','4','-zmax','100','-photon','-flo','0.1','-fhi','2000']
 
         ##### Parameters for prepfold
-        zmax = 10
+        zmax = 100
 
         ##### From Lv2_presto_subroutines
-        segment_lengths = [10000] #desired length of segments in seconds
-        PI1 = [30,300]
-        PI2 = [300,1200]
+        segment_lengths = [500] #desired length of segments in seconds
+        PI1 = [30,200]
+        PI2 = [200,1200]
 ################################################################################
 
 ############################ AVERAGE_PS PARAMETERS #############################
     do_average_ps = False
     if do_average_ps == True:
         demod = False
-        preprocessing = False #getting GTIs, running niextract, nicerfits2presto, edit_inf, edit_bin, and realfft!
-        time_segments = True
+        preprocessing = True #getting GTIs, running niextract, nicerfits2presto, edit_inf, edit_bin, and realfft!
+        time_segments = False
         time_energy_segments = True
         mode = 't'
-        segment_lengths = [500] #desired length of segments in seconds
-        PI1 = ['']
-        PI2 = ['']
+        segment_lengths = [500,1000] #desired length of segments in seconds
+        PI1 = [30,200]
+        PI2 = [200,1200]
         par_file = ''
-        tbin = 1 #bin size in s
-        threshold = 5 #threshold for counts in each segment (in 1s bins; in terms of a percentage)
-        W = 1 #number of consecutive Fourier bins to average over
-        starting_freq = 0.1 #for the noise histogram
+        tbin = 0.5 #bin size in s
+        threshold = [5,10,20,30,40,50] #threshold for counts in each segment (in 1s bins; in terms of a percentage)
+        W = [1] #number of consecutive Fourier bins to average over
+        hist_min_sig = 2.5
+        starting_freq = 0.02 #for the noise histogram
         xlims = np.array([])
         plot_mode = "save"
 
@@ -127,7 +146,7 @@ if __name__ == "__main__":
 ############################# SEARCH_BIN PARAMETERS ############################
 ##### SIDEBAND SEARCHES
     do_searchbin = False
-    fft_files = [eventfiles[i][:-3] + 'fft' for i in range(len(eventfiles))]
+    #fft_files = [eventfiles[i][:-3] + 'fft' for i in range(len(eventfiles))]
     ncand = 1000 #no. of candidates to try to return ; default 100 (1 to 1000)
     flo = 1 #the lowest frequency to check
     fhi = 1000 #the highest frequency to check
@@ -138,7 +157,7 @@ if __name__ == "__main__":
 ############################# EF_SEARCH PARAMETERS #############################
 ##### EPOCH FOLDING
 
-    do_efsearch = True
+    do_efsearch = False
     if do_efsearch == True:
         n_segments = 100 #number of segments to break the epoch folding search into
         dper = 4.80 #Value for the period used in the folding. In 'efsearch' the
@@ -165,16 +184,16 @@ if __name__ == "__main__":
             Lv2_preprocess.preprocess(obsdirs[i],nicerl2_flags,psrpipe_flags,refframe,orbitfiles[i],parfile,nicer_datafile[i],nicer_output[i],nicersoft_datafile[i],nicersoft_output[i],nicersoft_folder[i],custom_coords)
 
     if do_lc_ps_phase_color == True: #would only be useful for looking at the whole time series? Might be of limited usage depending on what I want to use it for.
-        par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
-        tbin_size = 1 #how you want to bin the light curve data
+        par_list = ['PI','TIME'] #parameter list from event_cl
+        tbin_size = 100 #how you want to bin the light curve data
         Ebin_size = 0.05 #in keV
         mode = 'show' #probably best to 'save' if using a LARGE set of ObsIDs!
         truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
 
         lc = True
-        ps = True
-        phase = True
-        color = True
+        ps = False
+        phase = False
+        color = False
         ###############################################################################
 
         #### DEFINE DESIRED TIME INTERVALS AND ENERGY RANGES HERE FOR:
@@ -182,22 +201,22 @@ if __name__ == "__main__":
         # Lv2_phase - partial_t, partial_E, partial_tE
         # Lv2_color - plotting_t
 
-        t1 = 2629580
-        t2 = 2630180
-        E1 = 0.3
-        E2 = 2.5
+        t1 = 1200
+        t2 = 56420
+        E1 = 3
+        E2 = 12
 
         #for Lv2_ps
-        ps_type = 'manual' # 'period' (for periodogram) or 'manual' (for FFT) or 'both'
+        ps_type = 'both' # 'period' (for periodogram) or 'manual' (for FFT) or 'both'
         oversampling = [False,5] # [False to NOT oversample, oversampling factor - 5 to oversample by factor of 5. (factor-1) sets of 0s are padded.]
         xlims = [False,0,5] # [False to NOT impose xlimit on plots; 2nd/3rd entries are the desired x-limits if needed.]
-        vlines = [True,0.2081] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
+        vlines = [False,0.2081] # [False to NOT draw a vertical line on the plot; 2nd entry is the equation for the vertical line, e.g. x=2]
 
         #for Lv2_phase
         ### For an unknown observation, one should run JUST Lv2_lc and Lv2_ps first to get
         ### the pulsation frequencies. Pulse profiles come LATER.
         ### If I have pulse_pars[1] and pulse_pars[2] != 0, then time binning DOES NOT MATTER, i.e., it'll be counts/s!
-        pulse_pars = [0.2081,0,0]
+        pulse_pars = [8.461664906286253e-06,0,0] #[8.45162E-6,0,0]
         shift = 0.4 # how much to shift the pulse by in the phase axis. It only affects how the pulse profile is 'displaced'.
         no_phase_bins = 20 # number of phase bins desired
 
@@ -205,7 +224,7 @@ if __name__ == "__main__":
         E1_data = 0.3 #data is reliable between 0.3 and 12 keV
         E2_data = 12 # in keV
         cut_type = 'manual' # 'manual' cut for boundary energy, or 'median' - for half number of counts
-        bound = 2.7 # boundary energy for when cut_type = 'manual'!
+        bound = 1.0 # boundary energy for when cut_type = 'manual'!
 
         for i in range(len(eventfiles)):
             E_bound = Lv3_E_boundary.E_bound(eventfiles[i],par_list,E1_data,E2_data,cut_type,bound) #use Lv3_E_boundary to get boundary energy
@@ -264,7 +283,7 @@ if __name__ == "__main__":
                     Lv2_color.plotting_t(eventfiles[i],par_list,E_bound,tbin_size,t1,t2,mode)
 
     if do_average_ps == True:
-        for k in range(0,len(PI1),2):
+        for k in range(0,len(PI1)):
             for j in range(len(segment_lengths)):
                 for i in range(len(eventfiles)):
                     N = Lv3_detection_level.N_trials(tbin,segment_lengths[j])
@@ -285,13 +304,15 @@ if __name__ == "__main__":
                         Lv2_average_ps_methods.edit_binary(eventfiles[i],tbin,segment_lengths[j])
                         Lv2_average_ps_methods.realfft(eventfiles[i],segment_lengths[j])
 
-                    Lv2_average_ps_methods.plotting(eventfiles[i],segment_lengths[j],demod,tbin,threshold,PI1[k],PI2[k],starting_freq,W,N,xlims,plot_mode)
+                    for x in range(len(W)):
+                        for y in range(len(threshold)):
+                            Lv2_average_ps_methods.plotting(eventfiles[i],segment_lengths[j],demod,tbin,threshold[y],PI1[k],PI2[k],starting_freq,W[x],hist_min_sig,N,xlims,plot_mode)
 
     if do_presto == True:
         if process_all == True:
             if conv_fits2presto == True:
                 for i in range(len(eventfiles)):
-                    Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,0)
+                    Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,0,'all')
 
             if accelsearch == True:
                 print('Doing realfft/accelsearch now!')
@@ -317,12 +338,17 @@ if __name__ == "__main__":
                         Lv2_presto_subroutines.get_gti_file(eventfiles[i],segment_lengths[j]) #make GTI files for each segment
                         Lv2_presto_subroutines.niextract_gti_time(eventfiles[i],segment_lengths[j]) #performing niextract-events
 
-                        Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,segment_lengths[j])
+                        Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,segment_lengths[j],'t')
                         Lv2_presto_subroutines.edit_inf(eventfiles[i],tbin,segment_lengths[j])
                         Lv2_presto_subroutines.edit_binary(eventfiles[i],tbin,segment_lengths[j])
 
         #                Lv3_duty_cycle.duty_cycle(eventfiles[i],tbin,segment_lengths[j],duty_cycle_bin,threshold)
         #                Lv3_duty_cycle.duty_cycle_dist(eventfiles[i],tbin,segment_lengths[j],duty_cycle_bin,threshold)
+
+            if gti_segments == True:
+                for i in range(len(eventfiles)):
+                    Lv2_presto_subroutines.niextract_gti(eventfiles[i],gap,gtifile)
+                    Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,0,'gtis')
 
             if energy_segments == True and preprocess_segments == True:
                 if len(PI1) != len(PI2):
@@ -330,7 +356,7 @@ if __name__ == "__main__":
                 for j in range(len(PI1)):
                     for i in range(len(eventfiles)):
                         Lv2_presto_subroutines.niextract_gti_energy(eventfiles[i],PI1[j],PI2[j])
-                        Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,0) #segment_length makes no sense, so 0 is a placeholder
+                        Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,0,'E') #segment_length makes no sense, so 0 is a placeholder
 
             if time_energy_segments == True and preprocess_segments == True:
                 for j in range(len(segment_lengths)):
@@ -339,7 +365,7 @@ if __name__ == "__main__":
                         for k in range(len(PI1)):
                             Lv2_presto_subroutines.niextract_gti_time_energy(eventfiles[i],segment_lengths[j],PI1[k],PI2[k])
 
-                        Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,segment_lengths[j])
+                        Lv2_presto_subroutines.do_nicerfits2presto(eventfiles[i],tbin,segment_lengths[j],'t')
                         Lv2_presto_subroutines.edit_inf(eventfiles[i],tbin,segment_lengths[j])
                         Lv2_presto_subroutines.edit_binary(eventfiles[i],tbin,segment_lengths[j])
 
@@ -354,6 +380,10 @@ if __name__ == "__main__":
                         for i in range(len(eventfiles)):
                             Lv2_presto_subroutines.realfft(eventfiles[i],segment_lengths[j],'t')
                             Lv2_presto_subroutines.accelsearch(eventfiles[i],segment_lengths[j],'t',accelsearch_flags)
+                if gti_segments == True:
+                    for i in range(len(eventfiles)):
+                        Lv2_presto_subroutines.realfft(eventfiles[i],0,'gtis')
+                        Lv2_presto_subroutines.accelsearch(eventfiles[i],0,'gtis',accelsearch_flags)
                 if energy_segments == True:
                     for i in range(len(eventfiles)):
                         Lv2_presto_subroutines.realfft(eventfiles[i],0,'E')
@@ -367,6 +397,9 @@ if __name__ == "__main__":
                     for j in range(len(segment_lengths)):
                         for i in range(len(eventfiles)):
                             Lv2_presto_subroutines.prepfold(eventfiles[i],segment_lengths[j],'t',zmax)
+                if gti_segments == True:
+                    for i in range(len(eventfiles)):
+                        Lv2_presto_subroutines.prepfold(eventfiles[i],0,'gtis',zmax)
                 if energy_segments == True:
                     for i in range(len(eventfiles)):
                         Lv2_presto_subroutines.prepfold(eventfiles[i],0,'E',zmax)
@@ -376,6 +409,9 @@ if __name__ == "__main__":
                     for j in range(len(segment_lengths)):
                         for i in range(len(eventfiles)):
                             Lv2_presto_subroutines.ps2pdf(eventfiles[i],segment_lengths[j],'t')
+                if gti_segments == True:
+                    for i in range(len(eventfiles)):
+                        Lv2_presto_subroutines.ps2pdf(eventfiles[i],0,'gtis')
                 if energy_segments == True:
                     for i in range(len(eventfiles)):
                         Lv2_presto_subroutines.ps2pdf(eventfiles[i],0,'E')

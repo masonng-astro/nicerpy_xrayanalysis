@@ -85,3 +85,19 @@ def efsearch(eventfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_
             plt.ylabel('chi-squared',fontsize=12)
             pdf.savefig()
             plt.close()
+
+if __name__ == "__main__":
+    eventfile = '/Volumes/Samsung_T5/NGC300_ULX_Swift/xrt/event/ngc300x1/ngc300x1_merge_niceroverlap_all.evt'
+    n_segments = 1
+    dper = 1/8.461949e-6
+    nphase = 20
+    nper = 128
+    dres = 1
+    plot_efsearch = "yes"
+
+    T = fits.open(eventfile)[2].data['STOP'][-1] - fits.open(eventfile)[2].data['START'][0]
+
+    outfile_root = 'ngc300x1' + '_' + str(n_segments) + 'segs_' + str(nper)
+    nbint = int((T/(dper/nphase))/n_segments)
+
+    efsearch(eventfile,n_segments,dper,nphase,nbint,nper,dres,outfile_root,plot_efsearch)

@@ -36,7 +36,7 @@ def scp(obsid):
 
 if __name__ == "__main__":
     #obsids = ['203420020' + str(i) for i in range(1,6)] + ['103419010' + str(i) for i in range(1,5)] + ['1034200' + str(i) for i in range(201,241)]
-    obsids = ['00' + str(i) for i in range(34070101,34070105)]
+    obsids = ['201001023' + str(i) for i in range(6,7)]
     for i in range(len(obsids)):
         scp(obsids[i])
 

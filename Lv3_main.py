@@ -21,18 +21,19 @@ Lv0_dirs.global_par() #obtaining the global parameters
 
 ### parameters used EVERYWHERE
 basedir = Lv0_dirs.NICERSOFT_DATADIR
-eventfiles = [basedir + str(i) + '_pipe/ni' + str(i) + '_nicersoft_bary.evt' for i in ['0050070102']]
+#eventfiles = [basedir + str(i) + '_pipe/ni' + str(i) + '_nicersoft_bary.evt' for i in ['0034070101']]
 #eventfiles = [Lv0_dirs.NICER_DATADIR + 'rxj0209/rxj0209kgfilt_bary.evt']
+eventfiles = ['/Volumes/Samsung_T5/NICER-data/1030180113/xti/event_cl/ni1030180113_0mpu7_ufa.evt']
 par_list = ['PI','PI_FAST','TIME'] #parameter list from event_cl
 
-tbin_size = 0.0005 #how you want to bin the light curve data
+tbin_size = 1 #how you want to bin the light curve data
 Ebin_size = 0.05 #in keV
 mode = 'show'
-truncations = 'tE' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
+truncations = 'all' #'all', 't', 'E', or 'tE', depending on whether we want to look at entire time series (all), or truncation by time interval (t), or time truncation by energy range (E), or truncation by both (tE)
 
 lc = False
-ps = True
-phase = True
+ps = False
+phase = False
 color = False
 ###############################################################################
 
@@ -144,9 +145,9 @@ diag_vars['hk'] = hk_var
 # [Best to do mode='save' with the many plots]
 # Getting diagnostic plots over the entire observation; looks at how variables
 # like TOT_OVER_COUNT changes over time!
-#mode = 'show'
-#for i in range(len(eventfiles)):
-#    Lv3_diagnostics.diag_all(eventfiles[i],par_list,tbin_size,mode,diag_vars)
+mode = 'save'
+for i in range(len(eventfiles)):
+    Lv3_diagnostics.diag_all(eventfiles[i],par_list,tbin_size,mode,diag_vars)
 
 # [Best to do mode='save' with the many plots]
 # Getting diagnostic plots over the desired time interval; looks at how variables

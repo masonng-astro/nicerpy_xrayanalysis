@@ -91,8 +91,7 @@ if merged == False:
 
 if merged == True:
     if preprocessing == True:
-        Lv2_merging_events.merging(obsids)
-        Lv2_merging_events.merging_GTIs(obsids,merged_id)
+        Lv2_merging_events.merging(obsids,merged_id)
         if time_segments == True or time_energy_segments == True:
             Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
         if time_segments == True:

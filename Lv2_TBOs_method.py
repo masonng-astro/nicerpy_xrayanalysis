@@ -108,10 +108,13 @@ def dynamic_ps(eventfile,search_window,T,dt,tbin_size,df,f_central,mode):
     times = fits.open(eventfile)[1].data['TIME']
     T_zeroized = times-times[0]
     counts = np.ones(len(T_zeroized))
-
-    T_bins = np.linspace(0,np.ceil(T_zeroized[-1]),np.ceil(T_zeroized[-1])*1/tbin_size+1)
-    binned_counts, bin_edges, binnumber = stats.binned_statistic(T_zeroized,counts,statistic='sum',bins=T_bins) #binning the photons
-
+    T_zeroized_trunc = T_zeroized[(T_zeroized>=search_window[0])&(T_zeroized<=search_window[1])]
+    counts_trunc = np.ones(len(T_zeroized_trunc))
+    #print(len(T_zeroized),len(T_zeroized_trunc),len(counts_trunc))
+    T_bins = np.linspace(T_zeroized_trunc[0],np.ceil(T_zeroized_trunc[-1]),np.ceil((T_zeroized_trunc[-1]-T_zeroized_trunc[0])*1/tbin_size+1))
+    #print(len(T_bins),T_bins[:20],T_bins[-20:])
+    binned_counts, bin_edges, binnumber = stats.binned_statistic(T_zeroized_trunc,counts_trunc,statistic='sum',bins=T_bins) #binning the photons
+    #print(len(binned_counts))
     for i in tqdm(range(len(T))): #for every window size:
         output_file = open(parent_folder + '/' + obsid + '_TBO_search_' + str(T[i]) + 's.txt','w')
         output_file.write('Source name: ' + source_name + ' ; ObsID: ' + obsid + '\n')
@@ -150,7 +153,9 @@ def dynamic_ps(eventfile,search_window,T,dt,tbin_size,df,f_central,mode):
                 output_file.write(str(f_window[k]) + ' ' + str(ps_window[k]) + ' ' + str(Lv3_detection_level.signal_significance(N,1,1,ps_window[k])) + '\n')
 
         output_file.close()
-
+        ps_max = np.array(ps_max)
+        f_max = np.array(f_max)
+        print('The maximum power in the whole plot is ' + str(round(np.max(ps_max),2)) + ' with corresponding frequency ' + str(f_max[ps_max==np.max(ps_max)][0]) + ' Hz')
         if mode == "show":
             mplcursors.cursor(hover=True)
         ax1.set_title('Window size: ' + str(T[i]) + 's, dt='+str(dt[i])+'s \n' + 'Central freq. = '+str(f_central) + 'Hz, df = ' + str(df) + 'Hz \n Power required for 3 sigma: ' + str(sig3),fontsize=12)

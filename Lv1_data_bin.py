@@ -41,7 +41,7 @@ def binning_t(eventfile,par_list,tbin_size,t1,t2):
     startt = int(t1)
     endt = int(t2)
 
-    t_bins = np.linspace(startt,endt,(endt-startt)*1/tbin_size+1) #getting an array of time values for the bins
+    t_bins = np.linspace(startt,endt,int((endt-startt)*1/tbin_size+1)) #getting an array of time values for the bins
     summed_data, bin_edges, binnumber = stats.binned_statistic(truncated_t,counts,statistic='sum',bins=t_bins) #binning the counts in the data
 
     print("The data is binned by " + str(tbin_size) + 's')
@@ -81,13 +81,13 @@ def binning_E(eventfile,par_list,tbin_size,Ebin_size,E1,E2):
     startt = int(truncated_t[0])
     endt = np.ceil(truncated_t[-1])
 
-    t_bins = np.linspace(startt,endt,(endt-startt)*1/tbin_size+1) #getting an array of time values for the bins
+    t_bins = np.linspace(startt,endt,int((endt-startt)*1/tbin_size+1)) #getting an array of time values for the bins
     summed_data_t, bin_edges, binnumber = stats.binned_statistic(truncated_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
     if E1 < 1: #if less than 1keV, the binning for 0.3-1keV is slightly different.
-        E_bins = np.linspace(E1,E2,(E2-E1)*1/Ebin_size+2) #getting an array of energy values for the bins
+        E_bins = np.linspace(E1,E2,int((E2-E1)*1/Ebin_size+2)) #getting an array of energy values for the bins
     else:
-        E_bins = np.linspace(E1,E2,(E2-E1)*1/Ebin_size+1) #getting an array of energy values for the bins
+        E_bins = np.linspace(E1,E2,int((E2-E1)*1/Ebin_size+1)) #getting an array of energy values for the bins
     summed_data_E, bin_edges, binnumber = stats.binned_statistic(truncated_E,counts,statistic='sum',bins=E_bins) #binning the energy values in the data
 
     print("The data is binned by " + str(tbin_size) + 's, and ' + str(Ebin_size) + 'keV')

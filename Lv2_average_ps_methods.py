@@ -13,8 +13,8 @@ from scipy import stats, signal
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from astropy.io import fits
-from presto import binary_psr
-import Lv3_detection_level
+#from presto import binary_psr
+import Lv2_presto_subroutines,Lv3_detection_level
 import pathlib
 import subprocess
 import os
@@ -89,6 +89,8 @@ def do_nicerfits2presto(eventfile,tbin,segment_length):
     eventfiles = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*.evt')) #get absolute paths of all demodulated event FITS files
     print('Now converting NICER event FITS files into the PRESTO-readable binary format!')
     for i in tqdm(range(len(eventfiles))):
+        if os.path.exists(eventfiles[i][:-3] + 'dat'):
+            continue
         try:
             subprocess.run(['nicerfits2presto.py','--dt='+str(tbin),eventfiles[i]])
         except (ValueError,subprocess.CalledProcessError):
@@ -189,15 +191,16 @@ def realfft(eventfile,segment_length):
     print('Doing realfft now!')
     with open(logfile,'w') as logtextfile:
         for i in tqdm(range(len(dat_files))):
-            output = subprocess.run(['realfft',dat_files[i]],capture_output=True,text=True)
-            logtextfile.write(output.stdout)
-            logtextfile.write('*------------------------------* \n')
-            logtextfile.write(output.stderr)
+            if os.path.exists(dat_files[i][:-3] + 'fft')==False:
+                output = subprocess.run(['realfft',dat_files[i]],capture_output=True,text=True)
+                logtextfile.write(output.stdout)
+                logtextfile.write('*------------------------------* \n')
+                logtextfile.write(output.stderr)
         logtextfile.close()
 
     return
 
-def presto_dat(eventfile,segment_length,demod,PI1,PI2):
+def presto_dat(eventfile,segment_length,demod,PI1,PI2,t1,t2):
     """
     Obtain the dat files that were generated from PRESTO
 
@@ -206,6 +209,9 @@ def presto_dat(eventfile,segment_length,demod,PI1,PI2):
     demod - whether we're dealing with demodulated data or not!
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    t1 - starting time for calculation of averaged power spectra
+    t2 - ending time for calculation of averaged power spectra
+    (note that t=0 corresponds to the MET of the FIRST event in the eventfile, so will need to inspect light curve with Lv2_lc.py to get times)
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
@@ -213,8 +219,8 @@ def presto_dat(eventfile,segment_length,demod,PI1,PI2):
     parent_folder = str(pathlib.Path(eventfile).parent)
 
     if PI1 != '': #if we're doing energy cuts instead
-        dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*.dat'))
-        demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*demod.dat'))
+        dat_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1).zfill(4) + '-' + str(PI2).zfill(4) + '*.dat'))
+        demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1).zfill(4) + '-' + str(PI2).zfill(4) + '*demod.dat'))
     else:
         dat_files = []
         demod_files = []
@@ -227,12 +233,24 @@ def presto_dat(eventfile,segment_length,demod,PI1,PI2):
             if 'E' not in str(pathlib.Path(all_demod_files[i]).name):
                 demod_files.append(all_demod_files[i])
 
-    if demod == True:
-        return np.array(demod_files)
-    else:
-        return np.array([datfile for datfile in dat_files if datfile not in set(demod_files)])
+    if t1 != 0 or t2 != 0: #if both starting and ending times are not zero; otherwise default is to use ALL the data in the eventfile
+        gti_start = int(t1/segment_length)
+        gti_end = np.ceil(t2/segment_length)
+        filt_dat_files = np.array([dat_files[i] for i in range(len(dat_files)) if (int(dat_files[i][dat_files[i].index('GTI')+3:dat_files[i].index('GTI')+9]) >= gti_start) and (int(dat_files[i][dat_files[i].index('GTI')+3:dat_files[i].index('GTI')+9]) <= gti_end)])
+        filt_demod_files = np.array([demod_files[i] for i in range(len(demod_files)) if (int(demod_files[i][demod_files[i].index('GTI')+3:demod_files[i].index('GTI')+9]) >= gti_start) and (int(demod_files[i][demod_files[i].index('GTI')+3:demod_files[i].index('GTI')+9]) <= gti_end)])
 
-def presto_fft(eventfile,segment_length,demod,PI1,PI2):
+        if demod == True:
+            return np.array(filt_demod_files)
+        else:
+            return np.array([datfile for datfile in filt_dat_files if datfile not in set(filt_demod_files)])
+
+    else:
+        if demod == True:
+            return np.array(demod_files)
+        else:
+            return np.array([datfile for datfile in dat_files if datfile not in set(demod_files)])
+
+def presto_fft(eventfile,segment_length,demod,PI1,PI2,t1,t2):
     """
     Obtain the FFT files that were generated from PRESTO
 
@@ -241,6 +259,9 @@ def presto_fft(eventfile,segment_length,demod,PI1,PI2):
     demod - whether we're dealing with demodulated data or not!
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    t1 - starting time for calculation of averaged power spectra
+    t2 - ending time for calculation of averaged power spectra
+    (note that t=0 corresponds to the MET of the FIRST event in the eventfile, so will need to inspect light curve with Lv2_lc.py to get times)
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
@@ -248,8 +269,9 @@ def presto_fft(eventfile,segment_length,demod,PI1,PI2):
     parent_folder = str(pathlib.Path(eventfile).parent)
 
     if PI1 != '': #if we're doing energy cuts instead
-        fft_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*.fft'))
-        demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1) + '-' + str(PI2) + '*demod.fft'))
+        fft_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1).zfill(4) + '-' + str(PI2).zfill(4) + '*.fft'))
+        demod_files = sorted(glob.glob(parent_folder + '/accelsearch_' + str(segment_length) + 's/*E' + str(PI1).zfill(4) + '-' + str(PI2).zfill(4) + '*demod.fft'))
+
     else:
         fft_files = []
         demod_files = []
@@ -262,12 +284,24 @@ def presto_fft(eventfile,segment_length,demod,PI1,PI2):
             if 'E' not in str(pathlib.Path(all_demod_files[i]).name):
                 demod_files.append(all_demod_files[i])
 
-    if demod == True:
-        return np.array(demod_files)
-    else:
-        return np.array([fftfile for fftfile in fft_files if fftfile not in set(demod_files)])
+    if t1 != 0 or t2 != 0: #if both starting and ending times are not zero; otherwise default is to use ALL the data in the eventfile
+        gti_start = int(t1/segment_length)
+        gti_end = np.ceil(t2/segment_length)
+        filt_fft_files = np.array([fft_files[i] for i in range(len(fft_files)) if (int(fft_files[i][fft_files[i].index('GTI')+3:fft_files[i].index('GTI')+9]) >= gti_start) and (int(fft_files[i][fft_files[i].index('GTI')+3:fft_files[i].index('GTI')+9]) <= gti_end)])
+        filt_demod_files = np.array([demod_files[i] for i in range(len(demod_files)) if (int(demod_files[i][demod_files[i].index('GTI')+3:demod_files[i].index('GTI')+9]) >= gti_start) and (int(demod_files[i][demod_files[i].index('GTI')+3:demod_files[i].index('GTI')+9]) <= gti_end)])
 
-def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2):
+        if demod == True:
+            return np.array(filt_demod_files)
+        else:
+            return np.array([fftfile for fftfile in filt_fft_files if fftfile not in set(filt_demod_files)])
+
+    else:
+        if demod == True:
+            return np.array(demod_files)
+        else:
+            return np.array([fftfile for fftfile in fft_files if fftfile not in set(demod_files)])
+
+def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,t1,t2):
     """
     Using the .dat files, rebin them into 1s bins, to weed out the segments below
     some desired threshold. Will return a *list* of *indices*! This is so that I
@@ -280,13 +314,15 @@ def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2
     threshold - if data is under threshold (in percentage), then don't use the segment!
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    t1 - starting time for calculation of averaged power spectra
+    t2 - ending time for calculation of averaged power spectra
+    (note that t=0 corresponds to the MET of the FIRST event in the eventfile, so will need to inspect light curve with Lv2_lc.py to get times)
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    dat_files = presto_dat(eventfile,segment_length,demod,PI1,PI2)
+    dat_files = presto_dat(eventfile,segment_length,demod,PI1,PI2,t1,t2)
     rebin_t = np.arange(segment_length+1)*1 #1-second bins
-
     passed_threshold = []
     print('Now finding the number of segments that can be used...')
     for i in tqdm(range(len(dat_files))):
@@ -300,9 +336,9 @@ def segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2
 
     print('Will use ' + str(len(passed_threshold)) + ' out of ' + str(len(dat_files)) + ' segments.')
 
-    return passed_threshold, len(passed_threshold)
+    return np.array(passed_threshold), len(passed_threshold)
 
-def average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starting_freq,W):
+def average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,t1,t2,starting_freq,W):
     """
     Given the full list of .dat and .fft files, and the indices where the PRESTO-binned
     data is beyond some threshold, return the averaged power spectrum!
@@ -314,16 +350,37 @@ def average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starti
     threshold - if data is under threshold (in percentage), then don't use the segment!
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    t1 - starting time for calculation of averaged power spectra
+    t2 - ending time for calculation of averaged power spectra
+    (note that t=0 corresponds to the MET of the FIRST event in the eventfile, so will need to inspect light curve with Lv2_lc.py to get times)
     starting_freq - frequency to start constructing the histogram of powers from
     W - number of consecutive frequency bins to AVERAGE over
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    dat_files = presto_dat(eventfile,segment_length,demod,PI1,PI2) #sorted array of .dat files
-    fft_files = presto_fft(eventfile,segment_length,demod,PI1,PI2) #sorted array of .fft files
-    passed_threshold,M = segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2)
+    dat_files = presto_dat(eventfile,segment_length,demod,PI1,PI2,t1,t2) #sorted array of .dat files
+    fft_files = presto_fft(eventfile,segment_length,demod,PI1,PI2,t1,t2) #sorted array of .fft files
+    passed_threshold,M = segment_threshold(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,t1,t2)
     #list of indices where the rebinned .dat files are beyond the threshold
+
+    if len(passed_threshold) == 0:
+        freqs = np.fft.fftfreq(int(segment_length/tbin_size),tbin_size)
+        N = len(freqs)
+
+        f = freqs[1:int(N/2)]
+        average_ps = np.ones(int(segment_length/(2*tbin_size)))*2
+        ps = average_ps[1:]
+
+        ps_to_use = ps[f>starting_freq]
+        ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
+        N_greaterthanP = []
+        print('Creating the noise histogram [N(>P)]...')
+        for i in tqdm(range(len(ps_bins))):
+            array_greaterthan = ps_to_use[ps_to_use>ps_bins[i]]
+            N_greaterthanP.append(len(array_greaterthan))
+
+        return f,ps,ps_bins,N_greaterthanP,M
 
     dat_threshold = dat_files[passed_threshold] #.dat files that passed the threshold
     fft_threshold = fft_files[passed_threshold] #corresponding .fft files that passed the threshold
@@ -377,7 +434,7 @@ def average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starti
 
         return f,ps,ps_bins,N_greaterthanP,M
 
-def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starting_freq,W):
+def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,t1,t2,starting_freq,W):
     """
     Given the average spectrum for an ObsID, return the histogram of powers, such
     that you have N(>P). This is for powers corresponding to frequencies larger
@@ -390,13 +447,16 @@ def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starti
     threshold - if data is under threshold (in percentage), then don't use the segment!
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    t1 - starting time for calculation of averaged power spectra
+    t2 - ending time for calculation of averaged power spectra
+    (note that t=0 corresponds to the MET of the FIRST event in the eventfile, so will need to inspect light curve with Lv2_lc.py to get times)
     starting_freq - frequency to start constructing the histogram of powers from
     W - number of consecutive frequency bins to AVERAGE over
     """
     if demod != True and demod != False:
         raise ValueError("demod should either be True or False!")
 
-    f,ps = average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starting_freq,W)
+    f,ps = average_ps(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,t1,t2,starting_freq,W)
 
     ps_to_use = ps[f>starting_freq]
     ps_bins = np.linspace(min(ps_to_use),max(ps_to_use),1000)
@@ -408,7 +468,7 @@ def noise_hist(eventfile,segment_length,demod,tbin_size,threshold,PI1,PI2,starti
 
     return ps_bins, N_greaterthanP
 
-def plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq,W,N,xlims,plot_mode):
+def plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,t1,t2,starting_freq,W,hist_min_sig,N,xlims,plot_mode):
     """
     Plotting the averaged power spectrum and the noise histogram
 
@@ -419,8 +479,12 @@ def plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq
     threshold - if data is under threshold (in percentage), then don't use the segment!
     PI1 - lower bound of PI (not energy in keV!) desired for the energy range
     PI2 - upper bound of PI (not energy in keV!) desired for the energy range
+    t1 - starting time for calculation of averaged power spectra
+    t2 - ending time for calculation of averaged power spectra
+    (note that t=0 corresponds to the MET of the FIRST event in the eventfile, so will need to inspect light curve with Lv2_lc.py to get times)
     starting_freq - frequency to start constructing the histogram of powers from
     W - number of consecutive frequency bins to AVERAGE over
+    hist_min_sig - minimum significance for a candidate frequency to be added to a text file; will be used to calculate histograms of candidates
     N - number of trials
     xlims - limits to apply on the x axis if desired
     plot_mode - whether to "show" the plots or to "save" them
@@ -432,32 +496,50 @@ def plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq
 
     parent_folder = str(pathlib.Path(eventfile).parent)
 
-    f,ps,ps_bins,N_greaterthanP,M = average_ps(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq,W)
+    f,ps,ps_bins,N_greaterthanP,M = average_ps(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,t1,t2,starting_freq,W)
 
     power_required_3 = Lv3_detection_level.power_for_sigma(3,N,M,W) #power required for significance
     power_required_4 = Lv3_detection_level.power_for_sigma(4,N,M,W) #power required for significance
 
-    plt.figure(1)
-    plt.plot(f,ps,'rx-')
+    ### to create the histogram of pulsation candidates
+    ps_sig = Lv3_detection_level.signal_significance(N,M,W,ps)
+
+    if PI1 == '':
+        output_file = open(parent_folder + '/S' + str(segment_length) + '_W' + str(W) + '_T' + str(threshold) + '_t1t2_' + str(t1) + '-' + str(t2) + '.txt','w')
+    else:
+        output_file = open(parent_folder + '/S' + str(segment_length) + '_W' + str(W) + '_T' + str(threshold) + '_E' + str(PI1) + '-' + str(PI2) + '_t1t2_' + str(t1) + '-' + str(t2) + '.txt','w')
+    cand_f = f[ps_sig>=hist_min_sig] #decided not to use hist_min_f ; otherwise I get empty files...
+    cand_ps = ps_sig[ps_sig>=hist_min_sig]
+    for i in range(len(cand_f)):
+        output_file.write(str(cand_f[i]) + ' ' + str(cand_ps[i]) + '\n')
+    output_file.close()
+
+    plt.figure(num=1,figsize=(10,5.63))
+    plt.errorbar(x=f,y=ps,color='r',drawstyle='steps-mid')
     plt.axhline(y=power_required_3,lw=0.8,alpha=0.5,color='b')
     plt.axhline(y=power_required_4,lw=0.8,alpha=0.5,color='k')
+    plt.axhline(y=2,lw=0.8,alpha=0.5,color='k',linestyle='--')
     plt.xlabel('Frequency (Hz)',fontsize=12)
     plt.ylabel('Leahy-normalized power',fontsize=12)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.ylim([1,min(20.0,3*power_required_4)])
+    plt.xlim([0.001,1/(2*tbin)])
     if len(xlims) != 0:
         plt.xlim([xlims[0],xlims[1]])
     #plt.axvline(x=271.453,lw=0.5,alpha=0.5)
-    plt.title('W = ' + str(W) + ', Threshold = ' + str(threshold) + '%' + '\n' + 'Segment Length: ' + str(segment_length) + 's, No. Segments = ' + str(M) + '\n' + 'Demodulated: ' + str(demod) + ' ; St.D = ' + str(np.std(ps)), fontsize=12)
-    plt.legend(('Power Spectrum','3 sigma','4 sigma'),loc='best')
+    plt.title('PI: ' + str(PI1)+'-'+str(PI2) + '; W = ' + str(W) + ', Threshold = ' + str(threshold) + '%' + '\n' + 't1 = ' + str(t1) + ', t2 = ' + str(t2) + ' ; Segment Length: ' + str(segment_length) + 's, No. Segments = ' + str(M) + '\n' + 'Demodulated: ' + str(demod) + ' ; St.D = ' + str(np.std(ps)), fontsize=12)
+    plt.legend(('Power Spectrum','3 sigma','4 sigma','Poisson noise'),loc='best')
     if plot_mode == "save":
         if PI1 != '':
-            energy_suffix = '_E' + str(PI1) + '-' + str(PI2)
+            energy_suffix = '_E' + str(PI1).zfill(4) + '-' + str(PI2).zfill(4)
         else:
             energy_suffix = ''
         if demod == True:
             demod_suffix = '_demod'
         else:
             demod_suffix = ''
-        plt.savefig(parent_folder + '/' + str(segment_length) + 's_average_ps_W' + str(W) + demod_suffix + energy_suffix + '.pdf',dpi=900)
+        plt.savefig(parent_folder + '/' + str(segment_length) + 's_average_ps_W' + str(W) + '_T' + str(threshold) + demod_suffix + energy_suffix + '_t1t2_' + str(t1) + '-' + str(t2) + '.pdf',dpi=900)
         plt.close()
 
     plt.figure(2)
@@ -467,23 +549,44 @@ def plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,starting_freq
     plt.title('Energy range: ' + str(PI1) + ' - ' + str(PI2) + ', W = ' + str(W),fontsize=12)
     if plot_mode == "save":
         if PI1 != '':
-            energy_suffix = '_E' + str(PI1) + '-' + str(PI2)
+            energy_suffix = '_E' + str(PI1).zfill(4) + '-' + str(PI2).zfill(4)
         else:
             energy_suffix = ''
         if demod == True:
             demod_suffix = '_demod'
         else:
             demod_suffix = ''
-            plt.savefig(parent_folder + '/' + str(segment_length) + 's_noise_hist_W' + str(W) + demod_suffix + energy_suffix + '.pdf',dpi=900)
+            plt.savefig(parent_folder + '/' + str(segment_length) + 's_noise_hist_W' + str(W) + '_T' + str(threshold) + demod_suffix + energy_suffix + '_t1t2_' + str(t1) + '-' + str(t2) + '.pdf',dpi=900)
         plt.close()
 
     if plot_mode == "show":
         plt.show()
 
-
 if __name__ == "__main__":
-    eventfile = Lv0_dirs.NICERSOFT_DATADIR + '1034070101_pipe/ni1034070101_nicersoft_bary.evt'
-    mode = 't'
+    eventfile = Lv0_dirs.NICERSOFT_DATADIR + '0034070101_pipe/ni0034070101_nicersoft_bary.evt'
+    #mode = 't'
     segment_length = 100
-    par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par'
-    do_demodulate(eventfile,segment_length,mode,par_file)
+    #par_file = Lv0_dirs.NICERSOFT_DATADIR + 'J1231-1411.par'
+    #do_demodulate(eventfile,segment_length,mode,par_file)
+    demod = False
+    tbin = 0.05
+    threshold = 50
+    PI1 = 30
+    PI2 = 1200
+    t1 = 200
+    t2 = 2000
+    starting_freq = 0.1
+    W = 1
+    hist_min_sig = 2.5
+    N = Lv3_detection_level.N_trials(tbin,segment_length)
+    xlims = np.array([])
+    plot_mode = "show"
+
+    Lv2_presto_subroutines.get_gti_file(eventfile,segment_length)
+    Lv2_presto_subroutines.niextract_gti_time_energy(eventfile,segment_length,PI1,PI2)
+    do_nicerfits2presto(eventfile,tbin,segment_length)
+    edit_inf(eventfile,tbin,segment_length)
+    edit_binary(eventfile,tbin,segment_length)
+    realfft(eventfile,segment_length)
+
+    plotting(eventfile,segment_length,demod,tbin,threshold,PI1,PI2,t1,t2,starting_freq,W,hist_min_sig,N,xlims,plot_mode)

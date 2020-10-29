@@ -12,7 +12,7 @@ import numpy as np
 import subprocess
 from astropy.io import fits
 
-from presto import binary_psr
+#from presto import binary_psr
 import Lv0_dirs,Lv2_phase
 import matplotlib.pyplot as plt
 

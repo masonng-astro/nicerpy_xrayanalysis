@@ -8,7 +8,9 @@ Getting the power spectra from the periodogram or manual method
 """
 from __future__ import division, print_function
 import numpy as np
-from scipy import stats, signal
+from scipy import signal
+from astropy.io import fits
+from scipy import stats
 import matplotlib.pyplot as plt
 
 def padding(counts):
@@ -90,6 +92,7 @@ def pdgm(times,counts,xlims,vlines,toplot,oversampling):
     dt = T/len(times)
     freq = 1/dt
     f,pxx = signal.periodogram(counts,fs=freq)
+    print(T,dt,freq)
 
     if oversampling[0] == True:
         os_counts = oversample(oversampling[1],counts)
@@ -137,6 +140,8 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
 
     T = times[-1] - times[0]
     dt = T/len(times)
+    print('Nyquist frequency: ' + str(1/(2*dt)))
+    print('Frequency resolution: ' + str(1/T))
 
     padded_counts = padding(counts)
     mean_corrected = padded_counts-np.mean(counts)
@@ -173,4 +178,23 @@ def manual(times,counts,xlims,vlines,toplot,oversampling):
     return freqs[1:int(N/2)], power_spec[1:int(N/2)]
 
 if __name__ == "__main__":
-    print('hi') #placeholder, but this is just a methods script...
+    #### did not work
+    eventfile = '/Volumes/Samsung_T5/NGC300_ULX_Swift/xrt/event/ngc300x1/ngc300x1_merge_niceroverlap_all.evt'
+    xmm_eventfile = '/Volumes/Samsung_T5/NGC300_XMMdata/xmm_bary_ngc300x1.evt'
+    """
+    times = fits.open(eventfile)[1].data['TIME'] #getting array of times
+    times_xmm = fits.open(xmm_eventfile)[1].data['TIME']
+
+    MJDREFI = fits.open(eventfile)[1].header['MJDREFI'] #Swift
+    MJDREFF = fits.open(eventfile)[1].header['MJDREFF'] #Swift
+    MJDREF = fits.open(xmm_eventfile)[1].header['MJDREF'] #XMM-Newton
+    diff_swiftxmm = (MJDREFI+MJDREFF-MJDREF)*86400
+
+    total_time = np.array(list(times_xmm) + list(times+diff_swiftxmm))
+    trunc_times = total_time - total_time[0]
+    tbins = np.arange(trunc_times[0],trunc_times[-1]+100,100)
+    summed_data, bin_edges, binnumber = stats.binned_statistic(trunc_times,np.ones(len(trunc_times)),statistic='sum',bins=tbins)
+
+    manual(tbins[:-1],summed_data,[False,0,0],[False,0],True,[True,5])
+    plt.show()
+    """

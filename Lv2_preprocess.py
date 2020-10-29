@@ -45,10 +45,14 @@ def preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nic
     if refframe != 'ICRS' and refframe != 'FK5':
         raise ValueError("refframe should either be ICRS or FK5! Otherwise, update Lv1_barycorr.py if there are options I was unaware of.")
 
+    print('Now unzipping all the files!')
     Lv0_gunzip.unzip_all(obsdir) #unzipping the contents within the observation
+    print('Now running nicerl2!')
     Lv0_nicerl2.nicerl2(obsdir,nicerl2_flags)
+    print('Now running psrpipe.py from NICERsoft!')
     Lv0_psrpipe.psrpipe(nicer_datafile,psrpipe_flags) #applying custom cuts (though no need --shrinkelv after HEASOFT 6.26)
 
+    print('Now running barycorr from HEASOFT!')
     ##### For the NICER data
     Lv1_barycorr.barycorr(nicer_datafile,nicer_output,refframe,orbitfile,parfile,obsdir,custom_coords)
     ##### For the NICERsoft file (cleanfilt.evt, usually)
@@ -58,7 +62,7 @@ def preprocess(obsdir,nicerl2_flags,psrpipe_flags,refframe,orbitfile,parfile,nic
 
 if __name__ == "__main__":
     #obsdirs = [Lv0_dirs.NICER_DATADIR + str(i) + '/' for i in range(1034200124,1034200200)] + [Lv0_dirs.NICER_DATADIR + str(i) + '/' for i in range(1034200201,1034200241)] + [Lv0_dirs.NICER_DATADIR + str(i) + '/' for i in range(2034200201,2034200206)]
-    obsdirs = [Lv0_dirs.NICER_DATADIR + '/1050070103/']
+    obsdirs = [Lv0_dirs.NICER_DATADIR + '/2584010501/']
     nicerl2_flags = ['clobber=YES']
     psrpipe_flags = ['--emin','0.3','--emax','12.0'] #for psrpipe in Lv0_psrpipe
     refframe = 'ICRS' #for barycorr in Lv1_barycorr

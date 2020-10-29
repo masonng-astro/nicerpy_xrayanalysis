@@ -56,7 +56,8 @@ def diag_all(eventfile,par_list,tbin_size,mode,diag_vars):
     counts = np.ones(len(times))
 
     shifted_t = times-times[0]
-    t_bins = np.linspace(0,int(shifted_t[-1]),int(shifted_t[-1])*1/tbin_size+1)
+
+    t_bins = np.linspace(0,int(shifted_t[-1]),int(shifted_t[-1]*1/tbin_size)+1)
     summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
     binned_t = t_bins
@@ -299,4 +300,6 @@ def diag_t(eventfile,par_list,tbin_size,t1,t2,mode,diag_vars):
                 plt.close()
 
 if __name__ == "__main__":
-    print('hi') #placeholder, but this is more of a methods script
+    #eventfile = '/Volumes/Samsung_T5/NICER-data/1030180113/'
+    #diag_all(eventfile,['TIME','ANG_DIST'],1,'save',{})
+    print('hi')

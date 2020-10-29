@@ -42,19 +42,28 @@ def whole(eventfile,par_list,tbin_size,mode):
 
     parent_folder = str(pathlib.Path(eventfile).parent)
 
+    start_stop = Lv0_fits2dict.fits2dict(eventfile,2,['START','STOP'])
+    exptime = sum([ (start_stop['STOP'][i]-start_stop['START'][i]) for i in range(len(start_stop['START'])) ])
+
     data_dict = Lv0_fits2dict.fits2dict(eventfile,1,par_list)
     times = data_dict['TIME']
     counts = np.ones(len(times))
 
     shifted_t = times-times[0]
-    t_bins = np.linspace(0,np.ceil(shifted_t[-1]),np.ceil(shifted_t[-1])*1/tbin_size+1)
+    t_bins = np.linspace(0,np.ceil(shifted_t[-1]),int(np.ceil(shifted_t[-1])*1/tbin_size+1))
     summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
 
     event_header = fits.open(eventfile)[1].header
     obj_name = event_header['OBJECT']
     obsid = event_header['OBS_ID']
 
-    plt.plot(t_bins[:-1],summed_data)
+    #for i in range(len(t_bins)-1):
+    #    print(t_bins[i],summed_data[i])
+    #print('----')
+    print('Creating light curve from ' + eventfile)
+    #for i in range(len(plot_time)):
+    #    print(plot_time[i],plot_data[i])
+    plt.plot(t_bins[:-1],summed_data,'x')
     plt.title('Light curve for ' + obj_name + ', ObsID ' + str(obsid),fontsize=12)
     plt.xlabel('Time (s)', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)

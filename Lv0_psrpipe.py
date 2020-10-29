@@ -10,6 +10,7 @@ from __future__ import division, print_function
 import numpy as np
 import Lv0_dirs
 from astropy.io import fits
+from tqdm import tqdm
 import os
 import subprocess
 
@@ -54,6 +55,10 @@ def psrpipe(eventfile,flags):
     return
 
 if __name__ == "__main__":
-    obsid = '1034070101'
-    eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid+'_0mpu7_cl.evt'
-    psrpipe(eventfile,['--emin','0.3','--emax','12.0'])
+    #obsid = '1034070101'
+    #eventfile = Lv0_dirs.NICER_DATADIR + obsid + '/xti/event_cl/ni' + obsid+'_0mpu7_cl.evt'
+    #psrpipe(eventfile,['--emin','0.3','--emax','12.0'])
+
+    eventfiles = [Lv0_dirs.NICER_DATADIR + str(i) + '/xti/event_cl/ni' + str(i) + '_0mpu7_cl.evt' for i in range(1030180101,1030180188)]
+    for i in tqdm(range(len(eventfiles))):
+        psrpipe(eventfiles[i],['--emin','0.3','--emax','12.0','--nounderfilt'])

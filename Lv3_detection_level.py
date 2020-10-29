@@ -101,6 +101,7 @@ if __name__ == "__main__":
     #print(max_acc(200,200,230))
     #sig_sig = signal_significance(43,5000,2.02697)
     #sig_sig = signal_significance(43,5000,2.01199)
-    print(power_for_sigma(5,4000,1,1))
+    #print(power_for_sigma(5,4000,1,1))
+    print(power_for_sigma(2.9,10/0.00025,1,1))
     #single_trial_prob(2,4e6)
     #single_trial_prob(1,4e6)

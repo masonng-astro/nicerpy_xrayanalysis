@@ -14,15 +14,14 @@ import Lv0_dirs
 
 Lv0_dirs.global_par()
 
-bin_size = '03d' #bins of 1 day!
-
-def get_color(bin_size,band1,band2):
+def get_color(bin_size,bgsub_type,band1,band2):
     """
     Obtain colors and the corresponding uncertainties. Will NOT use values where
     either the counts/rate from band1 OR band2 are negative! Allowed band values are
     "soft1, soft2, A, B, C, D, and inband."
 
     bin_size - binning size desired (1 day or 10 days, for example)
+    bgsub_type - either 'bgsub' or 'xbgsub'
     band1 - energy band 1
     band2 - energy band 2
     """
@@ -31,8 +30,8 @@ def get_color(bin_size,band1,band2):
     if band2 != 'soft1' and band2 != 'soft2' and band2 != 'A' and band2 != 'B' and band2 != 'C' and band2 != 'D' and band2 != 'inband':
         raise ValueError("Make sure band2 is either of soft1, soft2, A, B, C, D, or inband!")
 
-    binned_counts_file = Lv0_dirs.NGC300 + 'n300_ulx.bgsub_cl50_RGnorm_' + bin_size + '.ffphot'
-    binned_unc_file = Lv0_dirs.NGC300 + 'n300_ulx.bgsub_cl50_RGerr_' + bin_size + '.ffphot'
+    binned_counts_file = Lv0_dirs.NGC300_2020 + 'n300_ulx.' + bgsub_type + '_cl50_g2020norm_' + bin_size + '.fffphot'
+    binned_unc_file = Lv0_dirs.NGC300_2020 + 'n300_ulx.' + bgsub_type + '_cl50_g2020err_norm_' + bin_size + '.fffphot'
 
     mjds = np.genfromtxt(binned_counts_file,usecols=(0),unpack=True)
     if band1 == 'soft1':
@@ -91,4 +90,4 @@ def get_color(bin_size,band1,band2):
     return mjds_pos, color, color_unc
 
 if __name__ == "__main__":
-    binned_text()
+    bin_size = '01d' #bins of x day(s)!

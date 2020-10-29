@@ -26,17 +26,19 @@ import mplcursors
 
 Lv0_dirs.global_par()
 
-eventfiles = ['/Volumes/Samsung_T5/NICERsoft_outputs/1050070103_pipe/ni1050070103_nicersoft_bary.evt']
+#eventfiles = ['/Volumes/Samsung_T5/NICERsoft_outputs/1050070103_pipe/ni1050070103_nicersoft_bary.evt']
+#eventfiles = ['/Volumes/Samsung_T5/NICER-data/xtej1739/2002131540_bary_E200-1200.evt']
+eventfiles = ['/Users/masonng/Documents/MIT/Research/xtej1739_burst8/2002251704_bary.evt']
 
 do_search = False # Searching for burst candidates!
 do_plots = True # Creating dynamic power spectra and contours
 
-search_window = [16360,16508] #start/end times of burst oscillation search
-T = np.array([4]) #window sizes
+search_window = [0,350] #start/end times of burst oscillation search
+T = np.array([10]) #window sizes
 dt = T/10  #i.e., do overlapping windows of T seconds in steps of dt seconds
-tbin_size = 0.0005 #size of time bins in seconds
-df = 5 #tolerance of 10 Hz, say
-f_central = 619 #central frequency
+tbin_size = 0.00025 #size of time bins in seconds
+df = 10 #tolerance of 10 Hz, say
+f_central = 561 #central frequency
 mode = "show"
 
 for i in range(len(eventfiles)):

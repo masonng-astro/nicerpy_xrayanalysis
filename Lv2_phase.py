@@ -13,6 +13,7 @@ from astropy.io import fits
 import numpy as np
 import Lv0_dirs,Lv0_fits2dict,Lv1_data_bin,Lv2_mkdir
 from scipy import stats
+from pint.eventstats import sf_z2m,z2m,sig2sigma
 from PyAstronomy.pyasl import foldAt
 import pathlib
 import matplotlib.gridspec as gridspec
@@ -42,11 +43,99 @@ def pulse_profile(f_pulse,times,counts,shift,no_phase_bins):
     counts = list(counts[index_sort])*2
 
     phase_bins = np.linspace(0,2,no_phase_bins*2+1)
-    summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,counts,statistic='sum',bins=phase_bins)
+    summed_profile, bin_edges, binnumber = stats.binned_statistic(phases,counts,statistic='mean',bins=phase_bins)
 
     return phases, phase_bins, summed_profile
 
-def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
+
+def phase_exposure(start_time, stop_time, period, nbin=16, gtis=None):
+    """Calculate the exposure on each phase of a pulse profile.
+
+    THIS FUNCTION IS FROM STINGRAY.
+    https://stingray.readthedocs.io/en/latest/_modules/stingray/pulse/pulsar.html
+    (as of 6/29/2020)
+
+    Parameters
+    ----------
+    start_time, stop_time : float
+        Starting and stopping time (or phase if ``period==1``)
+    period : float
+        The pulse period (if 1, equivalent to phases)
+
+    Other parameters
+    ----------------
+    nbin : int, optional, default 16
+        The number of bins in the profile
+    gtis : [[gti00, gti01], [gti10, gti11], ...], optional, default None
+        Good Time Intervals
+
+    Returns
+    -------
+    expo : array of floats
+        The normalized exposure of each bin in the pulse profile (1 is the
+        highest exposure, 0 the lowest)
+    """
+    if gtis is None:
+        gtis = np.array([[start_time, stop_time]])
+
+    # Use precise floating points -------------
+    start_time = np.longdouble(start_time)
+    stop_time = np.longdouble(stop_time)
+    period = np.longdouble(period)
+    gtis = np.array(gtis, dtype=np.longdouble)
+    # -----------------------------------------
+
+    expo = np.zeros(nbin)
+    phs = np.linspace(0, 1, nbin + 1)
+    phs = np.array(list(zip(phs[0:-1], phs[1:])))
+
+    # Discard gtis outside [start, stop]
+    good = np.logical_and(gtis[:, 0] < stop_time, gtis[:, 1] > start_time)
+    gtis = gtis[good]
+
+    for g in gtis:
+        g0 = g[0]
+        g1 = g[1]
+        if g0 < start_time:
+            # If the start of the fold is inside a gti, start from there
+            g0 = start_time
+        if g1 > stop_time:
+            # If the end of the fold is inside a gti, end there
+            g1 = stop_time
+        length = g1 - g0
+        # How many periods inside this length?
+        nraw = length / period
+        # How many integer periods?
+        nper = nraw.astype(int)
+
+        # First raw exposure: the number of periods
+        expo += nper / nbin
+
+        # FRACTIONAL PART =================
+        # What remains is additional exposure for part of the profile.
+        start_phase = np.fmod(g0 / period, 1)
+        end_phase = nraw - nper + start_phase
+
+        limits = [[start_phase, end_phase]]
+        # start_phase is always < 1. end_phase not always. In this case...
+        if end_phase > 1:
+            limits = [[0, end_phase - 1], [start_phase, 1]]
+
+        for l in limits:
+            l0 = l[0]
+            l1 = l[1]
+            # Discards bins untouched by these limits
+            goodbins = np.logical_and(phs[:, 0] <= l1, phs[:, 1] >= l0)
+            idxs = np.arange(len(phs), dtype=int)[goodbins]
+            for i in idxs:
+                start = np.max([phs[i, 0], l0])
+                stop = np.min([phs[i, 1], l1])
+                w = stop - start
+                expo[i] += w
+
+    return expo / np.max(expo)
+
+def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins,mission):
     """
     Calculating the pulse profile by also incorporating \dot{f} corrections!
     Goes from 0 to 2.
@@ -58,32 +147,74 @@ def pulse_folding(t,T,T0,f,fdot,fdotdot,no_phase_bins):
     fdot - frequency derivative
     fdotdot - second derivative of frequency
     no_phase_bins - number of phase bins desired (recommended 20!)
+    mission - "NICER", "XMM", or "SWIFT" for now
 
     Returns the pulse profile in counts/s/phase bin vs phase. The number of counts
     is divided by the exposure time (calculated through total sum of the GTIs)
 
     Also added a "TIMEZERO" manually in the script since it'd be inconvenient to call the eventfile here.
     """
-    MJDREFI = 56658
-    MJDREFF = 0.000777592592592593
-    TIMEZERO = -1
-    t_MJDs =  MJDREFI + MJDREFF + (TIMEZERO+t)/86400
+    if mission == "NICER":
+        ##### NICER
+        MJDREFI = 56658.0
+        MJDREFF = 0.000777592592592593
+        TIMEZERO = -1
+        t_MJDs =  MJDREFI + MJDREFF + (TIMEZERO+t)/86400 #Swift or NICER
 
-    tau = (t_MJDs-T0)*86400
+    if mission == "SWIFT":
+        ##### SWIFT
+        MJDREFI = 51910.0
+        MJDREFF = 7.428703700000000E-04
+        TIMEZERO = 0
+        t_MJDs =  MJDREFI + MJDREFF + (TIMEZERO+t)/86400 #Swift or NICER
+
+    if mission == "XMM":
+        ##### XMM-NEWTON
+        MJDREF = 50814.0
+        t_MJDs = MJDREF + t/86400.0
+
+    tau = (t_MJDs-T0)*86400.0
+    #print(tau[:10])
+    #print(f*tau[:10])
     phase = (f*tau + fdot/2 *tau**2 + fdotdot/6*tau**3)%1
+    #print(phase[:10])
 
     counts = np.ones(len(phase))
     phase_bins = np.linspace(0,1,no_phase_bins+1)
 
     summed_profile,bin_edges,binnumber = stats.binned_statistic(phase,counts,statistic='sum',bins=phase_bins)
 
-    phase_bins_pad = np.linspace(1,2,no_phase_bins+1)
-    summed_profile_pad = summed_profile
+    phase_bins_total = np.array(list(phase_bins[:-1]) + list(phase_bins+1))
+    summed_profile_total = np.array(list(summed_profile)*2)
+    error = np.sqrt(summed_profile_total)
 
-    phase_bins_total = np.array(list(phase_bins[:-1]) + list(phase_bins_pad))
-    summed_profile_total = np.array(list(summed_profile) + list(summed_profile_pad))
+    return phase_bins_total, summed_profile_total/T, error/T #/T
+    #return phase_bins_total, summed_profile_total, error
 
-    return phase_bins_total, summed_profile_total/T
+def get_Z2(phases,m):
+    """
+    Calculate the Z^2 significances given the event file and harmonic number m
+
+    eventfile - name of event file
+    m - number of harmonics
+    """
+    z_vals = z2m(phases,m=m)
+    probs = sf_z2m(z_vals)
+    significances = sig2sigma(probs)
+
+    return significances
+
+def get_chi2(profile,error):
+    """
+    Calculating the chi^2 value from the folded profile
+
+    phase - array of phase values
+    profile - flux/counts per sec per phase bin
+    error - corresponding errors
+    """
+    mean_prof = np.mean(profile)
+
+    return sum( (profile-mean_prof)**2/error**2 )
 
 def whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
     """
@@ -125,7 +256,7 @@ def whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
     if pulse_pars[1] == 0 and pulse_pars[2] == 0: #i.e., if both \dot{f} and \ddot{f} are zero; that is, if we have no frequency derivatives
         counts = np.ones(len(times))
         shifted_t = times-times[0]
-        t_bins = np.linspace(0,np.ceil(shifted_t[-1]),np.ceil(shifted_t[-1])*1/tbin_size+1)
+        t_bins = np.linspace(0,np.ceil(shifted_t[-1]),int(np.ceil(shifted_t[-1])*1/tbin_size+1))
         summed_data, bin_edges, binnumber = stats.binned_statistic(shifted_t,counts,statistic='sum',bins=t_bins) #binning the time values in the data
         phases, phase_bins, summed_profile = pulse_profile(pulse_pars[0],t_bins[:-1],summed_data,shift,no_phase_bins)
     else:
@@ -138,8 +269,8 @@ def whole(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,mode):
     if mode != 'overlap':
         plt.figure()
         plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid),fontsize=12)
-#    plt.plot(phase_bins[:-1],summed_profile)
-    plt.step(phase_bins[:-1],summed_profile)
+#    plt.plot(phase_bins[:-1],summed_profile*(times[-1]-times[0])/T)
+    plt.step(phase_bins[:-1],summed_profile*(times[-1]-times[0])/T)
 
     plt.xlabel('Phase', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)
@@ -205,8 +336,8 @@ def partial_t(eventfile,par_list,tbin_size,pulse_pars,shift,no_phase_bins,t1,t2,
     if mode != 'overlap':
         plt.figure()
         plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid) + '\n Time interval: ' + str(t1) + 's - ' + str(t2) + 's',fontsize=12)
-#    plt.plot(phase_bins[:-1], summed_profile)
-    plt.step(phase_bins[:-1],summed_profile)
+#    plt.plot(phase_bins[:-1], summed_profile*(times[-1]-times[0])/T)
+    plt.step(phase_bins[:-1],summed_profile*(times[-1]-times[0])/T)
     plt.xlabel('Phase', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)
 
@@ -276,9 +407,9 @@ def partial_E(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_b
 
     if mode != 'overlap':
         plt.figure()
-#    plt.plot(phase_bins[:-1], summed_profile,'-')
+#    plt.plot(phase_bins[:-1], summed_profile*(times[-1]-times[0])/T,'-')
 #    print(sum(summed_profile)/truncated_t[-1])
-    plt.step(phase_bins[:-1],summed_profile)
+    plt.step(phase_bins[:-1],summed_profile*(times[-1]-times[0])/T)
     plt.xlabel('Phase', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)
 
@@ -353,8 +484,8 @@ def partial_tE(eventfile,par_list,tbin_size,Ebin_size,pulse_pars,shift,no_phase_
     if mode != 'overlap':
         plt.figure()
         plt.title('Pulse profile for ' + obj_name + ', ObsID ' + str(obsid)+ '\n Time interval: ' + str(t1) + 's - ' + str(t2) + 's'+ '\n Energy range: ' + str(E1) + 'keV - ' + str(E2) + 'keV',fontsize=12)
-#    plt.plot(phase_bins[:-1], summed_profile)
-    plt.step(phase_bins[:-1],summed_profile)
+#    plt.plot(phase_bins[:-1], summed_profile*(times[-1]-times[0])/T)
+    plt.step(phase_bins[:-1],summed_profile*(times[-1]-times[0])/T)
     plt.xlabel('Phase', fontsize=12)
     plt.ylabel('Count/' + str(tbin_size) + 's',fontsize=12)
 

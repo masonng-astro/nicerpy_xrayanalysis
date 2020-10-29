@@ -11,14 +11,52 @@ from __future__ import division, print_function
 import numpy as np
 import time
 from tqdm import tqdm
+from astropy.io import fits
 import glob
+import pathlib
 import subprocess
 
-import Lv0_dirs
-import Lv2_average_ps_methods,Lv2_average_merge_ps_methods
-import Lv3_detection_level
-
 import matplotlib.pyplot as plt
+from stingray.pulse.pulsar import pulse_phase,phase_exposure,fold_events
+
+eventfile = '/Volumes/Samsung_T5/NICERsoft_outputs/merged_events/merged000021/merged000021_nicersoft_bary_phase.evt'
+times = fits.open(eventfile)[1].data['TIME']
+pulse_phase = fits.open(eventfile)[1].data['PULSE_PHASE']
+gtis = fits.open(eventfile)[2].data
+T = sum([ gtis[i]['STOP']-gtis[i]['START'] for i in range(len(gtis)) ]) #exposure time
+
+gtis_conform = []
+for i in range(len(gtis)):
+    gtis_conform.append([gtis[i][0],gtis[i][1]]) #conform to the input that Stingray uses
+
+freq = 622.12202499673376738
+freqdot = -6.5114520166830696246e-15
+freqdotdot = 0
+nbins = 20
+
+phase_sr,prof_sr,err_sr = fold_events(times,freq,freqdot,freqdotdot,gtis=np.array(gtis_conform),ref_time=times[0],nbin=nbins)
+phase_sr_expo,prof_sr_expo,err_sr_expo = fold_events(times,freq,freqdot,freqdotdot,gtis=np.array(gtis_conform),ref_time=times[0],expocorr=True,nbin=nbins)
+
+total_phase_sr = list(phase_sr) + list(phase_sr+1)
+total_prof_sr = list(prof_sr)*2
+total_err_sr = list(err_sr)*2
+
+total_phase_sr_expo = list(phase_sr_expo) + list(phase_sr_expo+1)
+total_prof_sr_expo = list(prof_sr_expo)*2
+total_err_sr_expo = list(err_sr_expo)*2
+
+plt.figure()
+plt.errorbar(x=total_phase_sr,y=total_prof_sr/T,yerr=total_err_sr/T,color='r',drawstyle='steps-mid')
+plt.errorbar(x=total_phase_sr_expo,y=total_prof_sr_expo/T,yerr=total_err_sr_expo/T,color='b',drawstyle='steps-mid')
+plt.legend(('Folded profile','Exposure-corrected'),loc='best',fontsize=12)
+plt.title(str(pathlib.Path(eventfile).name) +', exposure-corrected (using Stingray fold_events)',fontsize=12)
+plt.xlabel('Phase',fontsize=12)
+plt.ylabel('Counts/s',fontsize=12)
+plt.show()
+
+
+"""
+DEPRECATED FOR NOW - 8/17
 
 par_file = Lv0_dirs.NICERSOFT_DATADIR + 'B1957+20.par' #parameter file for demodulation
 T_asc_paper = 51260.200512649951936
@@ -61,7 +99,7 @@ for i in tqdm(range(len(grid))):
     pyfile_contents.close()
 
     execfile("Lv3_average_ps_main.py")
-
+"""
 
 """
 obsids = ['10301801'+str(i) for i in range(49,58)]
