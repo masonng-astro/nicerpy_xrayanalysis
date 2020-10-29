@@ -35,3 +35,7 @@ Will make a more comprehensive README in the future, but this is the current sta
 v3.2 - January 15 2020
 
 - Adding Lv2_TBOs_method, which takes care of searching for burst candidates and adding contour/colormap plots. Edited Lv3_TBOs.py to make it more an executive script than a methods script.
+
+v3.3 - January 22 2020
+
+- Modified a few scripts because of basic syntax/import errors. Most importantly, I added and fully tested Lv3_nicer_archival.py - both the individual ObsIDs (in a list) and the merged ObsID, with Cen X-3! This should be ready to go for a systematic (blind) pulsation search through any data set.
